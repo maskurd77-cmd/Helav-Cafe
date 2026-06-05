@@ -1,17 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ShoppingCart, Plus, Minus, Trash2, Coffee, ReceiptText, X, Tag, Banknote, ShoppingBag, MonitorSmartphone } from 'lucide-react';
 import { usePosStore } from '@/store/usePosStore';
-import { getProducts } from '@/services/productService';
+import { useProductStore } from '@/store/useProductStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { addOrder } from '@/services/orderService';
-import { Product } from '@/types';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '@/firebase';
 
 export function PosView() {
   const [activeCategory, setActiveCategory] = useState('هەمووی');
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<string[]>(['هەمووی']);
-  const [loading, setLoading] = useState(true);
+  
+  const { products, loading } = useProductStore();
+  const { settings } = useSettingsStore();
+
+  const categories = ['هەمووی', ...Array.from(new Set(products.map(p => p.category)))];
+
   const [checkingOut, setCheckingOut] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   
@@ -20,49 +23,17 @@ export function PosView() {
   const [discountAmount, setDiscountAmount] = useState<number | string>('');
   const [receivedAmount, setReceivedAmount] = useState<number | string>('');
 
-  const [settings, setSettings] = useState({
-    storeName: 'Helav Cafe',
-    address: 'هەولێر',
-    phone: '',
-    footerMessage: 'سوپاس بۆ سەردانت!',
-    logoUrl: ''
-  });
   const receiptRef = useRef<HTMLDivElement>(null);
 
   const { cart, addToCart, removeFromCart, updateQuantity, clearCart, getCartTotal } = usePosStore();
 
+  // Sync cart for customer display
   useEffect(() => {
-    loadProducts();
-    loadSettings();
-  }, []);
-
-  const loadSettings = async () => {
-    try {
-      const docSnap = await getDoc(doc(db, 'settings', 'general'));
-      if (docSnap.exists()) {
-        setSettings({ ...settings, ...docSnap.data() });
-      }
-    } catch (e) {
-      console.error(e);
-      handleFirestoreError(e, OperationType.GET, 'settings/general');
-    }
-  };
-
-  const loadProducts = async () => {
-    try {
-      setLoading(true);
-      const data = await getProducts();
-      setProducts(data);
-      
-      const uniqueCats = Array.from(new Set(data.map(p => p.category)));
-      setCategories(['هەمووی', ...uniqueCats]);
-    } catch (error) {
-      console.error(error);
-      handleFirestoreError(error, OperationType.LIST, 'products');
-    } finally {
-      setLoading(false);
-    }
-  };
+    setDoc(doc(db, 'settings', 'customer_display_cart'), { 
+        cart, 
+        updatedAt: new Date().toISOString() 
+    }).catch(console.error);
+  }, [cart]);
 
   const getFinalTotal = () => {
       const total = getCartTotal();

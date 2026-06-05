@@ -23,43 +23,23 @@ export function CustomerDisplay() {
        console.error("Failed to fetch settings", err);
     });
 
-    const loadCart = () => {
-      const stored = localStorage.getItem('customer_cart');
-      if (stored) {
-        try {
-          setCart(JSON.parse(stored));
-        } catch (e) {
-          setCart([]);
-        }
-      } else {
-        setCart([]);
-      }
-    };
-    
-    loadCart();
-
-    // Listen for storage events (when updated in another tab)
-    const handleStorage = (e: StorageEvent) => {
-      if (e.key === 'customer_cart') {
-        if (e.newValue) {
-          try {
-            setCart(JSON.parse(e.newValue));
-          } catch (e) {
-             setCart([]);
-          }
+    const unsubscribeCart = onSnapshot(doc(db, 'settings', 'customer_display_cart'), (docSnap) => {
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            if (data && data.cart) {
+                setCart(data.cart);
+            } else {
+                setCart([]);
+            }
         } else {
-          setCart([]);
+            setCart([]);
         }
-      }
-    };
+    }, (err) => {
+        console.error("Failed to fetch cart", err);
+    });
 
-    // If on same page without storage event (some browsers), we can poll or use a broadcast channel.
-    // For simplicity and since we control the tabs, storage event might be enough if it's on a different tab.
-    // However, if the user opens the display and modifies cart on the SAME tab, storage event does NOT fire.
-    // But they wouldn't use customer display on the exact same physical window, they would open a new window for the customer screen.
-    window.addEventListener('storage', handleStorage);
     return () => {
-      window.removeEventListener('storage', handleStorage);
+      unsubscribeCart();
       unsubscribeSettings();
     };
   }, []);

@@ -18,6 +18,8 @@ import { cn } from '@/lib/utils';
 import { useAuth } from './AuthProvider';
 import { auth } from '@/firebase';
 import { signOut } from 'firebase/auth';
+import { useProductStore } from '@/store/useProductStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 
 const adminNavItems = [
   { text: 'داشبۆرد', icon: LayoutDashboard, path: '/' },
@@ -39,6 +41,14 @@ export function Layout() {
   const { user, role } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+
+  const initProducts = useProductStore(state => state.initProducts);
+  const initSettings = useSettingsStore(state => state.initSettings);
+
+  React.useEffect(() => {
+    initProducts();
+    initSettings();
+  }, [initProducts, initSettings]);
   
   const handleLogout = () => {
     signOut(auth);

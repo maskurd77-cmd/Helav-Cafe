@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Plus, Pencil, Trash2, Search, X, Coffee } from 'lucide-react';
 import { Product } from '@/types';
-import { getProducts, addProduct, deleteProduct } from '@/services/productService';
+import { addProduct, deleteProduct, updateProduct, updateCategoryName } from '@/services/productService';
 import { handleFirestoreError, OperationType } from '@/firebase';
+import { useProductStore } from '@/store/useProductStore';
 
 export function MenuView() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { products, loading } = useProductStore();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -30,39 +31,21 @@ export function MenuView() {
     return matchesSearch && matchesCategory;
   });
 
-  useEffect(() => {
-    loadProducts();
-  }, []);
-
-  const loadProducts = async () => {
-    try {
-      setLoading(true);
-      const data = await getProducts();
-      setProducts(data);
-    } catch (error) {
-      console.error(error);
-      handleFirestoreError(error, OperationType.LIST, 'products');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleUpdateCategory = async (oldName: string) => {
     if (!newCategoryName || newCategoryName === oldName) {
         setEditingCategory(null);
         return;
     }
     try {
-      setLoading(true);
-      const { updateCategoryName } = await import('@/services/productService');
+      setIsSubmitting(true);
       await updateCategoryName(oldName, newCategoryName);
       setEditingCategory(null);
       setNewCategoryName('');
-      await loadProducts();
+      if (selectedCategory === oldName) setSelectedCategory(newCategoryName);
     } catch (error) {
       console.error(error);
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -89,9 +72,8 @@ export function MenuView() {
     if (!name || !price || !category) return;
     
     try {
+      setIsSubmitting(true);
       if (editId) {
-        // We need to import updateProduct from productService
-        const { updateProduct } = await import('@/services/productService');
         await updateProduct(editId, {
           name,
           price: Number(price),
@@ -112,21 +94,24 @@ export function MenuView() {
       setCategory('');
       setStatus('بەردەستە');
       setEditId(null);
-      loadProducts();
     } catch (error) {
       console.error(error);
       handleFirestoreError(error, editId ? OperationType.UPDATE : OperationType.CREATE, 'products');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleDelete = async (id: string) => {
     if (confirm('تۆ دڵنیایت لە سڕینەوەی ئەم بابەتە؟')) {
       try {
+        setIsSubmitting(true);
         await deleteProduct(id);
-        loadProducts();
       } catch (error) {
         console.error(error);
         handleFirestoreError(error, OperationType.DELETE, `products/${id}`);
+      } finally {
+        setIsSubmitting(false);
       }
     }
   };
