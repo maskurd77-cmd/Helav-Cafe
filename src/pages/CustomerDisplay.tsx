@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { CartItem } from '@/types';
-import { Coffee, ShoppingCart, ShoppingBag } from 'lucide-react';
-import { doc, getDoc, onSnapshot } from 'firebase/firestore';
+import { Coffee, ShoppingCart, ShoppingBag, ArrowRight } from 'lucide-react';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/firebase';
+import { Link } from 'react-router-dom';
 
 export function CustomerDisplay() {
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -59,10 +60,13 @@ export function CustomerDisplay() {
                 </div>
              )}
              <div>
-                <h1 className="text-2xl font-bold font-mono tracking-tight text-[#D4A373]">{settings?.storeName || 'Helav Cafe'}</h1>
-                <p className="text-sm text-white/60">بەخێربێیت بۆ کافێکەمان</p>
+                <h1 className="text-2xl font-bold font-mono tracking-tight text-[#D4A373]">{settings?.storeName}</h1>
+                <p className="text-sm text-white/60">{settings?.greetingMessage}</p>
              </div>
          </div>
+         <Link to="/pos" className="w-12 h-12 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-white transition-colors" title="گەڕانەوە بۆ سیستەم">
+             <ArrowRight size={24} />
+         </Link>
       </header>
 
       {/* Main Content */}
@@ -76,8 +80,8 @@ export function CustomerDisplay() {
                 <div className="w-32 h-32 bg-[#F9F7F2] rounded-full flex items-center justify-center text-[#D4A373] shadow-inner mb-4">
                    <Coffee size={64} />
                 </div>
-                <h2 className="text-4xl font-bold text-[#1E2420] leading-tight">پێشوازییەکی گەرم</h2>
-                <p className="text-[#8B8378] text-xl max-w-md">ئێمە لێرەین بۆ پێشکەشکردنی باشترین تام و چێژ بۆ ئێوەی ئازیز.</p>
+                <h2 className="text-4xl font-bold text-[#1E2420] leading-tight">{settings?.greetingMessage}</h2>
+                <p className="text-[#8B8378] text-xl max-w-md">{settings?.subGreeting}</p>
              </div>
          </div>
 

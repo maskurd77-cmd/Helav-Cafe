@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { ShoppingCart, Plus, Minus, Trash2, Coffee, ReceiptText, X, Tag, Banknote, ShoppingBag, MonitorSmartphone } from 'lucide-react';
 import { usePosStore } from '@/store/usePosStore';
 import { useProductStore } from '@/store/useProductStore';
@@ -229,13 +230,15 @@ export function PosView() {
             <span className="bg-[#1E2420] text-white text-xs px-2 py-0.5 rounded-full">{cart.reduce((sum, item) => sum + item.quantity, 0)}</span>
           </h2>
           <div className="flex items-center gap-2">
-            <button 
-              onClick={() => window.open('/customer', 'CustomerDisplay', 'width=1024,height=768')}
+            <Link 
+              to="/customer"
+              target="_blank"
+              onClick={() => setIsCartOpen(false)}
               className="p-1.5 lg:p-2 text-[#8B8378] hover:bg-white rounded-full transition-colors border border-transparent hover:border-[#E9E5D9] hover:text-[#1E2420]"
               title="کردنەوەی شاشەی کڕیار"
             >
               <MonitorSmartphone size={18} />
-            </button>
+            </Link>
             {cart.length > 0 && (
               <button 
                 onClick={clearCart}

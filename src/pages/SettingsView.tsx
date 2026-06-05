@@ -11,7 +11,9 @@ export function SettingsView() {
     address: 'هەولێر - شەقامی ١٠٠ مەتری',
     phone: '٠٧٥٠ ١٢٣ ٤٥٦٧',
     footerMessage: 'سوپاس بۆ سەردانت! تکایە سەردانمان بکەرەوە',
-    logoUrl: ''
+    logoUrl: '',
+    greetingMessage: 'بەخێربێیت بۆ کافێکەمان',
+    subGreeting: 'ئێمە لێرەین بۆ پێشکەشکردنی باشترین تام و چێژ بۆ ئێوەی ئازیز.'
   });
 
   useEffect(() => {
@@ -137,6 +139,34 @@ export function SettingsView() {
                             value={settings.footerMessage}
                             rows={3}
                             onChange={(e) => setSettings({...settings, footerMessage: e.target.value})}
+                            className="w-full bg-[#F9F7F2] border-0 rounded-xl lg:rounded-2xl px-4 py-3 text-sm lg:text-base focus:ring-2 focus:ring-[#8DAA91] outline-none text-[#2D3631] resize-none"
+                        />
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-3 mb-4 lg:mb-6 border-b border-[#F9F7F2] pb-4 lg:pb-6 mt-8">
+                    <div className="bg-[#E9E5D9] p-2 lg:p-3 rounded-xl lg:rounded-2xl text-[#2D3631]">
+                        <Store size={20} className="w-5 h-5 lg:w-6 lg:h-6" />
+                    </div>
+                    <h2 className="text-lg lg:text-xl font-bold text-[#2D3631]">شاشەی کڕیار</h2>
+                </div>
+
+                <div className="space-y-4 lg:space-y-5">
+                    <div>
+                        <label className="block text-xs lg:text-sm font-bold text-[#2D3631] mb-2">نامەی پێشوازی (سەرەکی)</label>
+                        <input 
+                            value={settings.greetingMessage}
+                            onChange={(e) => setSettings({...settings, greetingMessage: e.target.value})}
+                            placeholder="بەخێربێیت بۆ کافێکەمان"
+                            className="w-full bg-[#F9F7F2] border-0 rounded-xl lg:rounded-2xl px-4 py-3 text-sm lg:text-base focus:ring-2 focus:ring-[#8DAA91] outline-none text-[#2D3631]"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-xs lg:text-sm font-bold text-[#2D3631] mb-2">نامەی ژێرەکی (وەسف)</label>
+                        <textarea 
+                            value={settings.subGreeting}
+                            rows={2}
+                            onChange={(e) => setSettings({...settings, subGreeting: e.target.value})}
                             className="w-full bg-[#F9F7F2] border-0 rounded-xl lg:rounded-2xl px-4 py-3 text-sm lg:text-base focus:ring-2 focus:ring-[#8DAA91] outline-none text-[#2D3631] resize-none"
                         />
                     </div>

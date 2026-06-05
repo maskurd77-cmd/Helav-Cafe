@@ -12,7 +12,8 @@ import {
   Coffee,
   LogOut,
   Menu,
-  X
+  X,
+  MonitorSmartphone
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from './AuthProvider';
@@ -25,6 +26,7 @@ const adminNavItems = [
   { text: 'داشبۆرد', icon: LayoutDashboard, path: '/' },
   { text: 'فرۆشتن (POS)', icon: ShoppingCart, path: '/pos' },
   { text: 'مێنۆ', icon: MenuSquare, path: '/menu' },
+  { text: 'شاشەی کڕیار', icon: MonitorSmartphone, path: '/customer' },
   { text: 'خەرجییەکان', icon: Wallet, path: '/expenses' },
   { text: 'وەسلەکان', icon: Receipt, path: '/receipts' },
   { text: 'ڕاپۆرتەکان', icon: BarChart3, path: '/reports' },
@@ -35,6 +37,7 @@ const adminNavItems = [
 const cashierNavItems = [
   { text: 'فرۆشتن (POS)', icon: ShoppingCart, path: '/pos' },
   { text: 'مێنۆ', icon: MenuSquare, path: '/menu' },
+  { text: 'شاشەی کڕیار', icon: MonitorSmartphone, path: '/customer' },
 ];
 
 export function Layout() {
