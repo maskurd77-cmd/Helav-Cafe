@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { Product } from '@/types';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, query } from 'firebase/firestore';
 import { db } from '@/firebase';
+import { useBranchStore } from './useBranchStore';
 
 interface ProductState {
   products: Product[];
@@ -24,8 +25,11 @@ export const useProductStore = create<ProductState>((set, get) => ({
         unsubscribe();
     }
     
-    // Subscribe to products in real-time, order if you like but we do client-side sorting if needed or just take as is
-    unsubscribe = onSnapshot(query(collection(db, 'products')), (snapshot) => {
+    const branch = useBranchStore.getState().currentBranch;
+    const collectionName = branch === 'cafe' ? 'products' : 'products_hospital';
+    
+    // Subscribe to products in real-time
+    unsubscribe = onSnapshot(query(collection(db, collectionName)), (snapshot) => {
       const productsData = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()

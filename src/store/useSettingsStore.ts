@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/firebase';
+import { useBranchStore } from './useBranchStore';
 
 interface SettingsState {
   settings: {
@@ -9,6 +10,9 @@ interface SettingsState {
     phone: string;
     footerMessage: string;
     logoUrl: string;
+    greetingMessage: string;
+    subGreeting: string;
+    enableVirtualKeyboard: boolean;
   };
   loading: boolean;
   initialized: boolean;
@@ -23,7 +27,10 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     address: 'هەولێر',
     phone: '',
     footerMessage: 'سوپاس بۆ سەردانت!',
-    logoUrl: ''
+    logoUrl: '',
+    greetingMessage: 'بەخێربێیت بۆ کافێکەمان',
+    subGreeting: 'ئێمە لێرەین بۆ پێشکەشکردنی باشترین تام و چێژ بۆ ئێوەی ئازیز.',
+    enableVirtualKeyboard: false
   },
   loading: true,
   initialized: false,
@@ -35,7 +42,10 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         unsubscribe();
     }
     
-    unsubscribe = onSnapshot(doc(db, 'settings', 'general'), (docSnap) => {
+    const branch = useBranchStore.getState().currentBranch;
+    const docName = branch === 'cafe' ? 'general' : 'hospital';
+    
+    unsubscribe = onSnapshot(doc(db, 'settings', docName), (docSnap) => {
       if (docSnap.exists()) {
           set({ settings: { ...get().settings, ...docSnap.data() as any }, loading: false, initialized: true });
       } else {

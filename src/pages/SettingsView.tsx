@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc, deleteDoc, getDocs, collection } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '@/firebase';
 import { Loader2, Save, Store, Printer, AlertTriangle } from 'lucide-react';
+import { useBranchStore } from '@/store/useBranchStore';
 
 export function SettingsView() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const { currentBranch } = useBranchStore();
   const [settings, setSettings] = useState({
     storeName: 'Helav Cafe',
     address: 'هەولێر - شەقامی ١٠٠ مەتری',
@@ -13,24 +15,27 @@ export function SettingsView() {
     footerMessage: 'سوپاس بۆ سەردانت! تکایە سەردانمان بکەرەوە',
     logoUrl: '',
     greetingMessage: 'بەخێربێیت بۆ کافێکەمان',
-    subGreeting: 'ئێمە لێرەین بۆ پێشکەشکردنی باشترین تام و چێژ بۆ ئێوەی ئازیز.'
+    subGreeting: 'ئێمە لێرەین بۆ پێشکەشکردنی باشترین تام و چێژ بۆ ئێوەی ئازیز.',
+    enableVirtualKeyboard: false
   });
+
+  const docName = currentBranch === 'cafe' ? 'general' : 'hospital';
 
   useEffect(() => {
     loadSettings();
-  }, []);
+  }, [currentBranch]);
 
   const loadSettings = async () => {
     try {
       setLoading(true);
-      const docRef = doc(db, 'settings', 'general');
+      const docRef = doc(db, 'settings', docName);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        setSettings({ ...settings, ...docSnap.data() });
+        setSettings(prev => ({ ...prev, ...docSnap.data() }));
       }
     } catch (e) {
       console.error("Error loading settings:", e);
-      handleFirestoreError(e, OperationType.GET, 'settings/general');
+      handleFirestoreError(e, OperationType.GET, `settings/${docName}`);
     } finally {
       setLoading(false);
     }
@@ -39,11 +44,11 @@ export function SettingsView() {
   const handleSave = async () => {
     try {
       setSaving(true);
-      await setDoc(doc(db, 'settings', 'general'), settings);
+      await setDoc(doc(db, 'settings', docName), settings);
       alert('ڕێکخستنەکان بە سەرکەوتوویی پاشەکەوتکران');
     } catch (e) {
       console.error(e);
-      handleFirestoreError(e, OperationType.UPDATE, 'settings/general');
+      handleFirestoreError(e, OperationType.UPDATE, `settings/${docName}`);
       alert('هەڵەیەک ڕوویدا لە پاشەکەوتکردندا');
     } finally {
       setSaving(false);
@@ -169,6 +174,15 @@ export function SettingsView() {
                             onChange={(e) => setSettings({...settings, subGreeting: e.target.value})}
                             className="w-full bg-[#F9F7F2] border-0 rounded-xl lg:rounded-2xl px-4 py-3 text-sm lg:text-base focus:ring-2 focus:ring-[#8DAA91] outline-none text-[#2D3631] resize-none"
                         />
+                    </div>
+                    <div className="flex items-center justify-between mt-4">
+                        <label className="block text-xs lg:text-sm font-bold text-[#2D3631]">چالاککردنی کیبۆردی سەر شاشە</label>
+                        <div 
+                          className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${settings.enableVirtualKeyboard ? 'bg-[#8DAA91]' : 'bg-gray-300'}`}
+                          onClick={() => setSettings({...settings, enableVirtualKeyboard: !settings.enableVirtualKeyboard})}
+                        >
+                            <div className={`w-4 h-4 bg-white rounded-full transition-transform ${settings.enableVirtualKeyboard ? 'translate-x-6' : 'translate-x-0'}`}></div>
+                        </div>
                     </div>
                 </div>
 

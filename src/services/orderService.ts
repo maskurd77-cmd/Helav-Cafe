@@ -1,27 +1,32 @@
 import { db } from '@/firebase';
 import { collection, addDoc, getDocs, query, orderBy, limit, where } from 'firebase/firestore';
 import { Order } from '@/types';
+import { useBranchStore } from '@/store/useBranchStore';
 
-const collectionName = 'orders';
+const getCollectionName = () => {
+  const branch = useBranchStore.getState().currentBranch;
+  return branch === 'cafe' ? 'orders' : 'orders_hospital';
+};
 
 export const addOrder = async (order: Omit<Order, 'id'>) => {
-  return await addDoc(collection(db, collectionName), {
+  return await addDoc(collection(db, getCollectionName()), {
     ...order,
-    date: order.date.toISOString(), // Convert Date to string for Firebase compatibility (or use Timestamp)
+    date: order.date.toISOString(),
   });
 };
 
 export const getOrders = async (startDate?: Date, endDate?: Date) => {
     let q;
+    const collName = getCollectionName();
     if (startDate && endDate) {
       q = query(
-        collection(db, collectionName), 
+        collection(db, collName), 
         where('date', '>=', startDate.toISOString()),
         where('date', '<=', endDate.toISOString()),
         orderBy('date', 'desc')
       );
     } else {
-      q = query(collection(db, collectionName), orderBy('date', 'desc'), limit(50));
+      q = query(collection(db, collName), orderBy('date', 'desc'), limit(50));
     }
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => {

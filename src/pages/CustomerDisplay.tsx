@@ -4,9 +4,11 @@ import { Coffee, ShoppingCart, ShoppingBag, ArrowRight } from 'lucide-react';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/firebase';
 import { Link } from 'react-router-dom';
+import { useBranchStore } from '@/store/useBranchStore';
 
 export function CustomerDisplay() {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const { currentBranch } = useBranchStore();
   const [settings, setSettings] = useState({
     storeName: 'Helav Cafe',
     logoUrl: '',
@@ -16,7 +18,8 @@ export function CustomerDisplay() {
 
   useEffect(() => {
     // Load remote settings via snapshot so it updates live
-    const unsubscribeSettings = onSnapshot(doc(db, 'settings', 'general'), (doc) => {
+    const settingsDocName = currentBranch === 'cafe' ? 'general' : 'hospital';
+    const unsubscribeSettings = onSnapshot(doc(db, 'settings', settingsDocName), (doc) => {
        if (doc.exists()) {
            setSettings(prev => ({ ...prev, ...doc.data() }));
        }
@@ -24,7 +27,7 @@ export function CustomerDisplay() {
        console.error("Failed to fetch settings", err);
     });
 
-    const unsubscribeCart = onSnapshot(doc(db, 'settings', 'customer_display_cart'), (docSnap) => {
+    const unsubscribeCart = onSnapshot(doc(db, 'settings', `customer_display_cart_${currentBranch}`), (docSnap) => {
         if (docSnap.exists()) {
             const data = docSnap.data();
             if (data && data.cart) {
@@ -43,7 +46,7 @@ export function CustomerDisplay() {
       unsubscribeCart();
       unsubscribeSettings();
     };
-  }, []);
+  }, [currentBranch]);
 
   const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 

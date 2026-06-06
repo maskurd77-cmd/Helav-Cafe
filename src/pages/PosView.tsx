@@ -4,6 +4,7 @@ import { ShoppingCart, Plus, Minus, Trash2, Coffee, ReceiptText, X, Tag, Banknot
 import { usePosStore } from '@/store/usePosStore';
 import { useProductStore } from '@/store/useProductStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
+import { useBranchStore } from '@/store/useBranchStore';
 import { addOrder } from '@/services/orderService';
 import { doc, setDoc } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '@/firebase';
@@ -28,13 +29,43 @@ export function PosView() {
 
   const { cart, addToCart, removeFromCart, updateQuantity, clearCart, getCartTotal } = usePosStore();
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Avoid if user is typing in an input
+      if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
+      
+      if (e.key === 'Enter') {
+          e.preventDefault();
+          if (cart.length > 0 && !checkingOut) {
+              if (showCheckoutModal) {
+                  handleCheckout();
+              } else {
+                  openCheckoutModal();
+              }
+          }
+      } else if (e.key === 'Escape') {
+          e.preventDefault();
+          if (showCheckoutModal) {
+              setShowCheckoutModal(false);
+          } else {
+              clearCart();
+          }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [cart, checkingOut, showCheckoutModal]);
+
+  const { currentBranch } = useBranchStore();
+
   // Sync cart for customer display
   useEffect(() => {
-    setDoc(doc(db, 'settings', 'customer_display_cart'), { 
+    setDoc(doc(db, 'settings', `customer_display_cart_${currentBranch}`), { 
         cart, 
         updatedAt: new Date().toISOString() 
     }).catch(console.error);
-  }, [cart]);
+  }, [cart, currentBranch]);
 
   const getFinalTotal = () => {
       const total = getCartTotal();
@@ -77,28 +108,29 @@ export function PosView() {
                  <style>
                     @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600;700&display=swap');
                     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
-                    body { font-family: 'Cairo', 'Inter', sans-serif; padding: 0; font-size: 13px; color: #000; margin: 0; background: #fff; max-width: 300px; margin: 0 auto; line-height: 1.4; }
+                    * { box-sizing: border-box; color: #000 !important; font-family: 'Cairo', 'Inter', sans-serif; }
+                    body { padding: 0; font-size: 14px; color: #000; margin: 0 auto; background: #fff; width: 78mm; line-height: 1.4; }
                     .center { text-align: center; }
-                    .bold { font-weight: 700; }
-                    .logo-img { max-width: 100px; max-height: 100px; margin: 0 auto 12px; display: block; object-fit: contain; }
-                    .header { font-size: 20px; margin-bottom: 4px; font-weight: 700; letter-spacing: -0.5px; font-family: 'Space Grotesk', 'Cairo', sans-serif; }
-                    .sub { font-size: 11px; color: #333; margin-bottom: 3px; white-space: pre-wrap; line-height: 1.4; font-family: 'Inter', sans-serif; }
-                    .dashed-line { border-bottom: 1.5px dashed #111; margin: 12px 0; }
-                    .dotted-line { border-bottom: 1.5px dotted #999; margin: 10px 0; }
+                    .bold { font-weight: 800; }
+                    .logo-img { max-width: 80px; max-height: 80px; margin: 0 auto 10px; display: block; object-fit: contain; filter: grayscale(100%); }
+                    .header { font-size: 22px; margin-bottom: 4px; font-weight: 800; letter-spacing: -0.5px; font-family: 'Space Grotesk', 'Cairo', sans-serif; }
+                    .sub { font-size: 13px; font-weight: 600; color: #000; margin-bottom: 2px; white-space: pre-wrap; line-height: 1.4; font-family: 'Inter', sans-serif; }
+                    .dashed-line { border-bottom: 1.5px dashed #000; margin: 12px 0; }
+                    .dotted-line { border-bottom: 1.5px dotted #000; margin: 10px 0; }
                     .solid-line { border-bottom: 2px solid #000; margin: 12px 0; }
-                    .item-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 13px; align-items: flex-start; }
-                    .item-name-group { flex: 1; padding-right: 12px; line-height: 1.3; font-weight: 600; }
-                    .item-qty { font-weight: 700; color: #111; font-size: 12px; margin-top: 1px; width: 24px; text-align: right; }
-                    .item-price { min-width: 70px; text-align: left; font-weight: 700; font-family: 'Space Grotesk', monospace; font-size: 14px; }
+                    .item-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; align-items: flex-start; }
+                    .item-name-group { flex: 1; padding-right: 12px; line-height: 1.3; font-weight: 700; }
+                    .item-qty { font-weight: 800; font-size: 14px; margin-top: 1px; width: 24px; text-align: right; }
+                    .item-price { min-width: 70px; text-align: left; font-weight: 800; font-family: 'Space Grotesk', monospace; font-size: 15px; }
                     .total-row { display: flex; justify-content: space-between; font-size: 16px; font-weight: 700; margin-top: 8px; align-items: center; }
                     .total-label { font-size: 16px; font-weight: 700; }
-                    .total-amount { font-family: 'Space Grotesk', monospace; font-size: 22px; letter-spacing: -0.5px; }
-                    .footer { text-align: center; margin-top: 25px; font-size: 12px; color: #000; white-space: pre-wrap; line-height: 1.6; font-weight: 700; border-top: 1px solid #eee; padding-top: 15px; }
-                    .date-row { display: flex; justify-content: space-between; font-size: 11px; color: #333; margin-top: 15px; margin-bottom: 12px; font-family: 'Inter', monospace; font-weight: 600; text-transform: uppercase; border-top: 1.5px dotted #999; border-bottom: 1.5px dotted #999; padding: 6px 0; }
-                    .powered-by { text-align: center; margin-top: 20px; font-size: 9px; color: #888; font-weight: 700; letter-spacing: 2px; font-family: 'Inter', sans-serif; }
+                    .total-amount { font-family: 'Space Grotesk', monospace; font-size: 24px; font-weight: 800; }
+                    .footer { text-align: center; margin-top: 25px; font-size: 14px; color: #000; white-space: pre-wrap; line-height: 1.6; font-weight: 800; border-top: 1.5px dashed #000; padding-top: 15px; }
+                    .date-row { display: flex; justify-content: space-between; font-size: 12px; color: #000; margin-top: 15px; margin-bottom: 12px; font-family: 'Inter', monospace; font-weight: 800; text-transform: uppercase; border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 6px 0; }
+                    .powered-by { text-align: center; margin-top: 20px; font-size: 10px; color: #000; font-weight: 800; letter-spacing: 2px; font-family: 'Inter', sans-serif; }
+                    @page { margin: 0; padding: 0; }
                     @media print {
-                       @page { margin: 0; padding: 0; }
-                       body { margin: 10px; width: 100%; }
+                       body { width: 78mm; padding: 2mm 0; margin: 0 auto; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
                     }
                  </style>
                </head>
@@ -223,73 +255,73 @@ export function PosView() {
       )}
 
       {/* Cart Sidebar */}
-      <div className={`fixed inset-y-0 left-0 lg:static w-[320px] lg:w-[380px] bg-white border-l lg:border border-[#E9E5D9] lg:rounded-[40px] flex flex-col shadow-2xl lg:shadow-[0_2px_10px_rgba(0,0,0,0.02)] overflow-hidden shrink-0 z-50 transform transition-transform duration-300 lg:transform-none ${isCartOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-        <div className="p-4 lg:p-6 border-b border-[#E9E5D9] flex items-center justify-between shrink-0 bg-[#FDFBF7]">
-          <h2 className="font-bold text-[#1E2420] text-base lg:text-lg flex items-center gap-2">
+      <div className={`fixed inset-y-0 left-0 lg:static w-[280px] lg:w-[320px] bg-white border-l lg:border border-[#E9E5D9] lg:rounded-[32px] flex flex-col shadow-2xl lg:shadow-[0_2px_10px_rgba(0,0,0,0.02)] overflow-hidden shrink-0 z-50 transform transition-transform duration-300 lg:transform-none ${isCartOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+        <div className="p-3 border-b border-[#E9E5D9] flex items-center justify-between shrink-0 bg-[#FDFBF7]">
+          <h2 className="font-bold text-[#1E2420] text-sm flex items-center gap-2">
             داواکارییەکان
-            <span className="bg-[#1E2420] text-white text-xs px-2 py-0.5 rounded-full">{cart.reduce((sum, item) => sum + item.quantity, 0)}</span>
+            <span className="bg-[#1E2420] text-white text-[10px] px-1.5 py-0.5 rounded-full">{cart.reduce((sum, item) => sum + item.quantity, 0)}</span>
           </h2>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <Link 
               to="/customer"
               target="_blank"
               onClick={() => setIsCartOpen(false)}
-              className="p-1.5 lg:p-2 text-[#8B8378] hover:bg-white rounded-full transition-colors border border-transparent hover:border-[#E9E5D9] hover:text-[#1E2420]"
+              className="p-1.5 text-[#8B8378] hover:bg-white rounded-full transition-colors border border-transparent hover:border-[#E9E5D9] hover:text-[#1E2420]"
               title="کردنەوەی شاشەی کڕیار"
             >
-              <MonitorSmartphone size={18} />
+              <MonitorSmartphone size={16} />
             </Link>
             {cart.length > 0 && (
               <button 
                 onClick={clearCart}
-                className="text-xs lg:text-sm text-[#E11D48] hover:text-white flex items-center gap-1 font-bold px-3 py-1.5 rounded-full hover:bg-[#E11D48] transition-colors"
+                className="text-xs text-[#E11D48] hover:text-white flex items-center gap-1 font-bold px-2 py-1 rounded-full hover:bg-[#E11D48] transition-colors"
                 title="سڕینەوەی سەلەی کاڵاکان"
                >
-                <Trash2 size={16} />
-                <span className="hidden lg:inline">پاککردنەوە</span>
+                <Trash2 size={14} />
+                <span className="hidden lg:inline text-[11px]">پاککردنەوە</span>
               </button>
             )}
-            <button className="lg:hidden p-2 text-[#8B8378] hover:bg-white rounded-full transition-colors border border-transparent hover:border-[#E9E5D9]" onClick={() => setIsCartOpen(false)}>
-              <X size={18} />
+            <button className="lg:hidden p-1 text-[#8B8378] hover:bg-white rounded-full transition-colors border border-transparent hover:border-[#E9E5D9]" onClick={() => setIsCartOpen(false)}>
+              <X size={16} />
             </button>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-3 lg:space-y-4">
+        <div className="flex-1 overflow-y-auto p-3 space-y-2 no-scrollbar">
           {cart.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-[#8B8378] space-y-4 opacity-70">
-              <div className="w-20 h-20 bg-[#F9F7F2] rounded-full flex items-center justify-center">
-                  <ShoppingCart size={32} className="text-[#D4A373]" />
+            <div className="h-full flex flex-col items-center justify-center text-[#8B8378] space-y-2 opacity-70">
+              <div className="w-14 h-14 bg-[#F9F7F2] rounded-full flex items-center justify-center">
+                  <ShoppingCart size={24} className="text-[#D4A373]" />
               </div>
-              <p className="font-medium text-sm lg:text-base">سەبەتەی کاڵاکان بەتاڵە</p>
+              <p className="font-medium text-xs">سەبەتەی کاڵاکان بەتاڵە</p>
             </div>
           ) : (
             cart.map((item, index) => (
-              <div key={item.id} className="flex flex-col gap-3 p-4 bg-white rounded-2xl border border-[#E9E5D9] hover:border-[#D4A373] transition-colors shadow-sm group">
+              <div key={item.id} className="flex flex-col gap-2 p-2.5 bg-white rounded-[16px] border border-[#E9E5D9] hover:border-[#D4A373] transition-colors shadow-sm group">
                 <div className="flex justify-between items-start">
-                  <div className="flex items-start gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#1E2420] text-[#D4A373] flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
+                  <div className="flex items-start gap-2">
+                      <div className="w-5 h-5 rounded-full bg-[#1E2420] text-[#D4A373] flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
                           {index + 1}
                       </div>
-                      <h4 className="font-bold text-[#1E2420] text-sm leading-snug pt-1">{item.name}</h4>
+                      <h4 className="font-bold text-[#1E2420] text-xs leading-snug pt-0.5 max-w-[140px]">{item.name}</h4>
                   </div>
-                  <span className="font-bold text-[#1E2420] text-sm whitespace-nowrap font-mono bg-[#F9F7F2] px-2 py-1 rounded-md">{formatPrice(item.price * item.quantity)}</span>
+                  <span className="font-bold text-[#1E2420] text-xs font-mono bg-[#F9F7F2] px-1.5 py-0.5 rounded mr-1">{formatPrice(item.price * item.quantity)}</span>
                 </div>
-                <div className="flex justify-between items-center pl-11">
-                  <span className="text-[#8B8378] text-xs font-mono">{formatPrice(item.price)} دانەیەک</span>
-                  <div className="flex items-center gap-1 lg:gap-3 bg-[#F9F7F2] rounded-full p-1 border border-[#E9E5D9]">
+                <div className="flex justify-between items-center pl-7">
+                  <span className="text-[#8B8378] text-[10px] font-mono">{formatPrice(item.price)} دانەیەک</span>
+                  <div className="flex items-center gap-1 bg-[#F9F7F2] rounded-full p-0.5 border border-[#E9E5D9]">
                     <button 
                       onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                      className="w-7 h-7 flex items-center justify-center hover:bg-white rounded-full text-[#1E2420] transition-colors shadow-sm"
+                      className="w-6 h-6 flex items-center justify-center hover:bg-white rounded-full text-[#1E2420] transition-colors shadow-sm"
                     >
-                      <Minus size={14} strokeWidth={3} />
+                      <Minus size={12} strokeWidth={3} />
                     </button>
-                    <span className="w-5 lg:w-6 text-center font-bold text-[#1E2420] text-xs lg:text-sm">{item.quantity}</span>
+                    <span className="w-4 text-center font-bold text-[#1E2420] text-[11px]">{item.quantity}</span>
                     <button 
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      className="w-7 h-7 flex items-center justify-center hover:bg-white rounded-full text-[#1E2420] transition-colors shadow-sm"
+                      className="w-6 h-6 flex items-center justify-center hover:bg-white rounded-full text-[#1E2420] transition-colors shadow-sm"
                     >
-                      <Plus size={14} strokeWidth={3} />
+                      <Plus size={12} strokeWidth={3} />
                     </button>
                   </div>
                 </div>
@@ -298,20 +330,20 @@ export function PosView() {
           )}
         </div>
 
-        <div className="p-4 lg:p-6 bg-[#1E2420] text-white shrink-0 relative overflow-hidden flex flex-col justify-end">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
+        <div className="p-4 bg-[#1E2420] text-white shrink-0 relative overflow-hidden flex flex-col justify-end lg:rounded-b-[32px] lg:m-1">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
           
-          <div className="relative z-10 flex justify-between items-end mb-4 lg:mb-6">
-            <span className="text-white/70 font-medium text-sm">کۆی گشتی:</span>
-            <div className="text-right">
-                <span className="text-2xl lg:text-3xl font-bold font-mono text-[#D4A373] tracking-tight">{getCartTotal().toLocaleString('en-US')}</span>
-                <span className="text-sm text-white/70 mr-1">د.ع</span>
+          <div className="relative z-10 flex justify-between items-end mb-3">
+            <span className="text-white/70 font-medium text-xs">کۆی گشتی:</span>
+            <div className="text-right flex items-baseline gap-1">
+                <span className="text-xl font-bold font-mono text-[#D4A373] tracking-tight">{getCartTotal().toLocaleString('en-US')}</span>
+                <span className="text-[10px] text-white/70">د.ع</span>
             </div>
           </div>
           <button 
             disabled={cart.length === 0 || checkingOut}
             onClick={openCheckoutModal}
-            className="w-full relative z-10 bg-[#D4A373] hover:brightness-110 disabled:bg-white/10 disabled:text-white/40 disabled:cursor-not-allowed text-[#1E2420] font-bold py-3.5 lg:py-4 rounded-xl transition-all shadow-lg shadow-[#D4A373]/20 disabled:shadow-none flex justify-center items-center gap-2 text-sm lg:text-base border border-transparent disabled:border-white/10"
+            className="w-full relative z-10 bg-[#D4A373] hover:brightness-110 disabled:bg-white/10 disabled:text-white/40 disabled:cursor-not-allowed text-[#1E2420] font-bold py-3 rounded-xl transition-all shadow-lg shadow-[#D4A373]/20 disabled:shadow-none flex justify-center items-center gap-2 text-sm border border-transparent disabled:border-white/10"
           >
             {checkingOut ? 'چاوەڕێبە...' : 'پارەدان و وەسل'}
           </button>
