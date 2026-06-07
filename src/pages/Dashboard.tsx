@@ -129,111 +129,106 @@ export function Dashboard() {
   return (
     <div className="h-full flex flex-col gap-6 lg:gap-8 min-w-0 pb-6 lg:pb-0">
       
-      {/* Dynamic Welcome Heading Banner */}
-      <div className="bg-[#1E2420] text-white p-6 lg:p-8 rounded-[32px] shadow-xl relative overflow-hidden shrink-0">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-[#D4A373]/10 rounded-full blur-3xl -mr-24 -mt-24"></div>
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-2xl -ml-16 -mb-16"></div>
-        
-        <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      {/* Dynamic Welcome Heading Banner - Simplified and Compact */}
+      <div className="bg-gradient-to-l from-[#1E2420] to-[#2D3631] text-white p-5 lg:p-6 rounded-[24px] shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative overflow-hidden shrink-0 border border-[#D4A373]/10">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-[#D4A373]/5 rounded-full blur-2xl -mr-20 -mt-20 pointer-events-none"></div>
+        <div className="relative z-10 flex items-center gap-3.5">
+          <div className="p-3 bg-white/10 backdrop-blur-md rounded-xl text-[#D4A373] border border-white/10 hidden sm:block">
+             <LayoutDashboard size={22} className="stroke-[2.5]" />
+          </div>
           <div>
-            <span className="bg-[#D4A373]/20 border border-[#D4A373]/30 text-[#D4A373] text-[10px] sm:text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-wider inline-flex items-center gap-1.5 shadow-sm">
-               <Sparkles size={12} />
-               تەواو خۆکار و بێ کێشە
-            </span>
-            <h1 className="text-2xl lg:text-3xl font-extrabold text-white mt-4 flex items-center gap-2 tracking-tight">
-               <LayoutDashboard className="text-[#D4A373] w-8 h-8" />
-               بێخێربێیتەوە بۆ سیستەمی {settings.storeName || 'Helav Cafe'}
+            <h1 className="text-xl lg:text-2xl font-black tracking-tight text-white">
+              بەخێربێیتەوە بۆ {settings.storeName || 'MAS MENU'}
             </h1>
-            <p className="text-white/80 text-xs lg:text-sm mt-2 font-medium">
-               بەڕێوەبەرایەتی سەرەکى ڕاپۆرتی لقی ئێستا: <strong className="text-[#D4A373] text-sm lg:text-base underline underline-offset-4 decoration-2">{currentBranch === 'cafe' ? 'لقى کافێ' : 'لقى نەخۆشخانە'}</strong>
+            <p className="text-xs lg:text-sm text-white/70 mt-1 font-bold">
+              ڕاپۆرت و ئاماری لقی: <strong className="text-[#D4A373]">{currentBranch === 'cafe' ? 'کافێ' : 'نەخۆشخانە'}</strong>
             </p>
           </div>
-          
-          <div className="bg-[#2D3631]/80 backdrop-blur-md border border-white/10 px-5 py-3 rounded-2xl flex items-center gap-3 self-stretch sm:self-auto">
-             <div className="p-2 bg-[#D4A373]/20 text-[#D4A373] rounded-xl">
-                <CalendarDays size={18} />
-             </div>
-             <div className="text-right">
-                <p className="text-white/40 text-[10px] font-bold">بەرواری ئەمڕۆ</p>
-                <p className="text-white text-xs font-mono font-bold mt-0.5">{new Date().toLocaleDateString('ku-IQ')}</p>
-             </div>
-          </div>
+        </div>
+        
+        <div className="relative z-10 flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 rounded-xl text-[11px] sm:text-xs">
+           <CalendarDays size={14} className="text-[#D4A373]" />
+           <p className="text-white/60 font-bold">ئەمڕۆ:</p>
+           <p className="text-white font-mono font-black">{new Date().toLocaleDateString('ku-IQ')}</p>
         </div>
       </div>
 
       {/* Stats Grid of Today Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 shrink-0">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-8 shrink-0">
         
         {/* Stat Card 1: Today's Revenue */}
-        <div className="bg-white p-6 rounded-[24px] lg:rounded-[32px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-[#E9E5D9] relative overflow-hidden group hover:border-[#8DAA91] hover:shadow-xl hover:shadow-[#8DAA91]/5 transition-all duration-300">
-          <div className="flex justify-between items-start mb-4">
-            <div className="p-3 bg-green-50 rounded-2xl text-green-600 transition-colors">
-              <TrendingUp size={24} />
+        <div className="bg-gradient-to-b from-white to-[#FDFBF7] p-7 rounded-[32px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-[#E9E5D9] relative overflow-hidden group hover:border-[#8DAA91] hover:shadow-[0_20px_40px_rgba(141,170,145,0.15)] transition-all duration-500">
+          <div className="absolute top-0 right-0 w-2 h-full bg-gradient-to-b from-[#8DAA91]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="flex justify-between items-start mb-6">
+            <div className="p-3.5 bg-green-50 rounded-[20px] text-green-600 shadow-inner border border-green-100 group-hover:scale-110 transition-transform duration-500">
+              <TrendingUp size={24} className="stroke-[2.5]" />
             </div>
-            <span className="flex items-center text-xs font-bold text-green-600 bg-green-50 px-2.5 py-1 rounded-lg">
-              ئەمڕۆ <ArrowUpRight size={14} className="ml-1" />
+            <span className="flex items-center text-xs font-black text-green-700 bg-green-100/80 px-3 py-1.5 rounded-xl border border-green-200">
+              ئەمڕۆ <ArrowUpRight size={16} className="ml-1" />
             </span>
           </div>
-          <p className="text-[#8B8378] text-xs font-bold mb-1">کۆی فرۆشی دەراوزە (POS) بۆ ئەمڕۆ</p>
-          <h3 className="text-2xl lg:text-3xl font-extrabold text-[#1E2420] font-mono tracking-tight group-hover:text-[#8DAA91] transition-colors">
-            {totalSalesToday.toLocaleString('en-US')} <span className="text-sm font-sans text-[#8B8378] font-normal">د.ع</span>
+          <p className="text-[#8B8378] text-xs font-bold mb-2 uppercase tracking-wider">کۆی فرۆشی دەراوزە (POS) بۆ ئەمڕۆ</p>
+          <h3 className="text-3xl lg:text-4xl font-black text-[#1E2420] font-mono tracking-tight group-hover:text-[#8DAA91] transition-colors duration-500 flex items-baseline gap-1.5">
+            {totalSalesToday.toLocaleString('en-US')} <span className="text-sm font-sans text-[#8B8378] font-bold">د.ع</span>
           </h3>
         </div>
 
         {/* Stat Card 2: Today's Orders */}
-        <div className="bg-white p-6 rounded-[24px] lg:rounded-[32px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-[#E9E5D9] relative overflow-hidden group hover:border-[#D4A373] hover:shadow-xl hover:shadow-[#D4A373]/5 transition-all duration-300">
-          <div className="flex justify-between items-start mb-4">
-            <div className="p-3 bg-amber-50 rounded-2xl text-[#D4A373] transition-colors">
-              <ShoppingBag size={24} />
+        <div className="bg-gradient-to-b from-white to-[#FDFBF7] p-7 rounded-[32px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-[#E9E5D9] relative overflow-hidden group hover:border-[#D4A373] hover:shadow-[0_20px_40px_rgba(212,163,115,0.15)] transition-all duration-500">
+          <div className="absolute top-0 right-0 w-2 h-full bg-gradient-to-b from-[#D4A373]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="flex justify-between items-start mb-6">
+            <div className="p-3.5 bg-amber-50 rounded-[20px] text-[#D4A373] border border-amber-100 shadow-inner group-hover:scale-110 transition-transform duration-500">
+              <ShoppingBag size={24} className="stroke-[2.5]" />
             </div>
-            <span className="flex items-center text-xs font-bold text-[#D4A373] bg-amber-50 px-2.5 py-1 rounded-lg">
+            <span className="flex items-center text-xs font-black text-[#D4A373] bg-amber-50 px-3 py-1.5 rounded-xl border border-[#D4A373]/20">
                پسوولە
             </span>
           </div>
-          <p className="text-[#8B8378] text-xs font-bold mb-1">ژمارەی فاکتۆرە فەرمییەکان</p>
-          <h3 className="text-2xl lg:text-3xl font-extrabold text-[#1E2420] font-mono tracking-tight group-hover:text-[#D4A373] transition-colors">
-            {totalOrdersToday} <span className="text-sm font-sans text-[#8B8378] font-normal">دانە</span>
+          <p className="text-[#8B8378] text-xs font-bold mb-2 uppercase tracking-wider">ژمارەی فاکتۆرە فەرمییەکان</p>
+          <h3 className="text-3xl lg:text-4xl font-black text-[#1E2420] font-mono tracking-tight group-hover:text-[#D4A373] transition-colors duration-500 flex items-baseline gap-1.5">
+            {totalOrdersToday} <span className="text-sm font-sans text-[#8B8378] font-bold">دانە</span>
           </h3>
         </div>
 
         {/* Stat Card 3: Today's Expenses */}
-        <div className="bg-white p-6 rounded-[24px] lg:rounded-[32px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-[#E9E5D9] relative overflow-hidden group hover:border-[#E11D48] hover:shadow-xl hover:shadow-[#E11D48]/5 transition-all duration-300 sm:col-span-2 lg:col-span-1">
-          <div className="flex justify-between items-start mb-4">
-            <div className="p-3 bg-[#FFF1F2] rounded-2xl text-[#E11D48] transition-colors">
-              <Wallet size={24} />
+        <div className="bg-gradient-to-b from-white to-[#FDFBF7] p-7 rounded-[32px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-[#E9E5D9] relative overflow-hidden group hover:border-[#E11D48] hover:shadow-[0_20px_40px_rgba(225,29,72,0.1)] transition-all duration-500 sm:col-span-2 lg:col-span-1">
+          <div className="absolute top-0 right-0 w-2 h-full bg-gradient-to-b from-[#E11D48]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div className="flex justify-between items-start mb-6">
+            <div className="p-3.5 bg-[#FFF1F2] rounded-[20px] text-[#E11D48] shadow-inner border border-red-100 group-hover:scale-110 transition-transform duration-500">
+              <Wallet size={24} className="stroke-[2.5]" />
             </div>
-            <span className="flex items-center text-xs font-bold text-[#E11D48] bg-[#FFF1F2] px-2.5 py-1 rounded-lg">
-              خەرجیی گشتی <ArrowDownRight size={14} className="ml-1" />
+            <span className="flex items-center text-xs font-black text-[#E11D48] bg-[#FFF1F2] px-3 py-1.5 rounded-xl border border-red-100">
+              خەرجیی گشتی <ArrowDownRight size={16} className="ml-1" />
             </span>
           </div>
-          <p className="text-[#8B8378] text-xs font-bold mb-1">خەرجییەکانی تەواوی ئەمڕۆ</p>
-          <h3 className="text-2xl lg:text-3xl font-extrabold text-[#1E2420] font-mono tracking-tight group-hover:text-[#E11D48] transition-colors">
-             {expensesTotal.toLocaleString('en-US')} <span className="text-sm font-sans text-[#8B8378] font-normal">د.ع</span>
+          <p className="text-[#8B8378] text-xs font-bold mb-2 uppercase tracking-wider">خەرجییەکانی تەواوی ئەمڕۆ</p>
+          <h3 className="text-3xl lg:text-4xl font-black text-[#1E2420] font-mono tracking-tight group-hover:text-[#E11D48] transition-colors duration-500 flex items-baseline gap-1.5">
+             {expensesTotal.toLocaleString('en-US')} <span className="text-sm font-sans text-[#8B8378] font-bold">د.ع</span>
           </h3>
         </div>
 
       </div>
 
       {/* 7-Days Sales Analytical Visualization Graph */}
-      <div className="bg-white p-6 lg:p-8 rounded-[28px] lg:rounded-[40px] border border-[#E9E5D9] shadow-sm flex flex-col gap-4 shrink-0 hover:border-[#8DAA91] transition-all duration-300">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-[#1E2420] text-[#D4A373] rounded-xl shadow-md">
-              <BarChart3 size={20} />
+      <div className="bg-gradient-to-b from-white to-[#FDFBF7] p-8 lg:p-10 rounded-[32px] lg:rounded-[40px] border border-[#E9E5D9] shadow-md flex flex-col gap-6 shrink-0 hover:border-[#8DAA91] hover:shadow-xl transition-all duration-500">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-gradient-to-br from-[#1E2420] to-[#2D3631] text-[#D4A373] rounded-2xl shadow-xl border border-[#D4A373]/20">
+              <BarChart3 size={24} className="stroke-[2]" />
             </div>
             <div>
-              <h4 className="font-extrabold text-[#1E2420] text-base">دۆخی فرۆشتنی لقی ئێستا</h4>
-              <p className="text-[10px] text-[#8B8378] mt-0.5">گەشەی گشتی فرۆشراوەکان لە ماوەی ٧ ڕۆژی ڕابردوودا</p>
+              <h4 className="font-extrabold text-[#1E2420] text-xl">دۆخی فرۆشتنی لقی ئێستا</h4>
+              <p className="text-xs text-[#8B8378] mt-1 font-bold">گەشەی گشتی فرۆشراوەکان لە ماوەی ٧ ڕۆژی ڕابردوودا</p>
             </div>
           </div>
           <div className="text-right sm:text-left">
-             <span className="text-xs font-bold text-[#8DAA91] bg-green-50 border border-green-100 px-3.5 py-1.5 rounded-full inline-flex items-center gap-1.5 shadow-sm">
+             <span className="text-sm font-black text-[#8DAA91] bg-green-50 border border-green-200 px-5 py-2.5 rounded-2xl inline-flex items-center gap-2 shadow-sm">
                 تێکڕای فرۆش: {(chartData.reduce((acc, curr) => acc + curr.sales, 0) / 7).toLocaleString('en-US', {maximumFractionDigits: 0})} د.ع / ڕۆژانە
              </span>
           </div>
         </div>
 
-        <div className="h-[220px] w-full mt-2">
+        <div className="h-[280px] w-full mt-4">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
               <defs>
@@ -406,7 +401,7 @@ export function Dashboard() {
           <div className="mt-6 pt-6 shrink-0 border-t border-dashed border-[#E9E5D9]">
             <div className="text-center">
               <span className="text-[9px] text-[#8B8378] font-bold uppercase tracking-[0.25em] opacity-60">
-                 سیستەمی بەڕێوبەرایەتی کۆیی هێلاڤ
+                 سیستەمی بەڕێوبەرایەتی کۆیی MAS MENU
               </span>
             </div>
           </div>

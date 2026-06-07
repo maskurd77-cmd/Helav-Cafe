@@ -447,18 +447,18 @@ export function ReportsView() {
     <div className="space-y-6 h-full flex flex-col min-w-0 pb-6">
       
       {/* Page Header Banner */}
-      <div className="bg-[#1E2420] text-white p-6 lg:p-8 rounded-[32px] shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden shrink-0">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#D4A373]/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
-        <div className="relative z-10">
-          <span className="bg-[#D4A373]/20 border border-[#D4A373]/30 text-[#D4A373] text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-wider">
+      <div className="bg-gradient-to-br from-[#1E2420] to-[#2D3631] text-white p-6 lg:p-8 rounded-[32px] lg:rounded-[40px] shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden shrink-0 border border-[#D4A373]/20">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#D4A373]/10 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
+        <div className="relative z-10 w-full md:w-auto">
+          <span className="bg-[#D4A373]/20 border border-[#D4A373]/40 text-[#D4A373] text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-wider shadow-sm">
              لق تاقیکردنەوە پڕۆفیشناڵ {currentBranch === 'cafe' ? 'کافێ' : 'نەخۆشخانە'}
           </span>
-          <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-white mt-3 flex items-center gap-2">
-            <Activity className="text-[#D4A373] w-8 h-8 animate-pulse" />
-            سیستەمی ڕاپۆرت و شیکاری دارایی
+          <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-l from-white to-[#F5E6CA] mt-4 flex items-center gap-3">
+            <Activity className="text-[#D4A373] w-9 h-9 animate-pulse" />
+            سیستەمی ڕاپۆرت و شیکاری
           </h1>
-          <p className="text-white/60 text-xs lg:text-sm mt-1.5 font-medium">
-             بینینی داهاتی پسوولەکان، ڕێژەی مۆدێرنی خەرجییەکان، و باشترینەکانی فرۆشتنی لقی {currentBranch === 'cafe' ? 'کافێ' : 'نەخۆشخانە'} چڕ بە ژمێریاری نوێ
+          <p className="text-white/70 text-sm mt-3 font-bold max-w-lg">
+             بینینی داهاتی پسوولەکان، ڕێژەی مۆدێرنی خەرجییەکان، و باشترینەکانی فرۆشتنی لقی {currentBranch === 'cafe' ? 'کافێ' : 'نەخۆشخانە'} بە شێوەیەکی زیرەک
           </p>
         </div>
 
@@ -468,9 +468,9 @@ export function ReportsView() {
           {/* Print Button */}
           <button
             onClick={handlePrintReport}
-            className="bg-[#D4A373] text-[#1E2420] hover:bg-[#cdaf8f] font-bold py-3 px-6 rounded-2xl text-xs sm:text-sm transition-all shadow-md shadow-[#D4A373]/10 flex items-center justify-center gap-2 active:scale-95"
+            className="bg-gradient-to-br from-[#D4A373] to-[#BFA171] hover:from-[#cdaf8f] hover:to-[#BFA171] text-[#1E2420] font-black py-4 px-7 rounded-2xl text-xs sm:text-sm transition-all shadow-xl flex items-center justify-center gap-2 active:scale-95 stroke-[2.5]"
           >
-            <Printer size={16} />
+            <Printer size={18} className="stroke-[2.5]" />
             <span>چاپکردنی ڕاپۆرت</span>
           </button>
 
@@ -480,7 +480,7 @@ export function ReportsView() {
                  type="date"
                  value={customDate}
                  onChange={(e) => setCustomDate(e.target.value)}
-                 className="w-full bg-[#2D3631] border border-white/10 text-white font-bold py-3 px-4 rounded-2xl text-xs focus:ring-2 focus:ring-[#D4A373] focus:border-transparent outline-none"
+                 className="w-full bg-white/10 backdrop-blur-md border border-white/20 text-white font-black py-4 px-5 rounded-2xl text-xs sm:text-sm focus:ring-2 focus:ring-[#D4A373] focus:border-transparent outline-none shadow-inner"
                />
              </div>
           )}
@@ -492,17 +492,17 @@ export function ReportsView() {
                   setDateRange(e.target.value as any);
                   if (e.target.value !== 'custom') setCustomDate('');
               }}
-              className="w-full appearance-none bg-[#2D3631] border border-white/10 text-white font-bold py-3 pl-5 pr-12 rounded-2xl text-xs sm:text-sm focus:ring-2 focus:focus:ring-[#D4A373] focus:border-transparent outline-none cursor-pointer hover:bg-[#343e38] transition-colors"
+              className="w-full appearance-none bg-white/10 backdrop-blur-md border border-white/20 text-white font-black py-4 pl-5 pr-14 rounded-2xl text-xs sm:text-sm focus:ring-2 focus:ring-[#D4A373] focus:border-transparent outline-none cursor-pointer hover:bg-white/20 transition-all shadow-inner"
             >
-              <option value="today">ئەمڕۆ</option>
-              <option value="yesterday">دوێنێ</option>
-              <option value="thisMonth">ئەم مانگە</option>
-              <option value="lastMonth">مانگی پێشوو</option>
-              <option value="all">هەموو کاتێک</option>
-              <option value="custom">دیاریکراو...</option>
+              <option value="today" className="bg-[#2D3631] text-white">ئەمڕۆ</option>
+              <option value="yesterday" className="bg-[#2D3631] text-white">دوێنێ</option>
+              <option value="thisMonth" className="bg-[#2D3631] text-white">ئەم مانگە</option>
+              <option value="lastMonth" className="bg-[#2D3631] text-white">مانگی پێشوو</option>
+              <option value="all" className="bg-[#2D3631] text-white">هەموو کاتێک</option>
+              <option value="custom" className="bg-[#2D3631] text-white">دیاریکراو...</option>
             </select>
-            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-white/60">
-              <Calendar size={16} />
+            <div className="absolute inset-y-0 right-5 flex items-center pointer-events-none text-white">
+              <Calendar size={18} className="stroke-[2.5]" />
             </div>
           </div>
         </div>

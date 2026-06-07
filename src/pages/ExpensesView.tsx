@@ -69,64 +69,69 @@ export function ExpensesView() {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto h-full flex flex-col min-w-0">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
-        <div>
-          <h1 className="text-xl lg:text-2xl font-bold text-[#1E2420]">خەرجییەکان</h1>
-          <p className="text-xs lg:text-sm text-[#8B8378] mt-1">تۆمارکردن و بەدواداچوونی خەرجیەکان</p>
+    <div className="space-y-6 max-w-6xl mx-auto h-full flex flex-col min-w-0">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0 bg-white p-5 rounded-[24px] border border-[#E9E5D9] shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-gradient-to-br from-[#1E2420] to-[#2D3631] text-[#E11D48] rounded-[18px] shadow-md border border-[#E11D48]/20">
+             <Wallet size={24} className="stroke-[2]" />
+          </div>
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-black text-[#1E2420] tracking-tight">خەرجییەکان</h1>
+            <p className="text-xs lg:text-sm text-[#8B8378] mt-1 font-bold">تۆمارکردن و بەدواداچوونی خەرجییەکان</p>
+          </div>
         </div>
         <button 
           onClick={() => setShowModal(true)}
-          className="bg-[#1E2420] hover:bg-[#2D3631] text-[#E9E5D9] font-bold py-2.5 px-6 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2 text-sm w-full md:w-auto whitespace-nowrap"
+          className="bg-gradient-to-b from-[#1E2420] to-[#2D3631] hover:from-[#1E2420] hover:to-[#1E2420] text-[#E11D48] border border-[#E11D48]/30 font-black py-3 px-6 rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 text-sm w-full md:w-auto whitespace-nowrap"
         >
-          <Plus size={18} />
+          <Plus size={20} className="stroke-[2.5]" />
           تۆمارکردنی خەرجی
         </button>
       </div>
 
-      <div className="bg-white rounded-[24px] lg:rounded-[32px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-[#E9E5D9] overflow-hidden flex-1 flex flex-col min-w-0">
-        <div className="overflow-auto flex-1 max-w-full">
+      <div className="bg-gradient-to-b from-white to-[#FDFBF7] rounded-[24px] lg:rounded-[32px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-[#E9E5D9] overflow-hidden flex-1 flex flex-col min-w-0">
+        <div className="overflow-auto flex-1 max-w-full custom-scrollbar">
           {loading ? (
-             <div className="flex flex-col items-center justify-center h-full text-[#8B8378] gap-4">
-                 <div className="w-8 h-8 border-4 border-[#E9E5D9] border-t-[#E11D48] rounded-full animate-spin"></div>
-                 <span className="font-medium text-sm">بارکردنی خەرجییەکان...</span>
+             <div className="flex flex-col items-center justify-center h-full text-[#8B8378] gap-4 py-20">
+                 <div className="w-10 h-10 border-4 border-[#E9E5D9] border-t-[#E11D48] rounded-full animate-spin"></div>
+                 <span className="font-bold text-sm tracking-wide">بارکردنی خەرجییەکان...</span>
              </div>
           ) : (
           <table className="w-full text-right border-collapse min-w-[500px]">
-            <thead className="bg-[#FDFBF7] text-[#8B8378] text-[10px] lg:text-xs uppercase sticky top-0 z-10 border-b border-[#E9E5D9]">
+            <thead className="bg-white/50 backdrop-blur-md text-[#8B8378] text-[10px] lg:text-xs uppercase sticky top-0 z-10 border-b-2 border-[#E9E5D9] shadow-sm">
               <tr>
-                <th className="px-6 py-4 font-semibold text-right">وردەکاری خەرجی</th>
-                <th className="px-6 py-4 font-semibold text-right">ڕێکەوت</th>
-                <th className="px-6 py-4 font-semibold text-right">بڕی پارە</th>
-                <th className="px-6 py-4 font-semibold w-24 lg:w-32 text-left">کردارەکان</th>
+                <th className="px-6 py-5 font-black text-right tracking-wider">وردەکاری خەرجی</th>
+                <th className="px-6 py-5 font-black text-right tracking-wider">ڕێکەوت</th>
+                <th className="px-6 py-5 font-black text-right tracking-wider">بڕی پارە</th>
+                <th className="px-6 py-5 font-black w-24 lg:w-32 text-left tracking-wider">کردارەکان</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#F9F7F2]">
               {expenses.map((ex) => (
-                <tr key={ex.id} className="hover:bg-[#FDFBF7] transition-colors group">
+                <tr key={ex.id} className="hover:bg-white transition-all duration-300 group hover:shadow-[0_4px_20px_rgba(0,0,0,0.03)] relative">
                   <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-[#F87171]/10 rounded-xl flex items-center justify-center text-[#E11D48] flex-shrink-0 group-hover:bg-white group-hover:shadow-sm transition-all border border-transparent group-hover:border-[#F87171]/20">
-                              <Wallet size={18} />
+                      <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-gradient-to-br from-[#FDFBF7] to-[#F9F7F2] rounded-xl flex items-center justify-center text-[#E11D48] flex-shrink-0 group-hover:bg-gradient-to-br group-hover:from-[#1E2420] group-hover:to-[#2D3631] transition-all duration-300 shadow-sm border border-[#E9E5D9]">
+                              <Wallet size={20} className="stroke-[2.5]" />
                           </div>
-                          <span className="font-bold text-[#1E2420] text-sm">{ex.name}</span>
+                          <span className="font-black text-[#1E2420] text-base group-hover:text-[#E11D48] transition-colors">{ex.name}</span>
                       </div>
                   </td>
                   <td className="px-6 py-4">
-                      <div className="flex items-center gap-1.5 text-[#8B8378] text-xs font-medium bg-[#F9F7F2] w-max px-2 py-1 rounded-md border border-[#E9E5D9]">
-                          <CalendarIcon size={12} />
-                          {new Date(ex.date).toLocaleDateString('ku-IQ')} <span className="mx-1 text-[#D4A373]">|</span> {new Date(ex.date).toLocaleTimeString('ku-IQ', {hour: '2-digit', minute:'2-digit'})}
+                      <div className="flex items-center gap-1.5 text-[#8B8378] text-xs font-bold bg-white w-max px-3 py-1.5 rounded-xl border border-[#E9E5D9] shadow-sm group-hover:border-[#E11D48]/30 transition-colors">
+                          <CalendarIcon size={14} className="text-[#E11D48]" />
+                          {new Date(ex.date).toLocaleDateString('ku-IQ')} <span className="mx-1 text-[#E11D48]/50">|</span> {new Date(ex.date).toLocaleTimeString('ku-IQ', {hour: '2-digit', minute:'2-digit'})}
                       </div>
                   </td>
-                  <td className="px-6 py-4 font-bold text-[#E11D48] text-sm font-mono">{ex.amount.toLocaleString('en-US')} <span className="font-sans text-xs font-normal text-[#8B8378]">د.ع</span></td>
+                  <td className="px-6 py-4 font-black text-[#E11D48] text-base font-mono">{ex.amount.toLocaleString('en-US')} <span className="font-sans text-xs font-bold text-[#8B8378] ml-1">د.ع</span></td>
                   <td className="px-6 py-4 text-left">
-                    <div className="flex items-center justify-end opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center justify-end opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-300 transform lg:translate-x-4 lg:group-hover:translate-x-0">
                       <button 
                         onClick={() => handleDelete(ex.id)}
-                        className="p-2 text-[#8B8378] hover:text-[#E11D48] hover:bg-[#E11D48]/10 rounded-xl transition-colors"
+                        className="p-2.5 text-[#E11D48] bg-red-50 hover:bg-[#E11D48] hover:text-white rounded-xl transition-all shadow-sm border border-red-100"
                         title="سڕینەوە"
                       >
-                        <Trash2 size={18} />
+                        <Trash2 size={18} className="stroke-[2.5]" />
                       </button>
                     </div>
                   </td>
@@ -134,7 +139,15 @@ export function ExpensesView() {
               ))}
               {expenses.length === 0 && (
                 <tr>
-                   <td colSpan={4} className="text-center py-16 text-[#8B8378] text-sm font-medium">هیچ خەرجییەک تۆمارنەکراوە</td>
+                   <td colSpan={4} className="py-20 text-center">
+                     <div className="flex flex-col items-center justify-center gap-4 text-[#8B8378]">
+                        <div className="p-6 bg-[#F9F7F2] rounded-full border-2 border-dashed border-[#E9E5D9]">
+                           <Wallet size={32} className="text-[#E11D48] opacity-50 stroke-[1.5]" />
+                        </div>
+                        <p className="font-bold text-base">هیچ خەرجییەک تۆمارنەکراوە</p>
+                        <button onClick={() => setShowModal(true)} className="text-[#E11D48] font-black text-sm hover:underline mt-2">یەکەم خەرجی زیاد بکە +</button>
+                     </div>
+                   </td>
                 </tr>
               )}
             </tbody>

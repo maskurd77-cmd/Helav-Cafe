@@ -1,6 +1,6 @@
 {
-  "name": "Helav Cafe POS",
-  "description": "Professional POS and management system for Helav Cafe",
+  "name": "MAS MENU POS",
+  "description": "Professional POS and management system for MAS MENU",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

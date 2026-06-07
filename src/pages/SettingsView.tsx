@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc, deleteDoc, getDocs, collection } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '@/firebase';
-import { Loader2, Save, Store, Printer, AlertTriangle, Database, Download, Upload, RefreshCw, Image, Trash2, Plus } from 'lucide-react';
+import { Loader2, Save, Store, Printer, AlertTriangle, Database, Download, Upload, RefreshCw, Image, Trash2, Plus, Settings } from 'lucide-react';
 import { useBranchStore } from '@/store/useBranchStore';
 
 export function SettingsView() {
@@ -21,7 +21,7 @@ export function SettingsView() {
   };
 
   const [settings, setSettings] = useState({
-    storeName: 'Helav Cafe',
+    storeName: 'MAS MENU',
     address: 'هەولێر - شەقامی ١٠٠ مەتری',
     phone: '٠٧٥٠ ١٢٣ ٤٥٦٧',
     footerMessage: 'سوپاس بۆ سەردانت! تکایە سەردانمان بکەرەوە',
@@ -140,7 +140,7 @@ export function SettingsView() {
       const hospOrders = await getDocs(collection(db, 'orders_hospital'));
       
       const backupPayload = {
-        appName: 'Helav Cafe Cloud POS',
+        appName: 'MAS MENU Cloud POS',
         version: '1.2_premium',
         timestamp: new Date().toISOString(),
         settings: {
@@ -314,19 +314,26 @@ export function SettingsView() {
         </div>
       )}
 
-      <div className="px-1">
-        <h1 className="text-xl lg:text-2xl font-bold text-[#2D3631]">ڕێکخستنەکان</h1>
-        <p className="text-xs lg:text-sm text-[#8B8378] mt-1">بەڕێوەبردنی زانیارییەکانی کافێ و پرینت</p>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0 bg-white p-5 rounded-[24px] border border-[#E9E5D9] shadow-[0_4px_20px_rgba(0,0,0,0.03)] mx-1">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-gradient-to-br from-[#1E2420] to-[#2D3631] text-[#D4A373] rounded-[18px] shadow-md border border-[#D4A373]/20">
+             <Settings size={24} className="stroke-[2]" />
+          </div>
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-black text-[#1E2420] tracking-tight">ڕێکخستنەکان</h1>
+            <p className="text-xs lg:text-sm text-[#8B8378] mt-1 font-bold">بەڕێوەبردنی زانیارییەکان، پسوولە و سیستەم</p>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 px-1">
         <div className="space-y-6 lg:space-y-8">
-            <div className="bg-white rounded-[24px] lg:rounded-[32px] shadow-sm border border-[#E9E5D9] p-6 lg:p-8">
-                <div className="flex items-center gap-3 mb-4 lg:mb-6 border-b border-[#F9F7F2] pb-4 lg:pb-6">
-                    <div className="bg-[#E9E5D9] p-2 lg:p-3 rounded-xl lg:rounded-2xl text-[#2D3631]">
-                        <Store size={20} className="w-5 h-5 lg:w-6 lg:h-6" />
+            <div className="bg-gradient-to-b from-white to-[#FDFBF7] rounded-[24px] lg:rounded-[32px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-[#E9E5D9] p-6 lg:p-8">
+                <div className="flex items-center gap-4 mb-4 lg:mb-6 border-b-2 border-[#E9E5D9]/50 pb-4 lg:pb-6">
+                    <div className="bg-gradient-to-br from-[#1E2420] to-[#2D3631] p-3 rounded-xl lg:rounded-2xl text-[#D4A373] shadow-md">
+                        <Store size={20} className="w-5 h-5 lg:w-6 lg:h-6 stroke-[2]" />
                     </div>
-                    <h2 className="text-lg lg:text-xl font-bold text-[#2D3631]">زانیارییە گشتییەکان</h2>
+                    <h2 className="text-xl lg:text-2xl font-black text-[#1E2420]">زانیارییە گشتییەکان</h2>
                 </div>
 
                 <div className="space-y-4 lg:space-y-5">
@@ -632,7 +639,7 @@ export function SettingsView() {
                     
                     {/* Hardcoded system footer */}
                     <div className="mt-8 border-t border-gray-200 pt-3 text-center">
-                        <p className="text-[10px] text-gray-400 font-bold tracking-widest">POWERED BY HELAV CAFE</p>
+                        <p className="text-[10px] text-gray-400 font-bold tracking-widest">POWERED BY MAS MENU</p>
                     </div>
                  </div>
             </div>

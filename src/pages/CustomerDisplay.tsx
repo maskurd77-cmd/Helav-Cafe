@@ -12,7 +12,7 @@ export function CustomerDisplay() {
   const { currentBranch } = useBranchStore();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [settings, setSettings] = useState({
-    storeName: 'Helav Cafe',
+    storeName: 'MAS MENU',
     logoUrl: '',
     greetingMessage: 'بەخێربێیت بۆ کافێکەمان',
     subGreeting: 'ئێمە لێرەین بۆ پێشکەشکردنی باشترین تام و چێژ بۆ ئێوەی ئازیز.'
@@ -136,47 +136,36 @@ export function CustomerDisplay() {
       <main className="flex-1 flex overflow-hidden p-4 lg:p-5 gap-4 lg:gap-5 h-full max-h-[calc(100vh-76px)]">
          
          {/* Left Side: Premium Live Display Carousel */}
-         <div className="hidden lg:flex flex-[1.3] bg-[#1E2420] text-white rounded-[32px] overflow-hidden border-2 border-[#D4A373]/15 shadow-2xl relative flex-col justify-between p-6 lg:p-8 group-promo">
+         <div className="hidden lg:flex w-[260px] shrink-0 bg-[#1E2420] text-white rounded-[32px] overflow-hidden border-2 border-[#D4A373]/15 shadow-2xl relative flex-col justify-between p-5 group-promo">
               <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#D4A373_1px,transparent_1px)] [background-size:16px_16px]"></div>
               
-              <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-[#D4A373]/5 rounded-full blur-3xl -mr-24 -mt-24"></div>
-              <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-black/30 rounded-full blur-3xl -ml-24 -mb-24"></div>
+              <div className="absolute top-0 right-0 w-[180px] h-[180px] bg-[#D4A373]/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
+              <div className="absolute bottom-0 left-0 w-[180px] h-[180px] bg-black/30 rounded-full blur-3xl -ml-16 -mb-16"></div>
               
               <div className="relative z-10 w-full h-full flex flex-col justify-between">
                 
                 {/* Header Welcome Title */}
                 <div className="flex items-center justify-between w-full shrink-0">
                   <div className="bg-white/5 border border-white/10 py-1.5 px-3 rounded-full flex items-center gap-1.5">
-                    <Star size={14} className="text-[#D4A373] fill-[#D4A373]" />
-                    <span className="text-[10px] text-[#D4A373] font-bold">هەمیشە باشترین پێشکەش دەکەین</span>
+                    <Star size={10} className="text-[#D4A373] fill-[#D4A373]" />
+                    <span className="text-[9px] text-[#D4A373] font-bold">هەمیشە باشترین پێشکەش دەکەین</span>
                   </div>
                   <div className="flex gap-1.5">
                     {promoSlides.map((_, i) => (
                       <button 
                         key={i}
                         onClick={() => setActiveSlide(i)}
-                        className={`h-1.5 rounded-full transition-all duration-300 ${activeSlide === i ? 'w-6 bg-[#D4A373]' : 'w-1.5 bg-white/20'}`}
+                        className={`h-1.5 rounded-full transition-all duration-300 ${activeSlide === i ? 'w-5 bg-[#D4A373]' : 'w-1.5 bg-white/20'}`}
                       />
                     ))}
                   </div>
                 </div>
 
                 {/* Sliding Card Content - Slimmer for 13.3" Screen height restrictions */}
-                <div className="my-4 flex-1 flex flex-col lg:flex-row items-center gap-6 justify-center">
-                  <div className="flex-1 space-y-3 text-right">
-                    <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#D4A373]/20 border border-[#D4A373]/40 text-[#D4A373] text-[10px] font-bold">
-                      {promoSlides[activeSlide].tag}
-                    </span>
-                    <h2 className="text-3xl lg:text-4xl font-extrabold text-white leading-tight min-h-[90px]">
-                      {promoSlides[activeSlide].title}
-                    </h2>
-                    <p className="text-slate-300 text-sm lg:text-base leading-relaxed max-w-md min-h-[70px]">
-                      {promoSlides[activeSlide].desc}
-                    </p>
-                  </div>
+                <div className="my-2 flex-1 flex flex-col items-center gap-3 justify-center">
                   
                   {/* Photo Frame - Formatted for 13.3" Screen ratio */}
-                  <div className="w-[220px] h-[260px] shrink-0 rounded-[24px] overflow-hidden border-4 border-[#D4A373]/20 shadow-2xl relative group">
+                  <div className="w-[140px] h-[140px] shrink-0 rounded-[20px] overflow-hidden border-2 border-[#D4A373]/20 shadow-2xl relative group">
                     <img 
                       src={promoSlides[activeSlide].image} 
                       alt="promo" 
@@ -185,22 +174,27 @@ export function CustomerDisplay() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#1e2420] via-transparent to-transparent"></div>
                   </div>
+
+                  <div className="flex-1 space-y-1.5 text-center mt-2">
+                    <h2 className="text-xl lg:text-2xl font-extrabold text-white leading-tight min-h-[60px]">
+                      {promoSlides[activeSlide].title}
+                    </h2>
+                    <p className="text-slate-300 text-xs leading-relaxed line-clamp-3">
+                      {promoSlides[activeSlide].desc}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Bottom luxury slogan */}
-                <div className="p-3 bg-white/5 rounded-2xl border border-white/10 flex items-center gap-4 justify-between shrink-0">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-[#D4A373]/20 flex items-center justify-center text-[#D4A373] shrink-0">
-                      <Heart size={16} className="fill-[#D4A373]" />
+                <div className="p-3 bg-white/5 rounded-2xl border border-white/10 flex items-center gap-4 justify-between shrink-0 backdrop-blur-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D4A373]/30 to-transparent flex items-center justify-center text-[#D4A373] shrink-0 border border-[#D4A373]/20">
+                      <Star size={18} className="fill-[#D4A373]" />
                     </div>
                     <div className="text-right">
-                      <p className="text-[10px] text-slate-400 font-bold">تەندروست بن هەمیشە</p>
-                      <p className="text-xs font-bold text-white">Helav Cafe - Since 2026</p>
+                      <p className="text-[10px] text-slate-400 font-bold tracking-widest uppercase mb-0.5">PREMIUM EXPERIENCE</p>
+                      <p className="text-sm font-black text-white tracking-widest">POWERED BY MAS MENU</p>
                     </div>
-                  </div>
-                  <div className="bg-[#D4A373] text-[#1E2420] text-[10px] font-bold py-1 px-2.5 rounded-full flex items-center gap-1">
-                    <Volume2 size={10} />
-                    سیستەمی فەرمی کڕیار
                   </div>
                 </div>
 
@@ -210,107 +204,107 @@ export function CustomerDisplay() {
          {/* Right Side: Dynamic Real-time Order Cart Bill */}
          <div className="flex-1 flex flex-col bg-white rounded-[32px] shadow-2xl border-2 border-[#E9E5D9] overflow-hidden max-h-full">
             
-            <div className="p-5 bg-[#FDFBF7] border-b-2 border-[#E9E5D9] flex items-center justify-between shrink-0">
-               <div className="flex items-center gap-3">
-                  <div className="p-2.5 bg-[#1E2420] rounded-xl shadow-md border border-[#D4A373]/20 text-[#D4A373]">
-                     <ShoppingBag size={22} />
+            <div className="p-6 bg-[#FDFBF7] border-b-2 border-[#E9E5D9] flex items-center justify-between shrink-0 relative overflow-hidden">
+               <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4A373]/10 rounded-full blur-3xl pointer-events-none"></div>
+               <div className="flex items-center gap-4 relative z-10">
+                  <div className="p-3 bg-[#1E2420] rounded-2xl shadow-lg border border-[#D4A373]/30 text-[#D4A373]">
+                     <ShoppingBag size={24} />
                   </div>
                   <div className="text-right">
                     <h2 className="text-2xl font-black text-[#1E2420] tracking-tight">هەژماری داواکارییەکانتان</h2>
-                    <p className="text-xs text-[#8B8378] font-bold mt-0.5">بە فەرمی لە مێزی ژمێریاری هێلاڤ کافێ</p>
+                    <p className="text-[10px] text-[#8B8378] font-bold mt-1 tracking-widest uppercase">POWERED BY MAS MENU</p>
                   </div>
                </div>
-               <div className="bg-[#1E2420] text-[#D4A373] font-mono text-xs px-3 py-1.5 rounded-full font-bold shadow-md">
+               <div className="bg-white border text-[#D4A373] border-[#E9E5D9] font-mono text-xs px-4 py-2 rounded-xl font-bold shadow-sm flex items-center gap-2 relative z-10">
+                 <span className="relative flex h-2.5 w-2.5">
+                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D4A373] opacity-75"></span>
+                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#D4A373]"></span>
+                 </span>
                  LIVE CALCULATION
                </div>
             </div>
 
-            {/* List of items - High density padding, larger text, and giant highly visible prices */}
-            <div className="flex-1 overflow-y-auto p-5 space-y-3.5 bg-[#FCFAF5]">
+            {/* List of items - Ultra high density padding, auto-scaling to fit 10 items without scroll */}
+            <div className={`flex-1 p-2 lg:p-3 bg-gradient-to-b from-white to-[#FDFBF7] flex flex-col justify-start`}>
                 <AnimatePresence initial={false}>
                   {cart.length === 0 ? (
                       <motion.div 
                         initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 0.7, scale: 1 }}
+                        animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0 }}
-                        className="h-full flex flex-col items-center justify-center text-[#8B8378] gap-4 py-12"
+                        className="h-full flex flex-col items-center justify-center text-[#8B8378] gap-4"
                       >
-                          <div className="p-8 bg-[#F5F2EA] rounded-full text-[#D4A373] border-2 border-dashed border-[#D4A373]/30">
-                              <Coffee size={56} className="stroke-[1.5] animate-bounce" />
+                          <div className="p-6 bg-gradient-to-br from-[#FDFBF7] to-[#F9F7F2] rounded-full text-[#D4A373] shadow-inner border border-[#E9E5D9] relative">
+                              <ShoppingBag size={48} className="stroke-[1.5]" />
+                              <div className="absolute top-0 right-0 w-4 h-4 bg-[#E11D48] rounded-full animate-ping opacity-75"></div>
                           </div>
-                          <span className="text-2xl font-black text-[#1E2420]">بەخێربێن بۆ هێلاڤ کافێ</span>
-                          <span className="text-sm font-bold text-center text-[#8B8378] px-8 leading-relaxed max-w-sm">
-                            کڕیاری بەڕێز، کاتێک داواکارییەکەت لەلایەن کاشێرەوە تۆمار دەکرێت، لێرەدا بە ڕوونی پیشان دەدرێت.
-                          </span>
+                          <div className="text-center">
+                            <span className="text-2xl font-black text-[#1E2420] block mb-2">بەخێربێن بۆ {settings?.storeName}</span>
+                            <span className="text-[12px] font-bold text-[#8B8378] px-8 leading-relaxed max-w-sm block">
+                              تکایە داواکارییەکەت لای کاشێر تۆمار بکە. هەرکە تۆمارکرا، لێرەدا بە ڕوونی دەیدەبینیت.
+                            </span>
+                          </div>
                       </motion.div>
                   ) : (
-                      cart.map((item, index) => (
+                    <div className="grid grid-cols-2 gap-2 h-full content-start items-start auto-rows-max">
+                      {cart.map((item, index) => (
                           <motion.div 
                             key={item.id} 
-                            initial={{ opacity: 0, y: 15, scale: 0.96 }}
-                            animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            transition={{ duration: 0.2, delay: index * 0.03 }}
-                            className="flex items-center gap-4 p-4 bg-white rounded-[24px] border-2 border-[#E9E5D9] hover:border-[#D4A373] transition-all shadow-md relative overflow-hidden"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            transition={{ duration: 0.15, delay: index * 0.02 }}
+                            className="flex items-stretch bg-white rounded-xl border border-[#E9E5D9] shadow-sm relative overflow-hidden group h-[52px]"
                           >
                               {/* Left decorative color bar */}
-                              <div className="absolute top-0 right-0 w-2 bg-[#D4A373] h-full"></div>
+                              <div className="absolute top-0 right-0 w-1 bg-gradient-to-b from-[#1E2420] to-[#2D3631] h-full object-cover"></div>
                               
-                              <div className="w-12 h-12 bg-[#F9F7F2] rounded-2xl border border-[#E9E5D9] flex items-center justify-center text-[#1E2420] shadow-inner shrink-0">
-                                  <Coffee size={24} className="text-[#D4A373]" />
-                              </div>
-                              
-                              <div className="flex-1 text-right min-w-0">
+                              <div className="flex-1 text-right min-w-0 px-3 py-1.5 flex flex-col justify-center">
                                   {/* Giant product name */}
-                                  <h3 className="text-xl font-bold text-[#1E2420] truncate leading-tight">{item.name}</h3>
+                                  <h3 className="text-[13px] font-black text-[#1E2420] truncate leading-tight">{item.name}</h3>
                                   
                                   {/* Massive item unit price */}
-                                  <div className="text-sm text-[#8B8378] font-bold mt-1.5 flex items-center justify-end gap-1.5">
-                                      <span className="text-xs text-[#8B8378] font-sans">نرخی دانە:</span>
-                                      <span className="font-mono text-[#D4A373] text-base font-black">{item.price.toLocaleString('en-US')} د.ع</span>
+                                  <div className="text-[10px] text-[#8B8378] font-bold mt-0.5 flex items-center justify-start gap-1">
+                                      <span className="text-[9px] text-[#8B8378]">نرخی دانە:</span>
+                                      <span className="font-mono text-[#D4A373] text-[11px] font-black">{item.price.toLocaleString('en-US')}</span>
                                   </div>
                               </div>
 
                               {/* Quantity Badge Container */}
-                              <div className="flex flex-col items-center gap-1 justify-center shrink-0 ml-2">
-                                <span className="text-[10px] text-[#8B8378] font-bold uppercase tracking-wider">دانە</span>
-                                <div className="px-4 py-2 bg-[#1E2420] text-[#D4A373] rounded-xl font-mono font-black text-2xl shadow-lg border border-[#D4A373]/20">
-                                    {item.quantity}
-                                </div>
+                              <div className="flex flex-col items-center justify-center shrink-0 border-r border-l border-[#E9E5D9] bg-[#FDFBF7] px-3">
+                                  <span className="text-xs text-[#8B8378] font-bold mb-0.5">دانە</span>
+                                  <span className="text-[15px] font-black text-[#1E2420] font-mono leading-none">{item.quantity}</span>
                               </div>
 
                               {/* Subtotal of Item (Giant highly visible price) */}
-                              <div className="text-left shrink-0 min-w-[110px] flex flex-col justify-center items-end border-r border-[#E9E5D9] pr-4">
-                                  <span className="text-[10px] text-[#8B8378] font-bold">کۆی گشتی</span>
-                                  <span className="text-2xl font-black font-mono text-[#1E2420] mt-0.5 tracking-tight">
+                              <div className="text-left shrink-0 min-w-[85px] flex flex-col justify-center items-end bg-[#1E2420] text-white px-3 relative overflow-hidden">
+                                  <div className="absolute inset-0 bg-gradient-to-br from-transparent to-white/5 pointer-events-none"></div>
+                                  <span className="text-[8px] text-[#D4A373] font-bold uppercase tracking-wider relative z-10">کۆی بڕ</span>
+                                  <span className="text-[15px] font-black font-mono text-white tracking-tight leading-none mt-0.5 relative z-10">
                                       {(item.price * item.quantity).toLocaleString('en-US')}
                                   </span>
-                                  <span className="text-[9px] text-[#8B8378] font-bold leading-none">دینار</span>
                               </div>
                           </motion.div>
-                      ))
+                      ))}
+                    </div>
                   )}
                 </AnimatePresence>
             </div>
 
-            {/* Total Footer bill - HUGE DISPLAY for 13.3" viewport readability */}
-            <div className="p-6 bg-[#1E2420] text-white mt-auto relative overflow-hidden shrink-0 border-t-4 border-[#D4A373]">
-               <div className="absolute top-0 right-0 w-80 h-80 bg-[#D4A373]/5 rounded-full blur-3xl pointer-events-none"></div>
+            {/* Total Footer bill - HUGE DISPLAY for readability */}
+            <div className="p-3 lg:p-4 bg-[#1E2420] text-white mt-auto relative overflow-hidden shrink-0 border-t-4 border-[#D4A373] shadow-[0_-10px_30px_rgba(30,36,32,0.1)]">
+               <div className="absolute top-0 right-0 w-80 h-80 bg-[#D4A373]/10 rounded-full blur-3xl pointer-events-none"></div>
+               <div className="absolute bottom-0 left-10 w-40 h-40 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
                <div className="flex justify-between items-center relative z-10">
                    <div className="text-right">
-                      <span className="text-xs text-slate-400 font-bold tracking-widest uppercase">کۆی سەرجەم داواکاری کڕیار</span>
-                      <p className="text-2xl font-black text-white mt-1.5">بڕی کۆتایی بۆ پارەدان</p>
-                      <span className="text-xs text-emerald-400 font-bold mt-2.5 block flex items-center gap-1.5 justify-start">
-                         <span className="inline-block w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping"></span>
-                         باج و خزمەتگوزاری تێدایە
-                      </span>
+                      <span className="text-[9px] lg:text-[10px] text-[#D4A373] font-bold tracking-[0.2em] uppercase">کۆی سەرجەم داواکارییەکان</span>
+                      <p className="text-lg lg:text-xl font-black text-white mt-0.5">بڕی کۆتایی بۆ پارەدان</p>
                    </div>
                    <div className="text-left flex flex-col items-end">
-                      <div className="text-5xl lg:text-6xl font-black font-mono tracking-tight text-[#D4A373] flex items-baseline gap-1.5">
+                      <div className="text-4xl lg:text-5xl font-black font-mono tracking-tight text-[#D4A373] flex items-baseline gap-1.5">
                           {total.toLocaleString('en-US')}
-                          <span className="text-lg text-white font-sans font-bold ml-1">د.ع</span>
+                          <span className="text-sm lg:text-base text-white font-sans font-bold ml-1">د.ع</span>
                       </div>
-                      <span className="text-[11px] text-slate-400 font-bold mt-2">TOTAL AMOUNT TO PAY</span>
                    </div>
                </div>
             </div>

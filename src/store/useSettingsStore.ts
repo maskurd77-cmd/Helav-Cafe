@@ -25,7 +25,7 @@ let unsubscribe: (() => void) | null = null;
 
 const defaultSlides = [
   {
-    title: 'قاوەی داخی هێلاڤ',
+    title: 'قاوەی داخی MAS MENU',
     desc: 'بۆن و تامی ڕەسەنی قاوەی کوردی و جیهانی لەگەڵ شیری سروشتی گەرم.',
     tag: 'خواستی زۆری لەسەرە 🔥',
     image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&q=80&w=400'
@@ -46,12 +46,12 @@ const defaultSlides = [
 
 const defaultSettings = {
   cafe: {
-    storeName: 'Helav Cafe',
+    storeName: 'MAS MENU',
     address: 'هەولێر - شەقامی ١٠٠ مەتری',
     phone: '07500000000',
-    footerMessage: 'سوپاس بۆ سەردانتان بۆ هێلاڤ کافێ!',
+    footerMessage: 'سوپاس بۆ سەردانتان بۆ MAS MENU!',
     logoUrl: '',
-    greetingMessage: 'بەخێربێیت بۆ هێلاڤ کافێ',
+    greetingMessage: 'بەخێربێیت بۆ MAS MENU',
     subGreeting: 'تامێکی جیاواز لە هەموو لایەکەوە بۆ ئارامبوونەوە تاقیبکەرەوە.',
     promoSlides: defaultSlides,
     enableVirtualKeyboard: false
@@ -71,7 +71,7 @@ const defaultSettings = {
 
 export const useSettingsStore = create<SettingsState>((set, get) => ({
   settings: {
-    storeName: 'Helav Cafe',
+    storeName: 'MAS MENU',
     address: 'هەولێر',
     phone: '',
     footerMessage: 'سوپاس بۆ سەردانت!',

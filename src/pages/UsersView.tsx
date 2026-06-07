@@ -97,72 +97,80 @@ export function UsersView() {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto h-full flex flex-col">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shrink-0">
-        <div>
-          <h1 className="text-2xl font-bold text-[#1E2420]">بەکارهێنەران</h1>
-          <p className="text-sm text-[#8B8378] mt-1">بەڕێوەبردنی کاشێر و ئەدمین</p>
+    <div className="space-y-6 max-w-6xl mx-auto h-full flex flex-col">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0 bg-white p-5 rounded-[24px] border border-[#E9E5D9] shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-gradient-to-br from-[#1E2420] to-[#2D3631] text-[#D4A373] rounded-[18px] shadow-md border border-[#D4A373]/20">
+             <UserIcon size={24} className="stroke-[2]" />
+          </div>
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-black text-[#1E2420] tracking-tight">بەکارهێنەران</h1>
+            <p className="text-xs lg:text-sm text-[#8B8378] mt-1 font-bold">بەڕێوەبردنی ستاف، کاشێر و ئەدمین</p>
+          </div>
         </div>
         <button 
           onClick={openAddModal}
-          className="bg-[#1E2420] hover:bg-[#2D3631] text-[#E9E5D9] font-bold py-2.5 px-6 rounded-full transition-all shadow-lg flex items-center gap-2"
+          className="bg-gradient-to-b from-[#1E2420] to-[#2D3631] hover:from-[#1E2420] hover:to-[#1E2420] text-[#D4A373] border border-[#D4A373]/30 font-black py-3 px-6 rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 text-sm w-full md:w-auto whitespace-nowrap"
         >
-          <Plus size={18} />
-          <span>بەکارهێنەری نوێ</span>
+          <Plus size={20} className="stroke-[2.5]" />
+          بەکارهێنەری نوێ
         </button>
       </div>
 
-      <div className="bg-white rounded-[24px] lg:rounded-[32px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-[#E9E5D9] overflow-hidden flex-1 flex flex-col">
-        <div className="overflow-auto flex-1">
+      <div className="bg-gradient-to-b from-white to-[#FDFBF7] rounded-[24px] lg:rounded-[32px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-[#E9E5D9] overflow-hidden flex-1 flex flex-col min-w-0">
+        <div className="overflow-auto flex-1 custom-scrollbar">
           {loading ? (
-             <div className="flex items-center justify-center h-full text-[#8B8378] font-medium">چاوەڕێبە...</div>
+             <div className="flex flex-col items-center justify-center h-full text-[#8B8378] gap-4 py-20">
+                 <div className="w-10 h-10 border-4 border-[#E9E5D9] border-t-[#D4A373] rounded-full animate-spin"></div>
+                 <span className="font-bold text-sm tracking-wide">بارکردنی بەکارهێنەران...</span>
+             </div>
           ) : (
           <table className="w-full text-right border-collapse">
-            <thead className="bg-[#FDFBF7] text-[#8B8378] text-xs uppercase sticky top-0 border-b border-[#E9E5D9]">
+            <thead className="bg-white/50 backdrop-blur-md text-[#8B8378] text-[10px] lg:text-xs uppercase sticky top-0 z-10 border-b-2 border-[#E9E5D9] shadow-sm">
               <tr>
-                <th className="px-6 py-5 font-semibold text-right">ناو و ئیمەیڵ</th>
-                <th className="px-6 py-5 font-semibold text-right">ئەرک (Role)</th>
-                <th className="px-6 py-5 font-semibold text-left">کردارەکان</th>
+                <th className="px-6 py-5 font-black text-right tracking-wider">ناو و ئیمەیڵ</th>
+                <th className="px-6 py-5 font-black text-right tracking-wider">ئەرک (Role)</th>
+                <th className="px-6 py-5 font-black text-left tracking-wider">کردارەکان</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#F9F7F2]">
               {users.map((u) => (
-                <tr key={u.id} className="hover:bg-[#FDFBF7] transition-colors group">
+                <tr key={u.id} className="hover:bg-white transition-all duration-300 group hover:shadow-[0_4px_20px_rgba(0,0,0,0.03)] relative">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-[#F9F7F2] rounded-full flex items-center justify-center text-[#D4A373] flex-shrink-0">
-                        <UserIcon size={20} />
+                      <div className="w-12 h-12 bg-gradient-to-br from-[#FDFBF7] to-[#F9F7F2] rounded-[16px] flex items-center justify-center text-[#D4A373] flex-shrink-0 group-hover:bg-gradient-to-br group-hover:from-[#1E2420] group-hover:to-[#2D3631] transition-all duration-300 shadow-sm border border-[#E9E5D9]">
+                        <UserIcon size={20} className="stroke-[2.5]" />
                       </div>
                       <div>
-                        <div className="font-bold text-[#1E2420]">{u.name || 'بێ ناو'}</div>
-                        <div className="text-xs text-[#8B8378] mt-0.5">{u.email}</div>
+                        <div className="font-black text-[#1E2420] text-base group-hover:text-[#D4A373] transition-colors">{u.name || 'بێ ناو'}</div>
+                        <div className="text-xs font-bold text-[#8B8378] mt-1 tracking-wide">{u.email}</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase ${
+                    <span className={`px-4 py-1.5 rounded-xl text-xs font-black uppercase text-center min-w-[80px] inline-block shadow-sm border transition-colors ${
                       u.role === 'admin' 
-                        ? 'bg-[#1E2420] text-[#D4A373]' 
-                        : 'bg-[#E9E5D9] text-[#2D3631]'
+                        ? 'bg-gradient-to-br from-[#1E2420] to-[#2D3631] text-[#D4A373] border-[#1E2420]' 
+                        : 'bg-white text-[#8B8378] border-[#E9E5D9] group-hover:border-[#D4A373]'
                     }`}>
                         {u.role === 'admin' ? 'ئەدمین' : 'کاشێر'}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-left">
-                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center justify-end gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-300 transform lg:translate-x-4 lg:group-hover:translate-x-0">
                       <button 
                         onClick={() => openEditModal(u)}
-                        className="p-2 text-[#8DAA91] hover:bg-[#8DAA91]/10 rounded-xl transition-colors"
+                        className="p-2.5 text-[#8DAA91] bg-green-50 hover:bg-[#8DAA91] hover:text-white rounded-xl transition-all shadow-sm border border-green-100"
                         title="دەستکاریکردن"
                       >
-                        <Edit2 size={16} />
+                        <Edit2 size={18} className="stroke-[2.5]" />
                       </button>
                       <button 
                         onClick={() => handleDelete(u.id)}
-                        className="p-2 text-[#E11D48] hover:bg-[#E11D48]/10 rounded-xl transition-colors"
+                        className="p-2.5 text-[#E11D48] bg-red-50 hover:bg-[#E11D48] hover:text-white rounded-xl transition-all shadow-sm border border-red-100"
                         title="سڕینەوە"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={18} className="stroke-[2.5]" />
                       </button>
                     </div>
                   </td>
@@ -170,7 +178,14 @@ export function UsersView() {
               ))}
               {users.length === 0 && (
                 <tr>
-                   <td colSpan={3} className="text-center py-16 text-[#8B8378]">هیچ بەکارهێنەرێک نەدۆزرایەوە</td>
+                   <td colSpan={3} className="py-20 text-center">
+                     <div className="flex flex-col items-center justify-center gap-4 text-[#8B8378]">
+                        <div className="p-6 bg-[#F9F7F2] rounded-full border-2 border-dashed border-[#E9E5D9]">
+                           <UserIcon size={32} className="text-[#D4A373] opacity-50 stroke-[1.5]" />
+                        </div>
+                        <p className="font-bold text-base">هیچ بەکارهێنەرێک نەدۆزرایەوە.</p>
+                     </div>
+                   </td>
                 </tr>
               )}
             </tbody>

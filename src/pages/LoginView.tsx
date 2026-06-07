@@ -35,7 +35,7 @@ export function LoginView() {
           <div className="w-16 h-16 bg-[#F9F7F2] rounded-full flex items-center justify-center mx-auto mb-4 text-[#8DAA91]">
             <Coffee size={32} />
           </div>
-          <h1 className="text-2xl font-bold text-[#2D3631]">Helav Cafe</h1>
+          <h1 className="text-2xl font-bold text-[#2D3631]">MAS MENU</h1>
           <p className="text-[#8B8378] mt-2">سیستەمی بەڕێوەبردن</p>
         </div>
 

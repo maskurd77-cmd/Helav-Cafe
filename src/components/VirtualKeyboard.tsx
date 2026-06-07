@@ -10,7 +10,7 @@ interface VirtualKeyboardProps {
 const kurdishLayout = [
     ['ض', 'ص', 'ث', 'ق', 'ف', 'غ', 'ع', 'ه', 'خ', 'ح', 'ج', 'چ'],
     ['ش', 'س', 'ی', 'ب', 'ل', 'ا', 'ت', 'ن', 'م', 'ک', 'گ'],
-    ['ظ', 'ط', 'ز', 'ڕ', 'ر', 'و', 'ۆ', 'پ', 'د', 'ژ'],
+    ['ظ', 'ط', 'ز', 'ڕ', 'ر', 'و', 'ۆ', 'پ', 'د', 'ژ', 'Delete'],
     ['Space']
 ];
 
@@ -18,16 +18,16 @@ const englishLayout = [
     ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
     ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
     ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
-    ['z', 'x', 'c', 'v', 'b', 'n', 'm'],
+    ['z', 'x', 'c', 'v', 'b', 'n', 'm', 'Delete'],
     ['Space']
 ];
 
-const numericLayout = [
-    ['7', '8', '9'],
-    ['4', '5', '6'],
-    ['1', '2', '3'],
-    ['0', '.', 'Clear']
-];
+    const numericLayout = [
+        ['7', '8', '9', 'Delete'],
+        ['4', '5', '6', 'Clear'],
+        ['1', '2', '3', '000'],
+        ['0', '00', '.', '0000']
+    ];
 
 export function VirtualKeyboard({ inputRef, onChange, onClose }: VirtualKeyboardProps) {
     const [language, setLanguage] = useState<'ku' | 'en'>('ku');
@@ -56,7 +56,7 @@ export function VirtualKeyboard({ inputRef, onChange, onClose }: VirtualKeyboard
     const handleKeyPress = (key: string, e: React.MouseEvent) => {
         e.preventDefault(); // Prevents input from losing focus
         
-        if (!inputRef.current) return;
+        if (!key || !inputRef.current) return;
         
         const input = inputRef.current;
         const start = input.selectionStart || 0;
@@ -73,7 +73,7 @@ export function VirtualKeyboard({ inputRef, onChange, onClose }: VirtualKeyboard
             const charToAdd = isShift && !isNumeric ? key.toUpperCase() : key;
             currentValue = currentValue.substring(0, start) + charToAdd + currentValue.substring(end);
             onChange(currentValue);
-            setTimeout(() => input.setSelectionRange(start + 1, start + 1), 0);
+            setTimeout(() => input.setSelectionRange(start + charToAdd.length, start + charToAdd.length), 0);
         }
         input.focus();
     };
@@ -100,76 +100,78 @@ export function VirtualKeyboard({ inputRef, onChange, onClose }: VirtualKeyboard
     };
 
     return (
-        <div id="virtual-keyboard" className="fixed bottom-0 left-0 right-0 bg-[#F9F7F2]/95 backdrop-blur-md shadow-[0_-10px_40px_rgba(30,36,32,0.15)] border-t border-[#E9E5D9] p-3 lg:p-5 z-50 select-none animate-in slide-in-from-bottom-full duration-300">
-            <div className={`mx-auto ${isNumeric ? 'max-w-sm' : 'max-w-5xl'}`}>
-                <div className="flex justify-between items-center mb-4 px-2 border-b border-[#E9E5D9]/50 pb-3">
+        <div id="virtual-keyboard" className="fixed bottom-0 left-0 right-0 bg-[#Fdfbf7]/90 backdrop-blur-2xl shadow-[0_-20px_60px_rgba(30,36,32,0.15)] border-t border-[#D4A373]/30 p-4 lg:p-6 z-50 select-none animate-in slide-in-from-bottom-full duration-500 ease-out">
+            <div className={`mx-auto ${isNumeric ? 'max-w-md' : 'max-w-5xl'}`}>
+                <div className="flex justify-between items-center mb-5 px-4 bg-white/50 py-3 rounded-2xl border border-white/60 shadow-sm backdrop-blur-md">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-[#1E2420] text-[#D4A373] rounded-xl shadow-sm">
-                            <Keyboard size={18} />
+                        <div className="p-2.5 bg-gradient-to-br from-[#1E2420] to-[#2D3631] text-[#D4A373] rounded-xl shadow-md border border-[#D4A373]/20">
+                            <Keyboard size={20} />
                         </div>
-                        <span className="font-bold text-[#1E2420] text-sm">
-                            {isNumeric ? 'تەختەکلیلی ژمارەیی' : 'تەختەکلیلی سیستەم'}
+                        <span className="font-black tracking-tight text-[#1E2420] text-base drop-shadow-sm">
+                            {isNumeric ? 'تەختەکلیلی پێشکەوتووی ژمارەیی' : 'تەختەکلیلی پێشکەوتووی سیستەم'}
                         </span>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                         {!isNumeric && (
                             <button 
                                 onMouseDown={(e) => { e.preventDefault(); setLanguage(lang => lang === 'ku' ? 'en' : 'ku'); }}
-                                className="flex items-center gap-2 bg-white border border-[#E9E5D9] hover:border-[#D4A373] px-3 py-1.5 rounded-xl text-sm font-bold text-[#2D3631] shadow-sm hover:shadow-md transition-all active:scale-95"
+                                className="flex items-center gap-2 bg-gradient-to-b from-white to-[#F9F7F2] border border-[#E9E5D9] hover:border-[#D4A373] px-4 py-2 rounded-xl text-sm font-black text-[#2D3631] shadow-sm hover:shadow-md transition-all active:scale-95"
                             >
-                                <Globe size={16} className={language === 'ku' ? 'text-[#D4A373]' : 'text-[#8DAA91]'} />
-                                {language === 'ku' ? 'کوردی' : 'English'}
+                                <Globe size={18} className={language === 'ku' ? 'text-[#D4A373]' : 'text-[#8DAA91]'} />
+                                {language === 'ku' ? 'کوردی (KU)' : 'English (EN)'}
                             </button>
                         )}
                         <button 
                             onClick={onClose}
-                            className="p-1.5 bg-red-50 hover:bg-red-100 text-red-500 rounded-xl transition-colors active:scale-95 border border-red-100"
+                            className="p-2 bg-red-50 hover:bg-red-500 text-red-500 hover:text-white rounded-xl transition-all shadow-sm hover:shadow-md active:scale-95 border border-red-200 hover:border-red-600"
                         >
-                            <X size={20} />
+                            <X size={20} className="stroke-[2.5]" />
                         </button>
                     </div>
                 </div>
 
-                <div className="flex flex-col gap-2.5">
+                <div className="flex flex-col gap-3">
                     {layout.map((row, rowIndex) => (
-                        <div key={rowIndex} className="flex justify-center gap-2">
+                        <div key={rowIndex} className="flex justify-center gap-2 lg:gap-3 w-full">
                             {!isNumeric && rowIndex === (language === 'ku' ? 2 : 3) && language === 'en' && (
                                 <button
                                     onMouseDown={(e) => { e.preventDefault(); setIsShift(!isShift); }}
-                                    className={`px-4 py-3 rounded-2xl shadow-sm font-bold text-sm transition-all focus:outline-none flex items-center justify-center active:scale-95 border ${isShift ? 'bg-[#1E2420] text-[#D4A373] border-[#1E2420]' : 'bg-white text-[#1E2420] border-[#E9E5D9] hover:border-[#D4A373]'}`}
+                                    className={`px-5 py-3.5 rounded-[18px] shadow-sm font-bold text-sm transition-all focus:outline-none flex items-center justify-center active:scale-95 border-2 ${isShift ? 'bg-gradient-to-br from-[#1E2420] to-[#2D3631] text-[#D4A373] border-[#1E2420] shadow-inner' : 'bg-white text-[#1E2420] border-[#E9E5D9] hover:border-[#D4A373] hover:shadow-md'}`}
                                 >
-                                    <ArrowUp size={20} />
+                                    <ArrowUp size={22} className={isShift ? "stroke-[3]" : "stroke-[2.5]"} />
                                 </button>
                             )}
                             
-                            {row.map(key => {
-                                const isAction = key === 'Space' || key === 'Clear';
+                            {row.map((key, keyIndex) => {
+                                if (key === '') return <div key={keyIndex} className={isNumeric ? 'flex-1 max-w-[100px]' : ''}></div>;
+                                
+                                const isAction = key === 'Space' || key === 'Clear' || key === 'Delete';
                                 return (
                                     <button
                                         key={key}
-                                        onMouseDown={(e) => handleKeyPress(key, e)}
+                                        onMouseDown={(e) => key === 'Delete' ? handleDelete(e) : handleKeyPress(key, e)}
                                         className={`
-                                            ${key === 'Space' ? 'w-64 lg:w-[500px]' : (isNumeric ? 'w-20 h-16' : 'w-10 h-12 lg:w-14 lg:h-14')}
-                                            ${key === 'Clear' ? 'bg-[#E11D48]/10 text-[#E11D48] hover:bg-[#E11D48]/20 border-transparent w-20 h-16' : 'bg-white hover:bg-[#1E2420] hover:text-[#D4A373] text-[#1E2420] border-[#E9E5D9] border'}
-                                            font-black ${isNumeric ? 'text-2xl' : 'text-xl'}
-                                            rounded-2xl shadow-sm active:scale-90 active:shadow-none
-                                            transition-all flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#D4A373]
+                                            ${key === 'Space' ? 'w-[70%] lg:w-[600px] bg-white border border-[#E9E5D9] shadow-sm' : 
+                                              (isNumeric ? 'flex-1 h-16 lg:h-[85px] max-w-[110px] bg-white border border-[#E9E5D9] shadow-sm' : 
+                                              'w-11 h-14 lg:w-[72px] lg:h-[72px] bg-white border border-[#E9E5D9] shadow-sm')}
+                                            ${key === 'Clear' ? '!bg-gradient-to-br !from-red-50 !to-red-100 !text-red-500 hover:!from-red-500 hover:!to-red-600 hover:!text-white !border-red-200' : 
+                                              key === 'Delete' ? '!bg-gradient-to-br !from-slate-100 !to-slate-200 !text-slate-700 hover:!from-slate-700 hover:!to-slate-800 hover:!text-white !border-slate-300' :
+                                              key === 'Space' ? 'hover:border-[#D4A373] text-[#8B8378]' :
+                                              'hover:border-[#D4A373] hover:text-[#D4A373] text-[#1E2420]'}
+                                            font-black ${isNumeric && !isAction ? 'text-3xl lg:text-4xl' : 'text-2xl'}
+                                            rounded-[20px] lg:rounded-[24px] hover:shadow-[0_8px_20px_rgba(212,163,115,0.15)] 
+                                            active:scale-95 active:shadow-inner active:translate-y-1
+                                            transition-all flex items-center justify-center focus:outline-none
                                         `}
                                     >
-                                        {key === 'Space' ? 'بۆشایی Space' : (isShift && language === 'en' ? key.toUpperCase() : key)}
+                                        {key === 'Space' ? 'بۆشایی SPACE' : 
+                                         key === 'Delete' ? <Delete size={28} className={isNumeric ? 'stroke-[2]' : ''} /> : 
+                                         key === 'Clear' ? 'C' : 
+                                         (isShift && language === 'en' ? key.toUpperCase() : key)}
                                     </button>
                                 );
                             })}
-
-                            {((!isNumeric && rowIndex === (language === 'ku' ? 2 : 3)) || (isNumeric && rowIndex === 0)) && (
-                                <button
-                                    onMouseDown={handleDelete}
-                                    className={`px-4 lg:px-5 py-3 rounded-2xl bg-[#E11D48] text-white hover:bg-red-700 shadow-md font-bold transition-all flex items-center justify-center active:scale-95 focus:outline-none`}
-                                >
-                                    <Delete size={24} />
-                                </button>
-                            )}
                         </div>
                     ))}
                 </div>

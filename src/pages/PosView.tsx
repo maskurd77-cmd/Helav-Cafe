@@ -182,7 +182,7 @@ export function PosView() {
     if (!receiptRef.current) return;
     const printDiv = document.createElement('div');
     printDiv.className = 'direct-print-target';
-    printDiv.innerHTML = receiptRef.current.innerHTML + '<div style="text-align: center; margin-top: 20px; font-size: 10px; color: #000; font-weight: 800; letter-spacing: 2px; font-family: \'Inter\', sans-serif;">POWERED BY HELAV CAFE <br> <!-- Physical RJ11 drawer pulse character: \\x1b\\x70\\x00\\x19\\xfa --> </div>';
+    printDiv.innerHTML = receiptRef.current.innerHTML + '<div style="text-align: center; margin-top: 20px; font-size: 10px; color: #000; font-weight: 800; letter-spacing: 2px; font-family: \'Inter\', sans-serif;">POWERED BY MAS MENU <br> <!-- Physical RJ11 drawer pulse character: \\x1b\\x70\\x00\\x19\\xfa --> </div>';
     document.body.appendChild(printDiv);
     
     setTimeout(() => {
@@ -243,36 +243,37 @@ export function PosView() {
                    <title>Receipt</title>
                    <style>
                       @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600;700&display=swap');
-                      @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
-                      * { box-sizing: border-box; color: #000 !important; font-family: 'Cairo', 'Inter', sans-serif; }
-                      body { padding: 0; font-size: 14px; color: #000; margin: 0 auto; background: #fff; width: 78mm; line-height: 1.4; }
-                      .center { text-align: center; }
+                      @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
+                      * { box-sizing: border-box; color: #000 !important; font-family: 'Cairo', 'Inter', sans-serif; margin: 0; padding: 0; }
+                      body { padding: 0; font-size: 13px; color: #000; margin: 0 auto; background: #fff; width: 80mm; line-height: 1.4; display: block; }
+                      .receipt-container { width: 80mm; max-width: 80mm; padding: 2mm 5mm 5mm 5mm; margin: 0 auto; direction: rtl; }
+                      .center { text-align: center; width: 100%; }
                       .bold { font-weight: 800; }
-                      .logo-img { max-width: 80px; max-height: 80px; margin: 0 auto 10px; display: block; object-fit: contain; filter: grayscale(100%); }
-                      .header { font-size: 22px; margin-bottom: 4px; font-weight: 800; letter-spacing: -0.5px; font-family: 'Space Grotesk', 'Cairo', sans-serif; }
-                      .sub { font-size: 13px; font-weight: 600; color: #000; margin-bottom: 2px; white-space: pre-wrap; line-height: 1.4; font-family: 'Inter', sans-serif; }
-                      .dashed-line { border-bottom: 1.5px dashed #000; margin: 12px 0; }
-                      .dotted-line { border-bottom: 1.5px dotted #000; margin: 10px 0; }
-                      .solid-line { border-bottom: 2px solid #000; margin: 12px 0; }
-                      .item-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; align-items: flex-start; }
-                      .item-name-group { flex: 1; padding-right: 12px; line-height: 1.3; font-weight: 700; }
-                      .item-qty { font-weight: 800; font-size: 14px; margin-top: 1px; width: 24px; text-align: right; }
-                      .item-price { min-width: 70px; text-align: left; font-weight: 800; font-family: 'Space Grotesk', monospace; font-size: 15px; }
-                      .total-row { display: flex; justify-content: space-between; font-size: 16px; font-weight: 700; margin-top: 8px; align-items: center; }
-                      .total-label { font-size: 16px; font-weight: 700; }
-                      .total-amount { font-family: 'Space Grotesk', monospace; font-size: 24px; font-weight: 800; }
-                      .footer { text-align: center; margin-top: 25px; font-size: 14px; color: #000; white-space: pre-wrap; line-height: 1.6; font-weight: 800; border-top: 1.5px dashed #000; padding-top: 15px; }
-                      .date-row { display: flex; justify-content: space-between; font-size: 12px; color: #000; margin-top: 15px; margin-bottom: 12px; font-family: 'Inter', monospace; font-weight: 800; text-transform: uppercase; border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 6px 0; }
-                      .powered-by { text-align: center; margin-top: 20px; font-size: 10px; color: #000; font-weight: 800; letter-spacing: 2px; font-family: 'Inter', sans-serif; }
-                      @page { margin: 0; padding: 0; }
+                      .logo-img { max-width: 60px; max-height: 60px; margin: 0 auto 8px; display: block; object-fit: contain; filter: grayscale(100%) contrast(1.2); }
+                      .header { font-size: 20px; margin-bottom: 2px; font-weight: 800; letter-spacing: -0.5px; font-family: 'Space Grotesk', 'Cairo', sans-serif; text-align: center; }
+                      .sub { font-size: 12px; font-weight: 600; color: #000; margin-bottom: 1px; white-space: pre-wrap; line-height: 1.3; font-family: 'Inter', sans-serif; text-align: center; }
+                      .dashed-line { border-bottom: 1.5px dashed #000; margin: 8px 0; width: 100%; }
+                      .dotted-line { border-bottom: 1px dotted #000; margin: 6px 0; width: 100%; }
+                      .solid-line { border-bottom: 2px solid #000; margin: 8px 0; width: 100%; }
+                      .item-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px; align-items: flex-start; width: 100%; flex-wrap: nowrap; }
+                      .item-name-group { flex: 1; padding-right: 0px; padding-left: 8px; line-height: 1.2; font-weight: 700; text-align: right; }
+                      .item-qty { font-weight: 800; font-size: 13px; margin-top: 0px; width: 20px; text-align: right; shrink-0; }
+                      .item-price { min-width: 65px; text-align: left; font-weight: 800; font-family: 'Space Grotesk', monospace; font-size: 13px; white-space: nowrap; direction: ltr; shrink-0; }
+                      .total-row { display: flex; justify-content: space-between; font-size: 15px; font-weight: 800; margin-top: 6px; align-items: center; width: 100%; }
+                      .total-label { font-size: 15px; font-weight: 800; }
+                      .total-amount { font-family: 'Space Grotesk', monospace; font-size: 20px; font-weight: 800; direction: ltr; text-align: left; }
+                      .footer { text-align: center; margin-top: 15px; font-size: 12px; color: #000; white-space: pre-wrap; line-height: 1.4; font-weight: 800; border-top: 1.5px dashed #000; padding-top: 10px; width: 100%; }
+                      .date-row { display: flex; justify-content: space-between; font-size: 11px; color: #000; margin-top: 10px; margin-bottom: 8px; font-family: 'Inter', monospace; font-weight: 800; text-transform: uppercase; border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 4px 0; width: 100%; direction: ltr; }
+                      .powered-by { text-align: center; margin-top: 15px; font-size: 9px; color: #000; font-weight: 800; letter-spacing: 2px; font-family: 'Inter', sans-serif; width: 100%; direction: ltr; }
+                      @page { margin: 0; }
                       @media print {
-                         body { width: 78mm; padding: 2mm 0; margin: 0 auto; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                         html, body { width: 80mm; margin: 0 auto; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
                       }
                    </style>
                  </head>
                  <body>
                    ${receiptRef.current.innerHTML}
-                   <div class="powered-by">POWERED BY HELAV CAFE <br> <!-- Physical RJ11 drawer pulse character: \\x1b\\x70\\x00\\x19\\xfa --> </div>
+                   <div class="powered-by">POWERED BY MAS MENU <br> <!-- Physical RJ11 drawer pulse character: \\x1b\\x70\\x00\\x19\\xfa --> </div>
                  </body>
                </html>
              `);
@@ -540,10 +541,10 @@ export function PosView() {
 
       {/* Hidden Beautiful Receipt Template */}
       <div className="hidden">
-        <div ref={receiptRef}>
+        <div ref={receiptRef} className="receipt-container">
            <div className="center">
              {settings.logoUrl && <img src={settings.logoUrl} className="logo-img" alt="Logo" />}
-             <div className="header" style={{ marginBottom: settings.address ? '4px' : '10px' }}>{settings.storeName || 'Helav Cafe'}</div>
+             <div className="header" style={{ marginBottom: settings.address ? '4px' : '10px' }}>{settings.storeName || 'MAS MENU'}</div>
              {settings.address && <div className="sub">{settings.address}</div>}
              {settings.phone && <div className="sub">{settings.phone}</div>}
            </div>

@@ -135,7 +135,7 @@ export function Layout() {
         <div className={cn("p-6 flex items-center bg-[#181D1A]", isDesktopSidebarCollapsed ? "justify-center lg:p-4" : "justify-between lg:p-8")}>
           <div className={cn("transition-opacity duration-300", isDesktopSidebarCollapsed ? "hidden" : "block")}>
             <h1 className="text-xl font-bold tracking-tight text-[#D4A373]">
-              {settings?.storeName || 'Helav Cafe'}
+              {settings?.storeName || 'MAS MENU'}
             </h1>
             <p className="text-[10px] opacity-60 uppercase tracking-widest mt-1">سيستەمى بەڕێوەبردن</p>
           </div>
