@@ -140,8 +140,14 @@ export function UsersView() {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase ${u.role === 'admin' ? 'bg-[#1E2420] text-[#D4A373]' : 'bg-[#E9E5D9] text-[#2D3631]'}`}>
-                        {u.role === 'admin' ? 'ئەدمین' : 'کاشێر'}
+                    <span className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase ${
+                      u.role === 'admin' 
+                        ? 'bg-[#1E2420] text-[#D4A373]' 
+                        : u.role === 'hospital_requester'
+                        ? 'bg-blue-50 text-blue-600 border border-blue-100'
+                        : 'bg-[#E9E5D9] text-[#2D3631]'
+                    }`}>
+                        {u.role === 'admin' ? 'ئەدمین' : u.role === 'hospital_requester' ? 'داواکاری نەخۆشخانە' : 'کاشێر'}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-left">
@@ -209,6 +215,7 @@ export function UsersView() {
                   <select value={role} onChange={e => setRole(e.target.value)} className="w-full bg-[#F9F7F2] border-0 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#D4A373] outline-none text-[#1E2420]">
                     <option value="cashier">کاشێر</option>
                     <option value="admin">ئەدمین</option>
+                    <option value="hospital_requester">داواکاری نەخۆشخانە</option>
                   </select>
                 </div>
               </form>

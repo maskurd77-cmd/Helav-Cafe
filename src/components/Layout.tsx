@@ -16,7 +16,8 @@ import {
   MonitorSmartphone,
   ChevronRight,
   ChevronLeft,
-  Building2
+  Building2,
+  ClipboardList
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from './AuthProvider';
@@ -108,7 +109,21 @@ export function Layout() {
     signOut(auth);
   };
 
-  const navItems = role === 'admin' ? adminNavItems : cashierNavItems;
+  let navItems = role === 'admin' ? [...adminNavItems] : [...cashierNavItems];
+
+  // Apply branch dynamic logic: 
+  // In Hospital mode, exclude customer display completely 
+  if (currentBranch === 'hospital') {
+    navItems = navItems.filter(item => item.path !== '/customer');
+    
+    // For admin role in hospital branch, inject "दावाकारीयेकान" (Requests) at index 3
+    if (role === 'admin') {
+      const exists = navItems.some(x => x.path === '/requests');
+      if (!exists) {
+        navItems.splice(3, 0, { text: 'داواکارییەکان', icon: ClipboardList, path: '/requests' });
+      }
+    }
+  }
 
   // Protect routes based on role
   if (role === 'cashier' && location.pathname === '/') {
@@ -133,8 +148,10 @@ export function Layout() {
       )}>
         <div className={cn("p-6 flex items-center bg-[#181D1A]", isDesktopSidebarCollapsed ? "justify-center lg:p-4" : "justify-between lg:p-8")}>
           <div className={cn("transition-opacity duration-300", isDesktopSidebarCollapsed ? "hidden" : "block")}>
-            <h1 className="text-2xl font-bold tracking-tight text-[#D4A373]">Helav Cafe</h1>
-            <p className="text-[10px] opacity-60 uppercase tracking-widest mt-1">سیستەمی بەڕێوەبردن</p>
+            <h1 className="text-xl font-bold tracking-tight text-[#D4A373]">
+              {settings?.storeName || (currentBranch === 'cafe' ? 'Helav Cafe' : 'Helav Hospital')}
+            </h1>
+            <p className="text-[10px] opacity-60 uppercase tracking-widest mt-1">سيستەمى بەڕێوەبردن</p>
           </div>
           {isDesktopSidebarCollapsed && (
             <div className="hidden lg:flex w-10 h-10 rounded-xl bg-[#2D3631] items-center justify-center text-[#D4A373]">

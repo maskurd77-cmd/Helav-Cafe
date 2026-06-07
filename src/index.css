@@ -37,3 +37,43 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+/* @media print for Direct Browser & Iframe printing of thermal receipts */
+@media print {
+  @page {
+    margin: 0;
+    size: auto;
+  }
+  html, body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 14px;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 78mm !important;
+  }
+  #root {
+    display: none !important;
+  }
+  /* Support direct window.print() on a target container appended or formatted */
+  .direct-print-target {
+    display: block !important;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 78mm;
+    margin: 0;
+    padding: 2mm;
+    visibility: visible;
+  }
+  .no-print {
+    display: none !important;
+  }
+  /* Clean slate for print layout override */
+  body > * {
+    display: none !important;
+  }
+  body > .direct-print-target {
+    display: block !important;
+  }
+}

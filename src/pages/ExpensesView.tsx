@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs, addDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '@/firebase';
 import { Plus, Trash2, Wallet, X, Calendar as CalendarIcon, Tag } from 'lucide-react';
+import { useBranchStore } from '@/store/useBranchStore';
 
 interface Expense {
   id: string;
@@ -11,6 +12,9 @@ interface Expense {
 }
 
 export function ExpensesView() {
+  const { currentBranch } = useBranchStore();
+  const collectionName = currentBranch === 'cafe' ? 'expenses' : 'expenses_hospital';
+
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -19,12 +23,12 @@ export function ExpensesView() {
 
   useEffect(() => {
     loadExpenses();
-  }, []);
+  }, [currentBranch]);
 
   const loadExpenses = async () => {
     try {
       setLoading(true);
-      const snapshot = await getDocs(query(collection(db, 'expenses'), orderBy('date', 'desc')));
+      const snapshot = await getDocs(query(collection(db, collectionName), orderBy('date', 'desc')));
       setExpenses(snapshot.docs.map(d => ({ id: d.id, ...d.data() } as Expense)));
     } catch (e) {
       console.error(e);
@@ -37,7 +41,7 @@ export function ExpensesView() {
   const handleAddExpense = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await addDoc(collection(db, 'expenses'), {
+      await addDoc(collection(db, collectionName), {
         name,
         amount: Number(amount),
         date: new Date().toISOString()
@@ -55,7 +59,7 @@ export function ExpensesView() {
   const handleDelete = async (id: string) => {
     if (confirm('دڵنیایت لە سڕینەوەی ئەم خەرجییە؟')) {
       try {
-        await deleteDoc(doc(db, 'expenses', id));
+        await deleteDoc(doc(db, collectionName, id));
         loadExpenses();
       } catch (e) {
         console.error(e);

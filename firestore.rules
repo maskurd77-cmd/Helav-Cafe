@@ -1,7 +1,69 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // Global safety net (default deny)
     match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Settings Collection (contains branch configs & customer cart states)
+    match /settings/{settingsId} {
+      // Anyone can read parameters to allow customer displays & first loads to work cleanly
+      allow read: if true;
+      // Writing/updating requires authenticated status
+      allow write: if request.auth != null;
+    }
+
+    // Products - Cafe branch
+    match /products/{productId} {
+      // Read is public (for menu browsing and page loads)
+      allow read: if true;
+      // Modifications are reserved for signed-in staff
+      allow write: if request.auth != null;
+    }
+
+    // Products - Hospital branch
+    match /products_hospital/{productId} {
+      // Read is public (for menu browsing and page loads)
+      allow read: if true;
+      // Modifications are reserved for signed-in staff
+      allow write: if request.auth != null;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      // Secured for signed-in users
+      allow read, write: if request.auth != null;
+    }
+
+    // Orders - Cafe branch
+    match /orders/{orderId} {
+      // Strictly secured to authenticated staff/managers
+      allow read, write: if request.auth != null;
+    }
+
+    // Orders - Hospital branch
+    match /orders_hospital/{orderId} {
+      // Strictly secured to authenticated staff/managers
+      allow read, write: if request.auth != null;
+    }
+
+    // Expenses - Cafe branch
+    match /expenses/{expenseId} {
+      // Strictly secured to authenticated staff/managers
+      allow read, write: if request.auth != null;
+    }
+
+    // Expenses - Hospital branch
+    match /expenses_hospital/{expenseId} {
+      // Strictly secured to authenticated staff/managers
+      allow read, write: if request.auth != null;
+    }
+
+    // Hospital Requests
+    match /hospital_requests/{requestId} {
+      // Requesters and staff can access requests
       allow read, write: if request.auth != null;
     }
   }

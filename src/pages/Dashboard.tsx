@@ -2,29 +2,53 @@ import React, { useState, useEffect } from 'react';
 import { getOrders } from '@/services/orderService';
 import { Order } from '@/types';
 import { Link } from 'react-router-dom';
-import { TrendingUp, ShoppingBag, CheckCircle, ArrowUpRight, Clock, Star, Wallet, ArrowDownRight, Tag } from 'lucide-react';
-import { collection, getDocs } from 'firebase/firestore';
+import { 
+  TrendingUp, 
+  ShoppingBag, 
+  CheckCircle, 
+  ArrowUpRight, 
+  Clock, 
+  Star, 
+  Wallet, 
+  ArrowDownRight, 
+  Tag, 
+  LayoutDashboard,
+  Sparkles,
+  ClipboardCheck,
+  Building2,
+  CalendarDays,
+  BarChart3
+} from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '@/firebase';
+import { useBranchStore } from '@/store/useBranchStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 
 export function Dashboard() {
+  const { currentBranch } = useBranchStore();
+  const { settings } = useSettingsStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [expensesTotal, setExpensesTotal] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [currentBranch]);
 
   const loadData = async () => {
     try {
        setLoading(true);
        
-       // Load Orders
+       // Load Orders (automatically branch-aware via service)
        const ordersData = await getOrders();
        setOrders(ordersData);
        
-       // Load Expenses for today
-       const expensesSnapshot = await getDocs(collection(db, 'expenses'));
+       // Resolve correct branch expenses collection
+       const expensesCollName = currentBranch === 'cafe' ? 'expenses' : 'expenses_hospital';
+       
+       // Load Expenses for the current branch
+       const expensesSnapshot = await getDocs(collection(db, expensesCollName));
        let expTotal = 0;
        const todayStr = new Date().toDateString();
        
@@ -41,7 +65,7 @@ export function Dashboard() {
 
     } catch (e) {
        console.error(e);
-       import('@/firebase').then(({ handleFirestoreError, OperationType }) => handleFirestoreError(e, OperationType.LIST, 'orders/expenses'));
+       handleFirestoreError(e, OperationType.LIST, 'orders/expenses');
     } finally {
        setLoading(false);
     }
@@ -69,130 +93,272 @@ export function Dashboard() {
   const popularItems = Array.from(popularItemsMap.entries())
       .map(([name, quantity]) => ({ name, quantity }))
       .sort((a, b) => b.quantity - a.quantity)
-      .slice(0, 4);
+      .slice(0, 5);
+
+  // Dynamic calculation for 7-day analytical trends representation
+  const getLast7DaysData = () => {
+    const data = [];
+    const KurdishDays = ['یەکشەممە', 'دووشەممە', 'سێشەممە', 'چوارشەممە', 'پێنجشەممە', 'هەینی', 'شەممە'];
+    
+    for (let i = 6; i >= 0; i--) {
+      const targetDate = new Date();
+      targetDate.setDate(targetDate.getDate() - i);
+      const targetStr = targetDate.toDateString();
+      const KurdishLabel = KurdishDays[targetDate.getDay()];
+      
+      const filteredDaysOrders = orders.filter(o => {
+         try {
+           return new Date(o.date).toDateString() === targetStr;
+         } catch (_) {
+           return false;
+         }
+      });
+      
+      const totalAmountSum = filteredDaysOrders.reduce((acc, current) => acc + current.total, 0);
+      data.push({
+         name: KurdishLabel,
+         sales: totalAmountSum,
+         ordersCount: filteredDaysOrders.length
+      });
+    }
+    return data;
+  };
+
+  const chartData = getLast7DaysData();
 
   return (
     <div className="h-full flex flex-col gap-6 lg:gap-8 min-w-0 pb-6 lg:pb-0">
-      {/* Stats Grid */}
+      
+      {/* Dynamic Welcome Heading Banner */}
+      <div className="bg-[#1E2420] text-white p-6 lg:p-8 rounded-[32px] shadow-xl relative overflow-hidden shrink-0">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-[#D4A373]/10 rounded-full blur-3xl -mr-24 -mt-24"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-2xl -ml-16 -mb-16"></div>
+        
+        <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <span className="bg-[#D4A373]/20 border border-[#D4A373]/30 text-[#D4A373] text-[10px] sm:text-xs font-bold px-3.5 py-1.5 rounded-full uppercase tracking-wider inline-flex items-center gap-1.5 shadow-sm">
+               <Sparkles size={12} />
+               تەواو خۆکار و بێ کێشە
+            </span>
+            <h1 className="text-2xl lg:text-3xl font-extrabold text-white mt-4 flex items-center gap-2 tracking-tight">
+               <LayoutDashboard className="text-[#D4A373] w-8 h-8" />
+               بێخێربێیتەوە بۆ سیستەمی {settings.storeName || 'Helav Cafe'}
+            </h1>
+            <p className="text-white/80 text-xs lg:text-sm mt-2 font-medium">
+               بەڕێوەبەرایەتی سەرەکى ڕاپۆرتی لقی ئێستا: <strong className="text-[#D4A373] text-sm lg:text-base underline underline-offset-4 decoration-2">{currentBranch === 'cafe' ? 'لقى کافێ' : 'لقى نەخۆشخانە'}</strong>
+            </p>
+          </div>
+          
+          <div className="bg-[#2D3631]/80 backdrop-blur-md border border-white/10 px-5 py-3 rounded-2xl flex items-center gap-3 self-stretch sm:self-auto">
+             <div className="p-2 bg-[#D4A373]/20 text-[#D4A373] rounded-xl">
+                <CalendarDays size={18} />
+             </div>
+             <div className="text-right">
+                <p className="text-white/40 text-[10px] font-bold">بەرواری ئەمڕۆ</p>
+                <p className="text-white text-xs font-mono font-bold mt-0.5">{new Date().toLocaleDateString('ku-IQ')}</p>
+             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Grid of Today Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 shrink-0">
         
-        {/* Stat Card 1 */}
-        <div className="bg-white p-6 rounded-[24px] lg:rounded-[32px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-[#E9E5D9] relative overflow-hidden group hover:border-[#D4A373] hover:shadow-sm transition-colors">
+        {/* Stat Card 1: Today's Revenue */}
+        <div className="bg-white p-6 rounded-[24px] lg:rounded-[32px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-[#E9E5D9] relative overflow-hidden group hover:border-[#8DAA91] hover:shadow-xl hover:shadow-[#8DAA91]/5 transition-all duration-300">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-3 bg-[#F9F7F2] rounded-2xl text-[#1E2420] group-hover:bg-[#1E2420] group-hover:text-[#D4A373] transition-colors">
+            <div className="p-3 bg-green-50 rounded-2xl text-green-600 transition-colors">
               <TrendingUp size={24} />
             </div>
-            <span className="flex items-center text-xs font-bold text-[#10B981] bg-[#10B981]/10 px-2 py-1 rounded-lg">
+            <span className="flex items-center text-xs font-bold text-green-600 bg-green-50 px-2.5 py-1 rounded-lg">
               ئەمڕۆ <ArrowUpRight size={14} className="ml-1" />
             </span>
           </div>
-          <p className="text-[#8B8378] text-sm font-medium mb-1">کۆی فرۆشی ئەمڕۆ</p>
-          <h3 className="text-2xl lg:text-3xl font-bold text-[#1E2420] font-mono tracking-tight">
-            {totalSalesToday.toLocaleString('en-US')} <span className="text-base font-sans text-[#8B8378] font-normal">د.ع</span>
+          <p className="text-[#8B8378] text-xs font-bold mb-1">کۆی فرۆشی دەراوزە (POS) بۆ ئەمڕۆ</p>
+          <h3 className="text-2xl lg:text-3xl font-extrabold text-[#1E2420] font-mono tracking-tight group-hover:text-[#8DAA91] transition-colors">
+            {totalSalesToday.toLocaleString('en-US')} <span className="text-sm font-sans text-[#8B8378] font-normal">د.ع</span>
           </h3>
         </div>
 
-        {/* Stat Card 2 */}
-        <div className="bg-white p-6 rounded-[24px] lg:rounded-[32px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-[#E9E5D9] relative overflow-hidden group hover:border-[#D4A373] hover:shadow-sm transition-colors">
+        {/* Stat Card 2: Today's Orders */}
+        <div className="bg-white p-6 rounded-[24px] lg:rounded-[32px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-[#E9E5D9] relative overflow-hidden group hover:border-[#D4A373] hover:shadow-xl hover:shadow-[#D4A373]/5 transition-all duration-300">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-3 bg-[#F9F7F2] rounded-2xl text-[#1E2420] group-hover:bg-[#1E2420] group-hover:text-[#D4A373] transition-colors">
+            <div className="p-3 bg-amber-50 rounded-2xl text-[#D4A373] transition-colors">
               <ShoppingBag size={24} />
             </div>
-            <span className="flex items-center text-xs font-bold text-[#10B981] bg-[#10B981]/10 px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
-               ئەمڕۆ
+            <span className="flex items-center text-xs font-bold text-[#D4A373] bg-amber-50 px-2.5 py-1 rounded-lg">
+               پسوولە
             </span>
           </div>
-          <p className="text-[#8B8378] text-sm font-medium mb-1">ژمارەی داواکارییەکان</p>
-          <h3 className="text-2xl lg:text-3xl font-bold text-[#1E2420] font-mono tracking-tight">
-            {totalOrdersToday} <span className="text-base font-sans text-[#8B8378] font-normal">دانە</span>
+          <p className="text-[#8B8378] text-xs font-bold mb-1">ژمارەی فاکتۆرە فەرمییەکان</p>
+          <h3 className="text-2xl lg:text-3xl font-extrabold text-[#1E2420] font-mono tracking-tight group-hover:text-[#D4A373] transition-colors">
+            {totalOrdersToday} <span className="text-sm font-sans text-[#8B8378] font-normal">دانە</span>
           </h3>
         </div>
 
-        {/* Stat Card 3 - Expenses */}
-        <div className="bg-white p-6 rounded-[24px] lg:rounded-[32px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-[#E9E5D9] relative overflow-hidden group hover:border-[#E11D48] hover:shadow-sm transition-colors">
+        {/* Stat Card 3: Today's Expenses */}
+        <div className="bg-white p-6 rounded-[24px] lg:rounded-[32px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-[#E9E5D9] relative overflow-hidden group hover:border-[#E11D48] hover:shadow-xl hover:shadow-[#E11D48]/5 transition-all duration-300 sm:col-span-2 lg:col-span-1">
           <div className="flex justify-between items-start mb-4">
-            <div className="p-3 bg-[#FFF1F2] rounded-2xl text-[#E11D48] group-hover:bg-[#E11D48] group-hover:text-white transition-colors">
+            <div className="p-3 bg-[#FFF1F2] rounded-2xl text-[#E11D48] transition-colors">
               <Wallet size={24} />
             </div>
-            <span className="flex items-center text-xs font-bold text-[#E11D48] bg-[#E11D48]/10 px-2 py-1 rounded-lg">
-              ئەمڕۆ <ArrowDownRight size={14} className="ml-1" />
+            <span className="flex items-center text-xs font-bold text-[#E11D48] bg-[#FFF1F2] px-2.5 py-1 rounded-lg">
+              خەرجیی گشتی <ArrowDownRight size={14} className="ml-1" />
             </span>
           </div>
-          <p className="text-[#8B8378] text-sm font-medium mb-1">خەرجییەکانی ئەمڕۆ</p>
-          <h3 className="text-2xl lg:text-3xl font-bold text-[#1E2420] font-mono tracking-tight">
-             {expensesTotal.toLocaleString('en-US')} <span className="text-base font-sans text-[#8B8378] font-normal">د.ع</span>
+          <p className="text-[#8B8378] text-xs font-bold mb-1">خەرجییەکانی تەواوی ئەمڕۆ</p>
+          <h3 className="text-2xl lg:text-3xl font-extrabold text-[#1E2420] font-mono tracking-tight group-hover:text-[#E11D48] transition-colors">
+             {expensesTotal.toLocaleString('en-US')} <span className="text-sm font-sans text-[#8B8378] font-normal">د.ع</span>
           </h3>
         </div>
 
       </div>
 
-      {/* Content Grid */}
+      {/* 7-Days Sales Analytical Visualization Graph */}
+      <div className="bg-white p-6 lg:p-8 rounded-[28px] lg:rounded-[40px] border border-[#E9E5D9] shadow-sm flex flex-col gap-4 shrink-0 hover:border-[#8DAA91] transition-all duration-300">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-[#1E2420] text-[#D4A373] rounded-xl shadow-md">
+              <BarChart3 size={20} />
+            </div>
+            <div>
+              <h4 className="font-extrabold text-[#1E2420] text-base">دۆخی فرۆشتنی لقی ئێستا</h4>
+              <p className="text-[10px] text-[#8B8378] mt-0.5">گەشەی گشتی فرۆشراوەکان لە ماوەی ٧ ڕۆژی ڕابردوودا</p>
+            </div>
+          </div>
+          <div className="text-right sm:text-left">
+             <span className="text-xs font-bold text-[#8DAA91] bg-green-50 border border-green-100 px-3.5 py-1.5 rounded-full inline-flex items-center gap-1.5 shadow-sm">
+                تێکڕای فرۆش: {(chartData.reduce((acc, curr) => acc + curr.sales, 0) / 7).toLocaleString('en-US', {maximumFractionDigits: 0})} د.ع / ڕۆژانە
+             </span>
+          </div>
+        </div>
+
+        <div className="h-[220px] w-full mt-2">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+              <defs>
+                <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#D4A373" stopOpacity={0.25}/>
+                  <stop offset="95%" stopColor="#D4A373" stopOpacity={0.0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E9E5D9" opacity={0.5} />
+              <XAxis 
+                dataKey="name" 
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#8B8378', fontSize: 11, fontWeight: 700 }}
+              />
+              <YAxis 
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#8B8378', fontSize: 11 }}
+                orientation="right"
+                tickFormatter={(val) => val >= 1000000 ? `${(val / 1000000).toFixed(1)}M` : val >= 1000 ? `${(val / 1000).toFixed(0)}K` : val}
+              />
+              <Tooltip 
+                contentStyle={{
+                  backgroundColor: '#1E2420',
+                  borderColor: '#D4A373',
+                  borderRadius: '16px',
+                  color: '#fff',
+                  textAlign: 'right',
+                  direction: 'rtl',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                  padding: '12px'
+                }}
+                itemStyle={{ color: '#D4A373', fontWeight: 700 }}
+                labelStyle={{ color: '#E9E5D9', fontWeight: 700, marginBottom: '4px' }}
+                formatter={(value: any) => [`${Number(value).toLocaleString('en-US')} د.ع`, 'فرۆش']}
+                labelFormatter={(label) => `ڕۆژ: ${label}`}
+              />
+              <Area 
+                type="monotone" 
+                dataKey="sales" 
+                stroke="#D4A373" 
+                strokeWidth={3}
+                fillOpacity={1} 
+                fill="url(#salesGradient)" 
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Tables & Top Items Section */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 min-h-0 pb-6 lg:pb-8">
         
-        {/* Active Orders Table */}
-        <div className="lg:col-span-2 bg-white rounded-[24px] lg:rounded-[40px] shadow-sm border border-[#E9E5D9] flex flex-col overflow-hidden min-h-[350px]">
-          <div className="p-6 border-b border-[#E9E5D9] flex justify-between items-center shrink-0 bg-[#FDFBF7]">
+        {/* Active/Recent Orders Table Panel */}
+        <div className="lg:col-span-2 bg-white rounded-[28px] lg:rounded-[40px] shadow-sm border border-[#E9E5D9] flex flex-col overflow-hidden min-h-[350px]">
+          <div className="p-6 border-b border-[#E9E5D9] flex flex-row justify-between items-center bg-[#FDFBF7] shrink-0">
             <div className="flex items-center gap-3">
               <div className="p-2.5 bg-white border border-[#E9E5D9] rounded-xl text-[#D4A373] shadow-sm">
-                <Clock size={20} />
+                <Clock size={18} />
               </div>
-              <h4 className="font-bold text-[#1E2420] text-lg">دوایین داواکارییەکان</h4>
+              <div>
+                <h4 className="font-extrabold text-[#1E2420] text-base">تازەترین کارەکان</h4>
+                <p className="text-[10px] text-[#8B8378] mt-0.5">دوایین پسوولەکانی فرۆشتنی سەر شاشە</p>
+              </div>
             </div>
-            <Link to="/receipts" className="text-[#1E2420] text-sm font-bold bg-white border border-[#E9E5D9] px-5 py-2.5 rounded-full hover:bg-[#F9F7F2] transition-colors shadow-sm">بینینی هەمووی</Link>
+            <Link to="/receipts" className="text-xs font-bold bg-[#1E2420] text-white hover:bg-[#2D3631] px-5 py-2.5 rounded-full transition-all shadow-md">بینینی هەموو وەسلەکان</Link>
           </div>
-          <div className="flex-1 overflow-auto bg-white">
+          
+          <div className="flex-1 overflow-auto">
             {loading ? (
-                <div className="flex items-center justify-center h-full text-[#8B8378] font-medium p-8">بارکردن...</div>
+                <div className="flex flex-col items-center justify-center h-full text-[#8B8378] gap-2 p-8">
+                   <div className="w-8 h-8 border-4 border-[#E9E5D9] border-t-[#D4A373] rounded-full animate-spin"></div>
+                   <span className="text-xs">بارکردن...</span>
+                </div>
             ) : (
             <table className="w-full text-right border-collapse">
-              <thead className="text-[#8B8378] text-[10px] lg:text-xs uppercase sticky top-0 bg-[#FDFBF7] shadow-[0_1px_0_#E9E5D9] z-10">
+              <thead className="text-[#8B8378] text-[10px] uppercase bg-[#FDFBF7] sticky top-0 z-10 shadow-[0_1px_0_#E9E5D9]">
                 <tr>
-                  <th className="px-6 py-4 font-bold text-right tracking-wider">ژمارە</th>
-                  <th className="px-6 py-4 font-bold text-right hidden sm:table-cell tracking-wider">داواکاری</th>
-                  <th className="px-6 py-4 font-bold text-right tracking-wider">کۆی گشتی</th>
-                  <th className="px-6 py-4 font-bold text-right tracking-wider">بارودۆخ</th>
+                  <th className="px-6 py-4 font-extrabold">کۆدی پسوولە</th>
+                  <th className="px-6 py-4 font-extrabold hidden sm:table-cell">بابەتەکان</th>
+                  <th className="px-6 py-4 font-extrabold">بڕی گشتی</th>
+                  <th className="px-6 py-4 font-extrabold">دۆخی پارەدان</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#F9F7F2]">
                 {orders.slice(0, 6).map((order) => (
-                    <tr key={order.id} className="hover:bg-[#FDFBF7] transition-colors group">
-                    <td className="px-6 py-4">
-                      <span className="font-mono text-xs font-medium bg-[#F9F7F2] border border-[#E9E5D9] text-[#1E2420] px-2.5 py-1.5 rounded-md">
-                        #{order.id.slice(0, 6)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 font-medium text-sm text-[#1E2420] hidden sm:table-cell">
+                    <tr key={order.id} className="hover:bg-[#FDFBF7] transition-colors">
+                     <td className="px-6 py-4">
+                       <span className="font-mono text-xs font-bold bg-white border border-[#E9E5D9] text-[#1E2420] px-3 py-1.5 rounded-xl">
+                         #{order.id.slice(0, 8).toUpperCase()}
+                       </span>
+                     </td>
+                     <td className="px-6 py-4 hidden sm:table-cell">
                         <div className="flex flex-wrap gap-1.5">
-                          {order.items.slice(0, 2).map((i, idx) => (
-                            <span key={idx} className="bg-[#F9F7F2] text-[#1E2420] px-2.5 py-1 rounded-lg text-xs border border-[#E9E5D9] flex items-center gap-1.5">
-                              <span className="text-[#D4A373] font-bold font-mono">{i.quantity}x</span> {i.name}
-                            </span>
-                          ))}
-                          {order.items.length > 2 && (
-                            <span className="bg-[#1E2420] text-white px-2 py-1 rounded-lg text-xs font-bold border border-[#1E2420]">
-                              +{order.items.length - 2}
-                            </span>
-                          )}
+                           {order.items.slice(0, 2).map((i, idx) => (
+                             <span key={idx} className="bg-[#FDFBF7] text-[#1E2420] px-3 py-1.5 rounded-xl text-xs border border-[#E9E5D9] flex items-center gap-2">
+                               <span className="text-[#D4A373] font-extrabold font-mono text-[10px] bg-[#1E2420] text-white px-1.5 py-0.5 rounded-md">{i.quantity}x</span> 
+                               <span className="font-bold">{i.name}</span>
+                             </span>
+                           ))}
+                           {order.items.length > 2 && (
+                             <span className="bg-[#1E2420] text-white px-2 py-1 rounded-xl text-xs font-bold">
+                               +{order.items.length - 2} بابەت زیاتر
+                             </span>
+                           )}
                         </div>
-                    </td>
-                    <td className="px-6 py-4 text-[#1E2420] font-bold font-mono text-sm">
-                      {order.total.toLocaleString('en-US')} <span className="text-[#8B8378] text-xs font-sans">د.ع</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className="px-3 py-1.5 bg-[#10B981]/10 text-[#10B981] rounded-full text-xs font-bold border border-[#10B981]/20 flex items-center justify-center gap-1.5 w-max">
-                        <div className="w-1.5 h-1.5 bg-[#10B981] rounded-full"></div> تەواو
-                      </span>
-                    </td>
-                  </tr>
+                     </td>
+                     <td className="px-6 py-4 text-[#1E2420] font-mono font-extrabold text-sm">
+                       {order.total.toLocaleString('en-US')} <span className="text-gray-400 font-sans text-xs font-normal">د.ع</span>
+                     </td>
+                     <td className="px-6 py-4">
+                       <span className="px-3 py-1.5 bg-green-50 text-green-600 rounded-full text-xs font-bold border border-green-100 flex items-center justify-center gap-1.5 w-max">
+                          <CheckCircle size={12} /> پەرداخت کرا
+                       </span>
+                     </td>
+                   </tr>
                 ))}
                 {orders.length === 0 && (
                     <tr>
-                        <td colSpan={4} className="text-center py-20">
+                        <td colSpan={4} className="text-center py-24">
                            <div className="flex flex-col items-center gap-3 text-[#8B8378]">
-                              <div className="p-4 bg-[#F9F7F2] rounded-full">
-                                <ShoppingBag size={32} className="text-[#E9E5D9]" />
-                              </div>
-                              <span className="font-medium text-sm">هیچ داواکارییەک نییە</span>
+                              <ShoppingBag size={36} className="text-[#E9E5D9] opacity-30" />
+                              <span className="font-bold text-sm">هیچ داواکارییەک لەم مەودایەدا نییە</span>
+                              <p className="text-xs text-[#8B8378]">تۆماری فرۆشتنەکان لێرە بە شێوەیەکی خۆکار تازە دەبێتەوە</p>
                            </div>
                         </td>
                     </tr>
@@ -203,46 +369,49 @@ export function Dashboard() {
           </div>
         </div>
 
-        {/* Popular Items Section */}
-        <div className="bg-white rounded-[24px] lg:rounded-[40px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-[#E9E5D9] p-6 lg:p-8 flex flex-col min-h-[350px] lg:min-h-0 bg-gradient-to-b from-white to-[#FDFBF7]">
-          <h4 className="font-bold text-[#1E2420] mb-6 shrink-0 text-base flex items-center gap-2">
+        {/* Popular Items / Top Rated Sidebar panel */}
+        <div className="bg-white rounded-[28px] lg:rounded-[40px] shadow-sm border border-[#E9E5D9] p-6 lg:p-8 flex flex-col min-h-[350px] lg:min-h-0 relative overflow-hidden bg-gradient-to-b from-white to-[#FDFBF7]">
+          <h4 className="font-extrabold text-[#1E2420] mb-6 shrink-0 text-base flex items-center gap-2">
             <Star size={18} className="text-[#D4A373] fill-[#D4A373]" />
-            پڕفرۆشترینەکانی ئەمڕۆ
+            باشترین فرۆشراوەکانی یەکەم
           </h4>
           
-          <div className="space-y-4 flex-1 overflow-auto pr-2">
+          <div className="space-y-4 flex-1 overflow-auto pr-1">
              {popularItems.length > 0 ? (
-                 popularItems.map((item, i) => (
-                    <div key={i} className="flex justify-between items-center p-4 bg-[#F9F7F2] rounded-[20px] transition-all relative overflow-hidden group">
+                  popularItems.map((item, i) => (
+                     <div key={i} className="flex justify-between items-center p-4 bg-white border border-[#E9E5D9] rounded-2xl hover:border-[#D4A373] transition-all relative overflow-hidden group">
                         <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#D4A373] opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-xs font-bold text-[#1E2420] shadow-sm border border-[#E9E5D9]">
-                                {i + 1}
+                            <div className="w-8 h-8 rounded-xl bg-[#F9F7F2] flex items-center justify-center text-xs font-extrabold text-[#1E2420] border border-[#E9E5D9]">
+                                #{i + 1}
                             </div>
-                            <span className="font-bold text-[#1E2420] text-sm">{item.name}</span>
+                            <span className="font-extrabold text-[#2D3631] text-sm">{item.name}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <span className="text-[#8B8378] text-[10px] font-bold uppercase tracking-wider">دانە</span>
-                            <span className="bg-white px-3 py-1.5 rounded-full text-xs font-bold font-mono text-[#D4A373] shadow-sm border border-[#E9E5D9] min-w-[36px] text-center">{item.quantity}</span>
+                            <span className="text-[#8B8378] text-[9px] font-bold uppercase tracking-wider">دانە</span>
+                            <span className="bg-[#1E2420] text-[#D4A373] px-3 py-1 rounded-xl text-xs font-extrabold font-mono shadow-inner">{item.quantity}</span>
                         </div>
-                    </div>
-                 ))
-             ) : (
-                 <div className="h-full flex flex-col items-center justify-center text-[#8B8378] gap-4">
-                     <div className="p-4 bg-[#F9F7F2] rounded-full text-[#E9E5D9]">
-                        <Tag size={32} />
                      </div>
-                     <span className="text-sm font-medium">بۆ ئەمڕۆ هیچ نەفرۆشراوە</span>
-                 </div>
+                  ))
+             ) : (
+                  <div className="h-full flex flex-col items-center justify-center text-[#8B8378] gap-4">
+                      <div className="p-4 bg-[#F9F7F2] rounded-full text-[#E9E5D9]">
+                         <Tag size={32} />
+                      </div>
+                      <span className="text-xs font-bold text-gray-400">تا ئێستا کڕینی گشتی بۆ ئەمڕۆ نییە</span>
+                  </div>
              )}
           </div>
 
           <div className="mt-6 pt-6 shrink-0 border-t border-dashed border-[#E9E5D9]">
             <div className="text-center">
-              <div className="text-[10px] text-[#8B8378] font-bold uppercase tracking-[0.2em] opacity-80">POWERED BY HELAV CAFE</div>
+              <span className="text-[9px] text-[#8B8378] font-bold uppercase tracking-[0.25em] opacity-60">
+                 سیستەمی بەڕێوبەرایەتی کۆیی هێلاڤ
+              </span>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );

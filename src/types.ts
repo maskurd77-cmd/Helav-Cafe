@@ -18,3 +18,14 @@ export interface Order {
   date: Date;
   status: 'completed' | 'pending' | 'cancelled';
 }
+
+export interface HospitalRequest {
+  id: string;
+  department: string;
+  items: CartItem[];
+  status: 'pending' | 'approved' | 'rejected';
+  date: string;
+  notes?: string;
+  requesterEmail: string;
+  total: number;
+}
