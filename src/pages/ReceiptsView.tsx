@@ -43,7 +43,7 @@ export function ReceiptsView() {
     <div className="space-y-6 max-w-6xl mx-auto h-full flex flex-col min-w-0">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0 bg-white p-4 lg:px-6 lg:py-5 rounded-[24px] shadow-sm border border-[#E9E5D9]">
         <div>
-          <h1 className="text-xl lg:text-2xl font-bold text-[#1E2420]">وەسلەکان</h1>
+          <h1 className="text-xl lg:text-2xl font-bold text-[#1E2420]">پسوڵەکان</h1>
           <p className="text-xs lg:text-sm text-[#8B8378] mt-1">ئەرشیفی فرۆشتنەکان و پسوڵەکان بەپێی کات</p>
         </div>
         
@@ -84,13 +84,13 @@ export function ReceiptsView() {
           {loading ? (
              <div className="flex flex-col items-center justify-center h-full text-[#8B8378] gap-4 absolute inset-0 z-10 bg-white/50 backdrop-blur-sm">
                  <div className="w-10 h-10 border-4 border-[#E9E5D9] border-t-[#D4A373] rounded-full animate-spin"></div>
-                 <span className="font-bold text-sm">بارکردنی وەسلەکان...</span>
+                 <span className="font-bold text-sm">بارکردنی پسوڵەکان...</span>
              </div>
           ) : (
           <table className="w-full text-right border-collapse min-w-[700px]">
              <thead className="bg-[#FDFBF7] text-[#8B8378] text-[10px] lg:text-xs uppercase sticky top-0 z-10 shadow-[0_1px_0_rgba(233,229,217,1)]">
               <tr>
-                <th className="px-6 py-4 font-bold text-right tracking-wider">ژمارەی وەسل</th>
+                <th className="px-6 py-4 font-bold text-right tracking-wider">ژمارەی پسوڵە</th>
                 <th className="px-6 py-4 font-bold text-right tracking-wider">ڕێکەوت</th>
                 <th className="px-6 py-4 font-bold text-right tracking-wider w-1/3">وردەکاری (داواکارییەکان)</th>
                 <th className="px-6 py-4 font-bold text-right tracking-wider">کۆی گشتی</th>
@@ -146,7 +146,7 @@ export function ReceiptsView() {
                           <div className="p-4 bg-[#F9F7F2] rounded-full">
                             <Search size={32} className="text-[#E9E5D9]" />
                           </div>
-                          <span className="font-medium text-sm">هیچ وەسلێک نەدۆزرایەوە</span>
+                          <span className="font-medium text-sm">هیچ پسوڵەیەک نەدۆزرایەوە</span>
                        </div>
                    </td>
                 </tr>

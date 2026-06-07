@@ -13,6 +13,7 @@ interface SettingsState {
     greetingMessage: string;
     subGreeting: string;
     enableVirtualKeyboard: boolean;
+    promoSlides: { title: string; desc: string; tag: string; image: string; }[];
   };
   loading: boolean;
   initialized: boolean;
@@ -21,6 +22,27 @@ interface SettingsState {
 }
 
 let unsubscribe: (() => void) | null = null;
+
+const defaultSlides = [
+  {
+    title: 'قاوەی داخی هێلاڤ',
+    desc: 'بۆن و تامی ڕەسەنی قاوەی کوردی و جیهانی لەگەڵ شیری سروشتی گەرم.',
+    tag: 'خواستی زۆری لەسەرە 🔥',
+    image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&q=80&w=400'
+  },
+  {
+    title: 'شیرینی و کێکە تازەکانمان',
+    desc: 'هەموو بەیانییەک بە گەرمی و تازەیی بە کوالیتییەکی بەرز و بێوێنە ئامادە دەکرێن.',
+    tag: 'هەمیشە تازە 🍰',
+    image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=400'
+  },
+  {
+    title: 'ژینگەیەکی ئارام و بێدەنگ',
+    desc: 'شوێنێکی گونجاو پێشکەش دەکەین بۆ کۆبوونەوە، خوێندنەوە، و بەسەربردنی کاتی ناوازە.',
+    tag: 'ئاسودەیی دڵ ☕',
+    image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=400'
+  }
+];
 
 const defaultSettings = {
   cafe: {
@@ -31,6 +53,7 @@ const defaultSettings = {
     logoUrl: '',
     greetingMessage: 'بەخێربێیت بۆ هێلاڤ کافێ',
     subGreeting: 'تامێکی جیاواز لە هەموو لایەکەوە بۆ ئارامبوونەوە تاقیبکەرەوە.',
+    promoSlides: defaultSlides,
     enableVirtualKeyboard: false
   },
   hospital: {
@@ -41,6 +64,7 @@ const defaultSettings = {
     logoUrl: '',
     greetingMessage: 'بەخێربێیت بۆ کافتریای نەخۆشخانە',
     subGreeting: 'پێشکەشکردنی باشترین جۆرەکانی خۆراک و خواردنەوەی تەندروست بۆ ئێوە.',
+    promoSlides: defaultSlides,
     enableVirtualKeyboard: false
   }
 };
@@ -54,6 +78,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     logoUrl: '',
     greetingMessage: 'بەخێربێیت بۆ کافێکەمان',
     subGreeting: 'ئێمە لێرەین بۆ پێشکەشکردنی باشترین تام و چێژ بۆ ئێوەی ئازیز.',
+    promoSlides: defaultSlides,
     enableVirtualKeyboard: false
   },
   loading: true,

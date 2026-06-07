@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc, setDoc, deleteDoc, getDocs, collection } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '@/firebase';
-import { Loader2, Save, Store, Printer, AlertTriangle, Database, Download, Upload, RefreshCw } from 'lucide-react';
+import { Loader2, Save, Store, Printer, AlertTriangle, Database, Download, Upload, RefreshCw, Image, Trash2, Plus } from 'lucide-react';
 import { useBranchStore } from '@/store/useBranchStore';
 
 export function SettingsView() {
@@ -28,7 +28,27 @@ export function SettingsView() {
     logoUrl: '',
     greetingMessage: 'بەخێربێیت بۆ کافێکەمان',
     subGreeting: 'ئێمە لێرەین بۆ پێشکەشکردنی باشترین تام و چێژ بۆ ئێوەی ئازیز.',
-    enableVirtualKeyboard: false
+    enableVirtualKeyboard: false,
+    promoSlides: [
+        {
+          title: 'قاوەی داخی هێلاڤ',
+          desc: 'بۆن و تامی ڕەسەنی قاوەی کوردی و جیهانی لەگەڵ شیری سروشتی گەرم.',
+          tag: 'خواستی زۆری لەسەرە 🔥',
+          image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&q=80&w=400'
+        },
+        {
+          title: 'شیرینی و کێکە تازەکانمان',
+          desc: 'هەموو بەیانییەک بە گەرمی و تازەیی بە کوالیتییەکی بەرز و بێوێنە ئامادە دەکرێن.',
+          tag: 'هەمیشە تازە 🍰',
+          image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=400'
+        },
+        {
+          title: 'ژینگەیەکی ئارام و بێدەنگ',
+          desc: 'شوێنێکی گونجاو پێشکەش دەکەین بۆ کۆبوونەوە، خوێندنەوە، و بەسەربردنی کاتی ناوازە.',
+          tag: 'ئاسودەیی دڵ ☕',
+          image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=400'
+        }
+      ]
   });
 
   const docName = currentBranch === 'cafe' ? 'general' : 'hospital';
@@ -43,7 +63,12 @@ export function SettingsView() {
       const docRef = doc(db, 'settings', docName);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        setSettings(prev => ({ ...prev, ...docSnap.data() }));
+        const data = docSnap.data();
+        setSettings(prev => ({ 
+          ...prev, 
+          ...data,
+          promoSlides: data.promoSlides || prev.promoSlides 
+        }));
       }
     } catch (e) {
       console.error("Error loading settings:", e);
@@ -75,11 +100,6 @@ export function SettingsView() {
     if (!confirmDeleteConfig) return;
     const { collectionName, label } = confirmDeleteConfig;
     let resolvedCollection = collectionName;
-    if (currentBranch === 'hospital') {
-      if (collectionName === 'orders') resolvedCollection = 'orders_hospital';
-      else if (collectionName === 'expenses') resolvedCollection = 'expenses_hospital';
-      else if (collectionName === 'products') resolvedCollection = 'products_hospital';
-    }
 
     try {
       setSaving(true);
@@ -351,12 +371,12 @@ export function SettingsView() {
                     <div className="bg-[#E9E5D9] p-2 lg:p-3 rounded-xl lg:rounded-2xl text-[#2D3631]">
                         <Printer size={20} className="w-5 h-5 lg:w-6 lg:h-6" />
                     </div>
-                    <h2 className="text-lg lg:text-xl font-bold text-[#2D3631]">ڕێکخستنەکانی وەسل (پەسیتر)</h2>
+                    <h2 className="text-lg lg:text-xl font-bold text-[#2D3631]">ڕێکخستنەکانی پسوڵە (وەسڵ)</h2>
                 </div>
 
                 <div className="space-y-4 lg:space-y-5">
                     <div>
-                        <label className="block text-xs lg:text-sm font-bold text-[#2D3631] mb-2">نامەی کۆتایی وەسل (Footer)</label>
+                        <label className="block text-xs lg:text-sm font-bold text-[#2D3631] mb-2">نامەی کۆتایی پسوڵە (Footer)</label>
                         <textarea 
                             value={settings.footerMessage}
                             rows={3}
@@ -403,6 +423,104 @@ export function SettingsView() {
                     </div>
                 </div>
 
+                <div className="flex items-center gap-3 mb-4 lg:mb-6 border-b border-[#F9F7F2] pb-4 lg:pb-6 mt-8">
+                    <div className="bg-[#E9E5D9] p-2 lg:p-3 rounded-xl lg:rounded-2xl text-[#2D3631]">
+                        <Image size={20} className="w-5 h-5 lg:w-6 lg:h-6" />
+                    </div>
+                    <div>
+                        <h2 className="text-lg lg:text-xl font-bold text-[#2D3631]">وێنە و پەیامەکانی شاشەی کڕیار</h2>
+                        <p className="text-[10px] text-[#8B8378] mt-0.5">ئەو وێنانەی لە لای چەپی شاشەی کڕیار نیشان دەدرێن</p>
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                  {settings.promoSlides.map((slide, index) => (
+                    <div key={index} className="p-4 bg-[#F9F7F2] rounded-xl lg:rounded-2xl border border-[#E9E5D9] relative space-y-3">
+                       <button
+                         onClick={() => {
+                           const newSlides = [...settings.promoSlides];
+                           newSlides.splice(index, 1);
+                           setSettings({ ...settings, promoSlides: newSlides });
+                         }}
+                         className="absolute top-4 left-4 text-red-400 hover:text-red-600 transition-colors bg-white p-1.5 rounded-lg shadow-sm border border-red-100"
+                       >
+                         <Trash2 size={16} />
+                       </button>
+                       
+                       <div>
+                          <label className="block text-[11px] font-bold text-[#8B8378] mb-1">ناونیشان</label>
+                          <input 
+                             value={slide.title}
+                             onChange={(e) => {
+                               const newSlides = [...settings.promoSlides];
+                               newSlides[index].title = e.target.value;
+                               setSettings({ ...settings, promoSlides: newSlides });
+                             }}
+                             className="w-full bg-white border border-[#E9E5D9] rounded-lg px-3 py-2 text-sm focus:border-[#8DAA91] outline-none text-[#2D3631]"
+                          />
+                       </div>
+                       
+                       <div>
+                          <label className="block text-[11px] font-bold text-[#8B8378] mb-1">وەسف</label>
+                          <textarea 
+                             value={slide.desc}
+                             onChange={(e) => {
+                               const newSlides = [...settings.promoSlides];
+                               newSlides[index].desc = e.target.value;
+                               setSettings({ ...settings, promoSlides: newSlides });
+                             }}
+                             rows={2}
+                             className="w-full bg-white border border-[#E9E5D9] rounded-lg px-3 py-2 text-sm focus:border-[#8DAA91] outline-none text-[#2D3631] resize-none"
+                          />
+                       </div>
+
+                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                         <div>
+                            <label className="block text-[11px] font-bold text-[#8B8378] mb-1">تاگ (وەک: تازە 🔥)</label>
+                            <input 
+                               value={slide.tag}
+                               onChange={(e) => {
+                                 const newSlides = [...settings.promoSlides];
+                                 newSlides[index].tag = e.target.value;
+                                 setSettings({ ...settings, promoSlides: newSlides });
+                               }}
+                               className="w-full bg-white border border-[#E9E5D9] rounded-lg px-3 py-2 text-sm focus:border-[#8DAA91] outline-none text-[#2D3631]"
+                            />
+                         </div>
+                         <div>
+                            <label className="block text-[11px] font-bold text-[#8B8378] mb-1">لینکی وێنە</label>
+                            <input 
+                               value={slide.image}
+                               onChange={(e) => {
+                                 const newSlides = [...settings.promoSlides];
+                                 newSlides[index].image = e.target.value;
+                                 setSettings({ ...settings, promoSlides: newSlides });
+                               }}
+                               dir="ltr"
+                               className="w-full bg-white border border-[#E9E5D9] rounded-lg px-3 py-2 text-sm focus:border-[#8DAA91] outline-none text-[#2D3631] text-left"
+                            />
+                         </div>
+                       </div>
+                    </div>
+                  ))}
+
+                  <button
+                    onClick={() => {
+                        setSettings({
+                          ...settings,
+                          promoSlides: [
+                            ...settings.promoSlides,
+                            { title: 'ناونیشانی نوێ', desc: 'وەسفێک لێرە بنووسە', tag: 'نوێ 🌟', image: 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&q=80&w=400' }
+                          ]
+                        });
+                    }}
+                    className="w-full py-4 border-2 border-dashed border-[#8DAA91]/40 rounded-xl lg:rounded-2xl text-[#8DAA91] hover:bg-[#8DAA91]/5 hover:border-[#8DAA91] font-bold text-sm transition-all flex items-center justify-center gap-2"
+                  >
+                     <Plus size={18} />
+                     زیادکردنی سلایدی نوێ
+                  </button>
+                </div>
+
                 <button 
                   onClick={handleSave}
                   disabled={saving}
@@ -423,7 +541,7 @@ export function SettingsView() {
                     </div>
                     <div>
                         <h2 className="text-lg lg:text-xl font-bold text-[#1E2420]">پاراستن و هێنانەوەی باکئەپ</h2>
-                        <p className="text-[10px] text-[#8B8378] mt-0.5">زانیارییەکانی مێنۆ، خەرجییەکان، وەسلەکان و ڕێکخستنەکان بپارێزە</p>
+                        <p className="text-[10px] text-[#8B8378] mt-0.5">زانیارییەکانی مێنۆ، خەرجییەکان، پسوڵەکان و ڕێکخستنەکان بپارێزە</p>
                     </div>
                 </div>
 
@@ -472,7 +590,7 @@ export function SettingsView() {
                        onClick={() => handleDeleteAllTrigger('orders', 'داواکارییەکان')}
                        className="w-full bg-white border-2 border-red-100 hover:bg-red-50 hover:border-red-200 text-red-600 font-bold py-3 text-xs lg:text-sm rounded-xl lg:rounded-2xl transition-all"
                     >
-                        سڕینەوەی وەسل و داواکارییەکان
+                        سڕینەوەی پسوڵە و داواکارییەکان
                     </button>
                     <button 
                        onClick={() => handleDeleteAllTrigger('expenses', 'خەرجییەکان')}
@@ -481,10 +599,10 @@ export function SettingsView() {
                         سڕینەوەی سەرجەم خەرجییەکان
                     </button>
                     <button 
-                       onClick={() => handleDeleteAllTrigger('products', 'بەرهمەکان')}
+                       onClick={() => handleDeleteAllTrigger('products', 'بەرهەمەکان')}
                        className="w-full bg-white border-2 border-red-100 hover:bg-red-50 hover:border-red-200 text-red-600 font-bold py-3 text-xs lg:text-sm rounded-xl lg:rounded-2xl transition-all"
                     >
-                        سڕینەوەی کۆی مێنۆ و بابەتەکان
+                        سڕینەوەی کۆی مێنۆ و بەرهەمەکان
                     </button>
                 </div>
             </div>

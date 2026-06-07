@@ -300,7 +300,7 @@ export function Dashboard() {
                 <p className="text-[10px] text-[#8B8378] mt-0.5">دوایین پسوولەکانی فرۆشتنی سەر شاشە</p>
               </div>
             </div>
-            <Link to="/receipts" className="text-xs font-bold bg-[#1E2420] text-white hover:bg-[#2D3631] px-5 py-2.5 rounded-full transition-all shadow-md">بینینی هەموو وەسلەکان</Link>
+            <Link to="/receipts" className="text-xs font-bold bg-[#1E2420] text-white hover:bg-[#2D3631] px-5 py-2.5 rounded-full transition-all shadow-md">بینینی هەموو پسوڵەکان</Link>
           </div>
           
           <div className="flex-1 overflow-auto">

@@ -274,7 +274,7 @@ export function MenuView() {
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                     <label className="block text-sm font-bold text-[#1E2420] mb-2">نرخ <span className="text-[#8B8378] text-xs font-normal">(د.ع)</span></label>
-                    <input required value={price} onChange={e => setPrice(e.target.value)} type="number" className="w-full bg-[#F9F7F2] border border-transparent focus:bg-white focus:border-[#D4A373] rounded-xl px-4 py-3 outline-none text-[#1E2420] transition-colors font-mono" placeholder="2500" />
+                    <input required value={price} onChange={e => setPrice(e.target.value)} type="text" inputMode="numeric" className="w-full bg-[#F9F7F2] border border-transparent focus:bg-white focus:border-[#D4A373] rounded-xl px-4 py-3 outline-none text-[#1E2420] transition-colors font-mono" placeholder="2500" />
                     </div>
                     <div>
                     <label className="block text-sm font-bold text-[#1E2420] mb-2">دیاریکردنی دۆخ</label>

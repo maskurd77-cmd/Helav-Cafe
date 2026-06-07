@@ -338,34 +338,41 @@ export function PosView() {
           </div>
         </div>
         
-        <div className="p-4 lg:p-6 overflow-y-auto flex-1">
+        <div className="p-3 lg:p-5 overflow-y-auto flex-grow h-0 min-h-0">
           {loading ? (
              <div className="flex flex-col items-center justify-center h-full text-[#8B8378] gap-4">
                  <div className="w-8 h-8 border-4 border-[#E9E5D9] border-t-[#D4A373] rounded-full animate-spin"></div>
                  <span className="font-medium text-sm">بارکردنی بابەتەکان...</span>
              </div>
           ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 lg:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 lg:gap-4 select-none">
             {filteredProducts.map(product => (
               <button
                 key={product.id}
                 onClick={() => addToCart(product)}
                 disabled={product.status === 'تەواو بووە'}
-                className={`bg-white p-4 lg:p-6 rounded-2xl lg:rounded-[24px] border border-[#E9E5D9] hover:border-[#D4A373] hover:shadow-[0_8px_30px_rgba(212,163,115,0.12)] transition-all text-right flex flex-col items-center group relative overflow-hidden min-h-[160px] justify-between gap-3 lg:gap-4 ${product.status === 'تەواو بووە' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`bg-white p-3 lg:p-5 rounded-2xl lg:rounded-[22px] border-2 border-[#E9E5D9] hover:border-[#D4A373] active:scale-[0.97] hover:shadow-[0_8px_24px_rgba(212,163,115,0.08)] transition-all text-right flex flex-col items-center group relative overflow-hidden min-h-[140px] justify-between gap-2.5 cursor-pointer ${product.status === 'تەواو بووە' ? 'opacity-45 cursor-not-allowed border-dashed' : ''}`}
               >
-                <div className="w-14 h-14 bg-[#F9F7F2] rounded-2xl flex items-center justify-center text-[#1E2420] group-hover:-translate-y-1 group-hover:bg-[#1E2420] group-hover:text-[#D4A373] transition-all shrink-0 duration-300">
-                  <Coffee size={26} />
+                <div className="w-12 h-12 bg-[#F9F7F2] rounded-xl flex items-center justify-center text-[#1E2420] group-hover:bg-[#1E2420] group-hover:text-[#D4A373] transition-colors shrink-0 duration-300">
+                  <Coffee size={22} className="group-hover:rotate-6 transition-transform" />
                 </div>
                 <div className="text-center w-full flex-1 flex flex-col justify-center">
-                  <h3 className="font-bold text-[#1E2420] text-sm lg:text-base leading-snug line-clamp-2">{product.name}</h3>
+                  <h3 className="font-extrabold text-[#1E2420] text-xs lg:text-[13px] leading-snug line-clamp-2">{product.name}</h3>
                 </div>
                 <div className="text-center w-full mt-auto">
-                  <span className="inline-block bg-[#F9F7F2] group-hover:bg-[#D4A373]/10 px-3 py-1.5 rounded-lg text-[#8B8378] font-bold text-xs lg:text-sm font-mono group-hover:text-[#D4A373] transition-colors">{product.price.toLocaleString('en-US')} <span className="font-sans text-[10px] font-normal">د.ع</span></span>
+                  <span className="inline-block bg-[#F9F7F2] group-hover:bg-[#1E2420]/10 px-2.5 py-1 rounded-lg text-[#1E2420] font-black text-xs font-mono group-hover:text-[#D4A373] transition-colors">
+                    {product.price.toLocaleString('en-US')} <span className="font-sans text-[10px] font-normal">د.ع</span>
+                  </span>
                 </div>
+                {product.status === 'تەواو بووە' && (
+                  <div className="absolute inset-0 bg-[#F9F7F2]/80 backdrop-blur-[1px] flex items-center justify-center">
+                    <span className="bg-[#E11D48] text-white px-2.5 py-1 rounded-lg font-bold text-[10px]">تەواو بووە</span>
+                  </div>
+                )}
               </button>
             ))}
             {filteredProducts.length === 0 && (
-                <div className="col-span-full py-12 text-center text-[#8B8378] bg-[#F9F7F2] rounded-3xl mt-4">
+                <div className="col-span-full py-12 text-center font-bold text-[#8B8378] bg-[#F9F7F2] rounded-3xl mt-2 text-xs">
                     هیچ بابەتێک نەدۆزرایەوە بۆ فرۆشتن. تکایە لە بەشی مێنۆ بەروبووم زیاد بکە.
                 </div>
             )}
@@ -526,7 +533,7 @@ export function PosView() {
             onClick={openCheckoutModal}
             className="w-full relative z-10 bg-[#D4A373] hover:brightness-110 disabled:bg-white/10 disabled:text-white/40 disabled:cursor-not-allowed text-[#1E2420] font-bold py-3 rounded-xl transition-all shadow-lg shadow-[#D4A373]/20 disabled:shadow-none flex justify-center items-center gap-2 text-sm border border-transparent disabled:border-white/10"
           >
-            {checkingOut ? 'چاوەڕێبە...' : 'پارەدان و وەسل'}
+            {checkingOut ? 'چاوەڕێبە...' : 'پارەدان و پسوڵە'}
           </button>
         </div>
       </div>
@@ -599,7 +606,7 @@ export function PosView() {
             <div className="p-6 bg-[#FDFBF7] border-b border-[#E9E5D9] flex items-center justify-between">
               <h2 className="text-xl font-bold text-[#1E2420] flex items-center gap-2">
                   <Banknote size={24} className="text-[#D4A373]" />
-                  پارەدان و دەرکردنی وەسل
+                  پارەدان و دەرکردنی پسوڵە
               </h2>
               <button 
                 onClick={() => setShowCheckoutModal(false)}
@@ -623,7 +630,7 @@ export function PosView() {
                     بڕی داشکان (بە دینار)
                   </label>
                   <input 
-                    type="number" 
+                    type="text" inputMode="numeric"
                     value={discountAmount}
                     onChange={(e) => setDiscountAmount(e.target.value)}
                     placeholder="نموونە: 1000"
@@ -637,7 +644,7 @@ export function PosView() {
                     پارەی وەرگیراو (کاش)
                   </label>
                   <input 
-                    type="number" 
+                    type="text" inputMode="numeric"
                     value={receivedAmount}
                     onChange={(e) => setReceivedAmount(e.target.value)}
                     placeholder="بڕی پارەی پێدراو بۆ حیسابی باقی"
@@ -648,7 +655,7 @@ export function PosView() {
                 <div>
                   <label className="flex items-center gap-2 text-sm font-bold text-[#1E2420] mb-2">
                     <ReceiptText size={16} className="text-[#D4A373]" />
-                    شێوازی چاپکردنی وەسل (Printing Method)
+                    شێوازی چاپکردنی پسوڵە (Printing Method)
                   </label>
                   <div className="grid grid-cols-2 gap-2 bg-[#F9F7F2] p-1.5 rounded-xl border border-[#E9E5D9]">
                     <button
@@ -706,7 +713,7 @@ export function PosView() {
                 disabled={checkingOut}
                 className="flex-[2] bg-[#1E2420] hover:bg-[#2D3631] disabled:opacity-70 text-[#E9E5D9] font-bold py-4 rounded-xl transition-all shadow-lg shadow-[#1E2420]/10 flex items-center justify-center gap-2 text-sm"
               >
-                {checkingOut ? 'چاوەڕێبە...' : 'چاپکردنی وەسل و تەواوکردن'}
+                {checkingOut ? 'چاوەڕێبە...' : 'چاپکردنی پسوڵە و تەواوکردن'}
               </button>
             </div>
           </div>
@@ -747,7 +754,7 @@ export function PosView() {
                 <div>
                   <label className="block text-sm font-bold text-[#1E2420] mb-2 text-right">نرخ (بە دینار)</label>
                   <input 
-                    type="number" 
+                    type="text" inputMode="numeric"
                     required
                     min="0"
                     value={customItemPrice}

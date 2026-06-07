@@ -164,7 +164,7 @@ export function ExpensesView() {
                 </div>
                 <div>
                     <label className="block text-sm font-bold text-[#1E2420] mb-2 flex items-center gap-1.5"><Wallet size={16} className="text-[#D4A373]"/> بڕی پارە <span className="text-[#8B8378] text-xs font-normal">(د.ع)</span></label>
-                    <input required type="number" value={amount} onChange={e => setAmount(e.target.value)} placeholder="25000" className="w-full bg-[#F9F7F2] border border-transparent focus:bg-white focus:border-[#D4A373] rounded-xl px-4 py-3 outline-none text-[#E11D48] font-bold font-mono transition-colors" dir="ltr" />
+                    <input required type="text" inputMode="numeric" value={amount} onChange={e => setAmount(e.target.value)} placeholder="25000" className="w-full bg-[#F9F7F2] border border-transparent focus:bg-white focus:border-[#D4A373] rounded-xl px-4 py-3 outline-none text-[#E11D48] font-bold font-mono transition-colors" dir="ltr" />
                 </div>
                 </form>
             </div>

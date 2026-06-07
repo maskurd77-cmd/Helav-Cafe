@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { usePosStore } from './usePosStore';
 
-export type Branch = 'cafe' | 'hospital';
+export type Branch = 'cafe';
 
 interface BranchState {
   currentBranch: Branch;
@@ -9,11 +9,10 @@ interface BranchState {
 }
 
 export const useBranchStore = create<BranchState>((set) => ({
-  currentBranch: (localStorage.getItem('helav_branch') as Branch) || 'cafe',
+  currentBranch: 'cafe',
   setBranch: (branch) => {
-    localStorage.setItem('helav_branch', branch);
-    // Clear cart since products differ between cafe and hospital
-    usePosStore.getState().clearCart();
-    set({ currentBranch: branch });
+    // Only cafe exists
+    set({ currentBranch: 'cafe' });
   }
 }));
+
