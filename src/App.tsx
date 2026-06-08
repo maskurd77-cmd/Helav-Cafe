@@ -13,6 +13,7 @@ import { SettingsView } from './pages/SettingsView';
 import { CustomerDisplay } from './pages/CustomerDisplay';
 import { AuthProvider, useAuth } from './components/AuthProvider';
 import { LoginView } from './pages/LoginView';
+import SubscriptionLock from './components/SubscriptionLock';
 
 function AppRoutes() {
   const { user, loading, role } = useAuth();
@@ -51,6 +52,7 @@ function AppRoutes() {
 export default function App() {
   return (
     <ErrorBoundary>
+      <SubscriptionLock />
       <AuthProvider>
         <AppRoutes />
       </AuthProvider>
