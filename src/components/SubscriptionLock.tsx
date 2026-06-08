@@ -9,7 +9,7 @@ export default function SubscriptionLock() {
     async function checkSubscription() {
       try {
         // بەستنەوە بە سێرڤەری دابینکەر بۆ پشکنینی چالاکبوونی خزمەتگوزاری
-        const res = await fetch("https://ais-dev-ipdceuoehcen5e6coz7yvc-518362444188.europe-west2.run.app/api/subscription/check/qomRBGigeDnYSdUHhg5t");
+        const res = await fetch("https://masagency.vercel.app/api/subscription/check/qomRBGigeDnYSdUHhg5t");
         const status = await res.json();
         if (status.has_expiry && !status.active) {
           setIsLocked(true);
