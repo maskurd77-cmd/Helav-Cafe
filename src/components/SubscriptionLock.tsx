@@ -16,21 +16,51 @@ export default function SubscriptionLock() {
 
       for (const url of endpoints) {
         try {
-          const res = await fetch(url);
+          console.log(`[MasTech] Checking subscription at: ${url}`);
+          const res = await fetch(url, {
+            headers: {
+              "Accept": "application/json"
+            }
+          });
+          
           if (res.ok) {
+            const contentType = res.headers.get("content-type") || "";
+            if (contentType.includes("text/html")) {
+              console.warn(`[MasTech] Warning: Endpoint ${url} returned HTML instead of JSON. Skipping.`);
+              continue;
+            }
+
             const status = await res.json();
-            if (status.has_expiry && !status.active) {
+            console.log("[MasTech] Subscription response received:", status);
+            
+            // هەڵگرتنی ئەنجام بۆ نیشاندانی دیباگەر لە کۆنسۆڵدا
+            (window as any).mastechStatus = status;
+
+            // پشکنینی مەرجی قوفڵکردن بە توندی و بە شێوەیەکی گونجاو لە هەموو بارودۆخێکدا
+            const isLockedResponse = 
+              (status.has_expiry && !status.active) || 
+              (status.active === false) || 
+              (status.active === "false") ||
+              (status.status === "expired") ||
+              (status.expired === true) ||
+              (status.expired === "true");
+
+            if (isLockedResponse) {
               setIsLocked(true);
               setServiceName(status.service_name || "ئەم بەرهەمە");
               setExpiryDate(status.expiry_date || "");
+              console.log("[MasTech] System locked! Subscription is inactive/expired.");
               break; // ئەگەر قفڵ بوو، پشکنینەکە ڕادەگرین
-            } else if (status.active) {
+            } else {
+              console.log("[MasTech] Subscription is active and system is unlocked.");
               setIsLocked(false);
-              break; // ئەگەر چالاک بوو و بەسەرنەچووبوو، سیستەمەکە بە کراوەیی دەهێڵینەوە
+              break; // ئەگەر چالاک بوو، سیستەمەکە ڕاناگرین
             }
+          } else {
+            console.warn(`[MasTech] Endpoint ${url} returned status code: ${res.status}`);
           }
         } catch (e) {
-          console.warn(`MasTech subscription endpoint connection failed for ${url}:`, e);
+          console.warn(`[MasTech] Subscription endpoint connection or parsing failed for ${url}:`, e);
         }
       }
     }
