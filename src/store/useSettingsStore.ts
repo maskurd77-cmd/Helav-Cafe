@@ -14,6 +14,9 @@ interface SettingsState {
     subGreeting: string;
     enableVirtualKeyboard: boolean;
     promoSlides: { title: string; desc: string; tag: string; image: string; }[];
+    invoicePrefix?: string;
+    invoiceStartNumber?: number;
+    invoiceNextNumber?: number;
   };
   loading: boolean;
   initialized: boolean;
@@ -54,18 +57,10 @@ const defaultSettings = {
     greetingMessage: 'بەخێربێیت بۆ MAS MENU',
     subGreeting: 'تامێکی جیاواز لە هەموو لایەکەوە بۆ ئارامبوونەوە تاقیبکەرەوە.',
     promoSlides: defaultSlides,
-    enableVirtualKeyboard: false
-  },
-  hospital: {
-    storeName: 'Hospital Cafeteria',
-    address: 'هەولێر - ناو نەخۆشخانە',
-    phone: '07501111111',
-    footerMessage: 'هیوای تەندروستیەکی باشتان بۆ دەخوازین!',
-    logoUrl: '',
-    greetingMessage: 'بەخێربێیت بۆ کافتریای نەخۆشخانە',
-    subGreeting: 'پێشکەشکردنی باشترین جۆرەکانی خۆراک و خواردنەوەی تەندروست بۆ ئێوە.',
-    promoSlides: defaultSlides,
-    enableVirtualKeyboard: false
+    enableVirtualKeyboard: false,
+    invoicePrefix: '#',
+    invoiceStartNumber: 1000,
+    invoiceNextNumber: 1001
   }
 };
 
@@ -79,15 +74,18 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     greetingMessage: 'بەخێربێیت بۆ کافێکەمان',
     subGreeting: 'ئێمە لێرەین بۆ پێشکەشکردنی باشترین تام و چێژ بۆ ئێوەی ئازیز.',
     promoSlides: defaultSlides,
-    enableVirtualKeyboard: false
+    enableVirtualKeyboard: false,
+    invoicePrefix: '#',
+    invoiceStartNumber: 1000,
+    invoiceNextNumber: 1001
   },
   loading: true,
   initialized: false,
   loadedBranch: null,
   initSettings: () => {
-    const branch = useBranchStore.getState().currentBranch;
-    const cacheKey = `cached_settings_${branch}`;
-    const fallback = branch === 'cafe' ? defaultSettings.cafe : defaultSettings.hospital;
+    const branch = 'cafe' as Branch;
+    const cacheKey = `cached_settings_cafe`;
+    const fallback = defaultSettings.cafe;
 
     // Step 1: Immediately load from cache to prevent blank flashing and firebase quotas
     let cached: any = null;
@@ -109,7 +107,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         unsubscribe();
     }
     
-    const docName = branch === 'cafe' ? 'general' : 'hospital';
+    const docName = 'general';
     
     // Step 2: Set up real-time listener with automatic persistence
     unsubscribe = onSnapshot(doc(db, 'settings', docName), (docSnap) => {

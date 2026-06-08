@@ -105,7 +105,9 @@ export function ReceiptsView() {
   };
 
   const filteredOrders = orders.filter(o => {
-    let matchesSearch = o.id.includes(searchQuery) || o.items.some(i => i.name.includes(searchQuery));
+    let matchesSearch = o.id.includes(searchQuery) || 
+                        (o.invoiceNo && o.invoiceNo.toLowerCase().includes(searchQuery.toLowerCase())) || 
+                        o.items.some(i => i.name.includes(searchQuery));
     let matchesDate = true;
     if (dateFilter) {
       const orderDate = new Date(o.date).toLocaleDateString('en-CA'); // 'YYYY-MM-DD'
@@ -180,7 +182,7 @@ export function ReceiptsView() {
                           <div className="w-10 h-10 bg-white border border-[#E9E5D9] rounded-xl flex items-center justify-center text-[#D4A373] flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform">
                               <ReceiptText size={18} />
                           </div>
-                          <span className="font-mono text-sm font-bold text-[#1E2420]">#{order.id.slice(0, 8)}</span>
+                          <span className="font-mono text-sm font-bold text-[#1E2420]">{order.invoiceNo || `#${order.id.slice(0, 8)}`}</span>
                       </div>
                   </td>
                   <td className="px-6 py-5">
@@ -243,7 +245,7 @@ export function ReceiptsView() {
                       <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
                       <div className="relative z-10 flex justify-between items-start">
                           <div>
-                              <h3 className="text-xl font-bold font-mono tracking-tight text-[#D4A373]">#{selectedOrder.id.slice(0, 8)}</h3>
+                              <h3 className="text-xl font-bold font-mono tracking-tight text-[#D4A373]">{selectedOrder.invoiceNo || `#${selectedOrder.id.slice(0, 8)}`}</h3>
                               <p className="text-xs text-white/60 mt-1">{new Date(selectedOrder.date).toLocaleString('en-GB')}</p>
                           </div>
                           <div className="flex items-center gap-2">
@@ -272,6 +274,11 @@ export function ReceiptsView() {
                            <div className="center">
                              {storeSettings?.logoUrl && <img src={storeSettings.logoUrl} className="logo-img" alt="Logo" />}
                              <div className="header" style={{ marginBottom: storeSettings?.address ? '4px' : '10px' }}>{storeSettings?.storeName || 'MAS MENU'}</div>
+                             {selectedOrder.invoiceNo && (
+                               <div style={{ marginTop: '4px', marginBottom: '4px', fontSize: '11px', fontWeight: 'bold', border: '1.5px dashed #000', padding: '2px 8px', display: 'inline-block', borderRadius: '4px', fontFamily: 'Cairo, sans-serif' }}>
+                                 ژمارەی پسوڵە: {selectedOrder.invoiceNo}
+                               </div>
+                             )}
                              {storeSettings?.address && <div className="sub">{storeSettings.address}</div>}
                              {storeSettings?.phone && <div className="sub">{storeSettings.phone}</div>}
                            </div>

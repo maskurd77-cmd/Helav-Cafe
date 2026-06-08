@@ -6,7 +6,7 @@ import { useProductStore } from '@/store/useProductStore';
 import { useSettingsStore } from '@/store/useSettingsStore';
 import { useBranchStore } from '@/store/useBranchStore';
 import { addOrder } from '@/services/orderService';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, updateDoc } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '@/firebase';
 
 export function PosView() {
@@ -35,6 +35,7 @@ export function PosView() {
   const [showDrawerAnimation, setShowDrawerAnimation] = useState(false);
 
   const receiptRef = useRef<HTMLDivElement>(null);
+  const [currentInvoiceNo, setCurrentInvoiceNo] = useState('');
 
   const { cart, addToCart, removeFromCart, updateQuantity, clearCart, getCartTotal } = usePosStore();
 
@@ -217,12 +218,31 @@ export function PosView() {
     setCheckingOut(true);
     try {
       const finalTotal = getFinalTotal();
+      
+      // Calculate next sequential invoice ID/number
+      const prefix = settings.invoicePrefix || '#';
+      const nextNum = settings.invoiceNextNumber !== undefined ? settings.invoiceNextNumber : (settings.invoiceStartNumber || 1000);
+      const invoiceNo = `${prefix}${nextNum}`;
+      
+      setCurrentInvoiceNo(invoiceNo);
+
       await addOrder({
         items: cart,
         total: finalTotal,
         date: new Date(),
-        status: 'completed'
+        status: 'completed',
+        invoiceNo: invoiceNo
       });
+
+      // Update next invoice counter safely in Firestore
+      try {
+        const docName = currentBranch === 'cafe' ? 'general' : 'hospital';
+        await updateDoc(doc(db, 'settings', docName), {
+          invoiceNextNumber: nextNum + 1
+        });
+      } catch (err) {
+        console.error("Failed to increment next invoice counter:", err);
+      }
       
       // Beautiful Print logic
       if (receiptRef.current) {
@@ -545,6 +565,11 @@ export function PosView() {
            <div className="center">
              {settings.logoUrl && <img src={settings.logoUrl} className="logo-img" alt="Logo" />}
              <div className="header" style={{ marginBottom: settings.address ? '4px' : '10px' }}>{settings.storeName || 'MAS MENU'}</div>
+             {currentInvoiceNo && (
+               <div style={{ marginTop: '6px', fontSize: '11px', fontWeight: 'bold', border: '1.5px dashed #000', padding: '2px 8px', display: 'inline-block', borderRadius: '4px', fontFamily: 'Cairo, sans-serif' }}>
+                 ژمارەی پسوڵە: {currentInvoiceNo}
+               </div>
+             )}
              {settings.address && <div className="sub">{settings.address}</div>}
              {settings.phone && <div className="sub">{settings.phone}</div>}
            </div>

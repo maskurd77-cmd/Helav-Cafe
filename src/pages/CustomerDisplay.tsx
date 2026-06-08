@@ -52,11 +52,22 @@ export function CustomerDisplay() {
 
   // Slide loop timer
   useEffect(() => {
+    if (promoSlides.length <= 1) {
+      setActiveSlide(0);
+      return;
+    }
     const slideTimer = setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % promoSlides.length);
     }, 6000);
     return () => clearInterval(slideTimer);
-  }, []);
+  }, [promoSlides.length]);
+
+  // Clamp activeSlide if slides are deleted and index becomes out of bound
+  useEffect(() => {
+    if (activeSlide >= promoSlides.length) {
+      setActiveSlide(0);
+    }
+  }, [promoSlides.length, activeSlide]);
 
   useEffect(() => {
     // Load remote settings via snapshot so it updates live

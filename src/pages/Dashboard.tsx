@@ -141,7 +141,7 @@ export function Dashboard() {
               بەخێربێیتەوە بۆ {settings.storeName || 'MAS MENU'}
             </h1>
             <p className="text-xs lg:text-sm text-white/70 mt-1 font-bold">
-              ڕاپۆرت و ئاماری لقی: <strong className="text-[#D4A373]">{currentBranch === 'cafe' ? 'کافێ' : 'نەخۆشخانە'}</strong>
+              ڕاپۆرت و ئاماری گشتی سیستەمەکەت
             </p>
           </div>
         </div>
@@ -217,7 +217,7 @@ export function Dashboard() {
               <BarChart3 size={24} className="stroke-[2]" />
             </div>
             <div>
-              <h4 className="font-extrabold text-[#1E2420] text-xl">دۆخی فرۆشتنی لقی ئێستا</h4>
+              <h4 className="font-extrabold text-[#1E2420] text-xl">دۆخی فرۆشتنی ئێستا</h4>
               <p className="text-xs text-[#8B8378] mt-1 font-bold">گەشەی گشتی فرۆشراوەکان لە ماوەی ٧ ڕۆژی ڕابردوودا</p>
             </div>
           </div>

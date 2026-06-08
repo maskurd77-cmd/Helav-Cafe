@@ -17,6 +17,7 @@ export interface Order {
   total: number;
   date: Date;
   status: 'completed' | 'pending' | 'cancelled';
+  invoiceNo?: string;
 }
 
 export interface HospitalRequest {

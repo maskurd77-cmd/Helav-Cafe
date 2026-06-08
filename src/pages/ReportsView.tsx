@@ -208,7 +208,7 @@ export function ReportsView() {
       ? `<img src="${settings.logoUrl}" style="max-height: 70px; width: auto; margin-bottom: 12px; object-fit: contain;" referrerPolicy="no-referrer" />`
       : '';
 
-    const branchLabel = currentBranch === 'cafe' ? 'لقى کافێ' : 'لقى نەخۆشخانە';
+    const branchLabel = 'سیستەمی فرۆشتنی سەرەکی';
 
     iframeDoc.write(`
       <!DOCTYPE html>
@@ -451,14 +451,14 @@ export function ReportsView() {
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#D4A373]/10 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
         <div className="relative z-10 w-full md:w-auto">
           <span className="bg-[#D4A373]/20 border border-[#D4A373]/40 text-[#D4A373] text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-wider shadow-sm">
-             لق تاقیکردنەوە پڕۆفیشناڵ {currentBranch === 'cafe' ? 'کافێ' : 'نەخۆشخانە'}
+             سیستەمی فەرمی داتا و ڕاپۆرتەکان
           </span>
           <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-l from-white to-[#F5E6CA] mt-4 flex items-center gap-3">
             <Activity className="text-[#D4A373] w-9 h-9 animate-pulse" />
             سیستەمی ڕاپۆرت و شیکاری
           </h1>
           <p className="text-white/70 text-sm mt-3 font-bold max-w-lg">
-             بینینی داهاتی پسوولەکان، ڕێژەی مۆدێرنی خەرجییەکان، و باشترینەکانی فرۆشتنی لقی {currentBranch === 'cafe' ? 'کافێ' : 'نەخۆشخانە'} بە شێوەیەکی زیرەک
+             بینینی داهاتی پسوولەکان، ڕێژەی مۆدێرنی خەرجییەکان، و باشترینەکانی فرۆشتنی سیستەمەکە بە شێوەیەکی زیرەک
           </p>
         </div>
 
@@ -757,7 +757,7 @@ export function ReportsView() {
                        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 border-b border-[#F9F7F2] pb-5 mb-5 shrink-0">
                           <div>
                              <h3 className="font-extrabold text-sm lg:text-base text-[#1E2420]">شیکاریی هەر بەرهەمێک</h3>
-                             <p className="text-xs text-[#8B8378] mt-0.5">بەپێی ژمارەی فرۆشراو و پارەی کەڵەکەبوو لە تێکڕای لقەکەدا</p>
+                             <p className="text-xs text-[#8B8378] mt-0.5">بەپێی ژمارەی فرۆشراو و پارەی کەڵەکەبوو لە تێکڕای فرۆشتندا</p>
                           </div>
                           
                           {/* Search products filter */}
@@ -819,7 +819,7 @@ export function ReportsView() {
                        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 border-b border-[#F9F7F2] pb-5 mb-5 shrink-0">
                           <div>
                              <h3 className="font-extrabold text-sm lg:text-base text-[#1E2420]">تۆماری خەرجییەکان</h3>
-                             <p className="text-xs text-[#8B8378] mt-0.5">بەپێی مێژووی سەرهەڵدان و وردەکاری بڕە پارەی خەرجکراو لە لقی فەرمی</p>
+                             <p className="text-xs text-[#8B8378] mt-0.5">بەپێی مێژووی سەرهەڵدان و وردەکاری بڕە پارەی خەرجکراو لە سیستەمەکەدا</p>
                           </div>
                           
                           <div className="relative w-full sm:w-80">
