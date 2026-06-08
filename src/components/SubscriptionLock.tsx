@@ -64,7 +64,31 @@ export default function SubscriptionLock() {
         }
       }
     }
+
+    // پشکنینی سەرەتا
     checkSubscription();
+
+    // پشکنینی خولی یەک لە دوای یەک هەر ٣٠ چرکە جارێک بۆ نوێبوونەوەی ئۆتۆماتیکی بێ ڕیفرێش
+    const intervalId = setInterval(checkSubscription, 30000);
+
+    // پشکنینی دەستبەجێ کاتێک بەکارهێنەر شاشەکە یان تابەکەی دەکاتەوە
+    const handleFocus = () => {
+      console.log("[MasTech] Window focused - triggering background auto-subscription check...");
+      checkSubscription();
+    };
+
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        checkSubscription();
+      }
+    });
+
+    return () => {
+      clearInterval(intervalId);
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleFocus);
+    };
   }, []);
 
   if (!isLocked) return null;

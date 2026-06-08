@@ -17,7 +17,11 @@ import {
   ChevronRight,
   ChevronLeft,
   Building2,
-  ClipboardList
+  ClipboardList,
+  Maximize2,
+  Minimize2,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from './AuthProvider';
@@ -50,7 +54,54 @@ export function Layout() {
   const { user, role } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
+  const [showSyncSuccess, setShowSyncSuccess] = useState(false);
   const location = useLocation();
+
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      setShowSyncSuccess(true);
+      const timer = setTimeout(() => {
+        setShowSyncSuccess(false);
+      }, 4500);
+      return () => clearTimeout(timer);
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+      setShowSyncSuccess(false);
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(document.fullscreenElement !== null);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((err) => {
+        console.error(`Error enabling fullscreen: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  };
 
   const initProducts = useProductStore(state => state.initProducts);
   const { settings, initSettings } = useSettingsStore();
@@ -200,6 +251,21 @@ export function Layout() {
             </div>
           )}
 
+          {/* Full Screen (Kiosk) button */}
+          <button 
+            onClick={toggleFullscreen}
+            title={isDesktopSidebarCollapsed ? "شاشەی تەواو" : "پڕکردنی شاشە (Full Screen)"}
+            className={cn(
+              "flex items-center justify-center transition-all duration-300 font-medium border mb-3 cursor-pointer",
+              isDesktopSidebarCollapsed 
+                ? "w-12 h-12 rounded-xl bg-[#D4A373]/10 text-[#D4A373] hover:bg-[#D4A373]/20 border-[#D4A373]/20" 
+                : "gap-2 w-full px-4 py-3 bg-[#D4A373]/10 hover:bg-[#D4A373]/20 text-[#E9E5D9] hover:text-white rounded-xl border-[#D4A373]/20 text-sm"
+            )}
+          >
+            {isFullscreen ? <Minimize2 size={isDesktopSidebarCollapsed ? 20 : 16} /> : <Maximize2 size={isDesktopSidebarCollapsed ? 20 : 16} />}
+            {!isDesktopSidebarCollapsed && <span>شاشەی تەواو (Kiosk)</span>}
+          </button>
+
           <button 
             onClick={handleLogout}
             title={isDesktopSidebarCollapsed ? "چوونە دەرەوە" : undefined}
@@ -268,6 +334,31 @@ export function Layout() {
             onChange={handleKeyboardChange} 
             onClose={() => setActiveInputRef(null)} 
         />
+      )}
+
+      {/* Floating Network Sync Indicator */}
+      {!isOnline && (
+        <div className="fixed bottom-6 right-6 z-[9999] bg-[#E11D48] text-white px-5 py-4 rounded-3xl shadow-[0_12px_40px_rgba(225,29,72,0.35)] border border-[#E11D48]/30 flex items-center gap-4 animate-bounce max-w-sm">
+          <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center shrink-0">
+            <WifiOff size={20} className="text-white" />
+          </div>
+          <div>
+            <h5 className="font-extrabold text-[13px] leading-tight text-right text-white">دۆخی ئۆفلاین (Offline)</h5>
+            <p className="text-[11px] text-white/90 leading-snug mt-1 text-right">سیستەمەکە بە باشی کار دەکات؛ فرۆشتنە نوێیەکان لە کۆمپیوتەرەکەتدا دەپارێزرێن تا هێڵ دێتەوە.</p>
+          </div>
+        </div>
+      )}
+
+      {showSyncSuccess && isOnline && (
+        <div className="fixed bottom-6 right-6 z-[9999] bg-[#1E2420] text-[#E9E5D9] px-5 py-4 rounded-3xl shadow-[0_12px_40px_rgba(30,36,32,0.35)] border border-[#D4A373]/20 flex items-center gap-4 max-w-sm border-t-4 border-t-[#D4A373]">
+          <div className="w-10 h-10 bg-[#D4A373]/10 text-[#D4A373] rounded-full flex items-center justify-center shrink-0 animate-pulse">
+            <Wifi size={20} />
+          </div>
+          <div>
+            <h5 className="font-extrabold text-[13px] leading-tight text-right text-[#D4A373]">هێڵ پەیوەست بووەوە</h5>
+            <p className="text-[11px] text-[#A3B1A7] leading-snug mt-1 text-right">هاوکاتکردنی داتاکان (Real-time Sync) لەگەڵ فایربەیس بە سەرکەوتوویی ئەنجامدرا!</p>
+          </div>
+        </div>
       )}
     </div>
   );
