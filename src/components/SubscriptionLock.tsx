@@ -1,3 +1,4 @@
+// MasTech Auto Subscription Protection (Support: +9647508134034)
 import React, { useEffect, useState } from "react";
 
 export default function SubscriptionLock() {
@@ -7,17 +8,30 @@ export default function SubscriptionLock() {
 
   useEffect(() => {
     async function checkSubscription() {
-      try {
-        // بەستنەوە بە سێرڤەری دابینکەر بۆ پشکنینی چالاکبوونی خزمەتگوزاری
-        const res = await fetch("https://masagency.vercel.app/api/subscription/check/qomRBGigeDnYSdUHhg5t");
-        const status = await res.json();
-        if (status.has_expiry && !status.active) {
-          setIsLocked(true);
-          setServiceName(status.service_name || "ئەم بەرهەمە");
-          setExpiryDate(status.expiry_date || "");
+      // پشکنین لەسەر هەردوو ناونیشانەکە بۆ دڵنیابوونەوەی زیاتر لە بەردەستبوونی خزمەتگوزاری دارایی و ڕاگوێستن
+      const endpoints = [
+        "https://masagency.vercel.app/api/subscription/check/qomRBGigeDnYSdUHhg5t",
+        "https://ais-dev-ipdceuoehcen5e6coz7yvc-518362444188.europe-west2.run.app/api/subscription/check/qomRBGigeDnYSdUHhg5t"
+      ];
+
+      for (const url of endpoints) {
+        try {
+          const res = await fetch(url);
+          if (res.ok) {
+            const status = await res.json();
+            if (status.has_expiry && !status.active) {
+              setIsLocked(true);
+              setServiceName(status.service_name || "ئەم بەرهەمە");
+              setExpiryDate(status.expiry_date || "");
+              break; // ئەگەر قفڵ بوو، پشکنینەکە ڕادەگرین
+            } else if (status.active) {
+              setIsLocked(false);
+              break; // ئەگەر چالاک بوو و بەسەرنەچووبوو، سیستەمەکە بە کراوەیی دەهێڵینەوە
+            }
+          }
+        } catch (e) {
+          console.warn(`MasTech subscription endpoint connection failed for ${url}:`, e);
         }
-      } catch (e) {
-        console.warn("Mastech subscription check error:", e);
       }
     }
     checkSubscription();
