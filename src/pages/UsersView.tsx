@@ -9,6 +9,7 @@ interface AppUser {
   email: string;
   name?: string;
   role: string;
+  permissions?: string[];
 }
 
 export function UsersView() {
@@ -22,6 +23,19 @@ export function UsersView() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [role, setRole] = useState('cashier');
+  const [permissions, setPermissions] = useState<string[]>([]);
+  
+  const AVAILABLE_PERMISSIONS = [
+    { id: 'dashboard', label: 'داشبۆردی سەرەکی', info: 'بینینی ئامارە گشتییەکان' },
+    { id: 'pos', label: 'کاشێر و فرۆشتن', info: 'دەرکردنی پسوڵەگە' },
+    { id: 'menu', label: 'دەستکاری مێنۆ', info: 'دروستکردن و سڕینەوەی کاڵا' },
+    { id: 'customer', label: 'شاشەی کڕیار', info: 'ڕووکاری کڕیار' },
+    { id: 'expenses', label: 'خەرجییەکان', info: 'دیاریکردنی خەرجی' },
+    { id: 'receipts', label: 'پسوڵەکان', info: 'گەران و پرینتکردنەوە' },
+    { id: 'reports', label: 'ڕاپۆرتەکان', info: 'ڕاپۆرتی دارایی ڕۆژانە' },
+    { id: 'users', label: 'بەکارهێنەران', info: 'دەسەڵاتەکان و ستاف' },
+    { id: 'settings', label: 'ڕێکخستنەکان', info: 'کۆنترۆلکردنی سیستەم' },
+  ];
 
   useEffect(() => {
     loadUsers();
@@ -48,6 +62,7 @@ export function UsersView() {
     setPassword('');
     setName('');
     setRole('cashier');
+    setPermissions(['pos', 'menu', 'customer']);
     setShowModal(true);
   };
 
@@ -57,17 +72,27 @@ export function UsersView() {
     setPassword(''); // Don't populate password for editing
     setName(user.name || '');
     setRole(user.role);
+    setPermissions(user.permissions || ['pos', 'menu', 'customer']);
     setShowModal(true);
+  };
+
+  const togglePermission = (permId: string) => {
+    setPermissions(prev => 
+      prev.includes(permId) 
+        ? prev.filter(p => p !== permId)
+        : [...prev, permId]
+    );
   };
 
   const handleCreateOrUpdateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       if (editId) {
-        // Update user (cannot update password or email via this form right now easily in Firebase without admin SDK, so we just update firestore metadata)
+        // Update user
         await updateDoc(doc(db, 'users', editId), {
           name,
-          role
+          role,
+          permissions: role === 'admin' ? AVAILABLE_PERMISSIONS.map(p => p.id) : permissions
         });
       } else {
         // Create user
@@ -78,7 +103,8 @@ export function UsersView() {
         await setDoc(doc(db, 'users', newUid), {
           email,
           name,
-          role
+          role,
+          permissions: role === 'admin' ? AVAILABLE_PERMISSIONS.map(p => p.id) : permissions
         });
       }
 
@@ -196,8 +222,8 @@ export function UsersView() {
 
       {showModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-[32px] w-full max-w-md shadow-2xl overflow-hidden flex flex-col">
-            <div className="p-6 bg-[#FDFBF7] border-b border-[#E9E5D9] flex items-center justify-between">
+          <div className="bg-white rounded-[32px] w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-6 bg-[#FDFBF7] border-b border-[#E9E5D9] flex items-center justify-between shrink-0">
               <h2 className="text-xl font-bold text-[#1E2420]">{editId ? 'دەستکاریکردنی بەکارهێنەر' : 'زیادکردنی بەکارهێنەر'}</h2>
               <button 
                 onClick={() => setShowModal(false)}
@@ -207,33 +233,88 @@ export function UsersView() {
               </button>
             </div>
             
-            <div className="p-6 space-y-4">
-              <form id="userForm" onSubmit={handleCreateOrUpdateUser} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-bold text-[#1E2420] mb-2">ناوی تەواو</label>
-                  <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="بۆ نموونە: ئەحمەد" className="w-full bg-[#F9F7F2] border-0 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#D4A373] outline-none text-[#1E2420]" />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-[#1E2420] mb-2">ئیمەیڵ</label>
-                  <input required disabled={!!editId} type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-[#F9F7F2] border-0 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#D4A373] outline-none text-[#1E2420] text-left dir-ltr disabled:opacity-50" />
-                </div>
-                {!editId && (
+            <div className="p-6 overflow-y-auto custom-scrollbar custom-scrollbar-slim">
+              <form id="userForm" onSubmit={handleCreateOrUpdateUser} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-sm font-bold text-[#1E2420] mb-2">وشەی نهێنی</label>
-                    <input required type="password" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-[#F9F7F2] border-0 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#D4A373] outline-none text-[#1E2420] text-left dir-ltr" minLength={6} />
+                    <label className="block text-xs font-black text-[#1E2420] mb-2 focus-within:text-[#D4A373] transition-colors">ناوی تەواو</label>
+                    <input required type="text" value={name} onChange={e => setName(e.target.value)} placeholder="بۆ نموونە: ئەحمەد" className="w-full bg-[#FDFBF7] border border-[#E9E5D9] rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#D4A373]/30 focus:border-[#D4A373] outline-none text-[#1E2420] text-sm transition-all" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-black text-[#1E2420] mb-2 focus-within:text-[#D4A373] transition-colors">ئیمەیڵ</label>
+                    <input required disabled={!!editId} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="username@example.com" className="w-full bg-[#FDFBF7] border border-[#E9E5D9] rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#D4A373]/30 focus:border-[#D4A373] outline-none text-[#1E2420] text-left dir-ltr disabled:opacity-50 text-sm transition-all" />
+                  </div>
+                  {!editId && (
+                    <div>
+                      <label className="block text-xs font-black text-[#1E2420] mb-2 focus-within:text-[#D4A373] transition-colors">وشەی نهێنی</label>
+                      <input required type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="لانی کەم ٦ پیت بنووسە" className="w-full bg-[#FDFBF7] border border-[#E9E5D9] rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#D4A373]/30 focus:border-[#D4A373] outline-none text-[#1E2420] text-left dir-ltr text-sm transition-all" minLength={6} />
+                    </div>
+                  )}
+                  <div>
+                    <label className="block text-xs font-black text-[#1E2420] mb-2 focus-within:text-[#D4A373] transition-colors">ئەرکی سەرەکی</label>
+                    <div className="relative">
+                      <select value={role} onChange={e => setRole(e.target.value)} className="w-full bg-[#FDFBF7] border border-[#E9E5D9] rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#D4A373]/30 focus:border-[#D4A373] outline-none text-[#1E2420] text-sm appearance-none pr-10 transition-all font-bold">
+                        <option value="cashier">کاشێر (Cashier)</option>
+                        <option value="admin">سەرپەرشتیار / ئەدمین</option>
+                      </select>
+                      <div className="absolute top-1/2 -translate-y-1/2 right-3 pointer-events-none text-neutral-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {role === 'cashier' && (
+                  <div className="pt-6 border-t border-dashed border-[#E9E5D9]">
+                    <div className="mb-5">
+                      <h3 className="text-base font-black text-[#1E2420]">دەسەڵاتەکان و ڕێگەپێدانەکان</h3>
+                      <p className="text-xs font-bold text-[#8B8378] mt-1">دیاریبکە ئەم بەکارهێنەرە دەتوانێت دەستی بە کام بەش لە سیستەمەکە هەبێت؟</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {AVAILABLE_PERMISSIONS.map(perm => (
+                        <div 
+                          key={perm.id} 
+                          onClick={() => togglePermission(perm.id)}
+                          className={`flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all ${
+                            permissions.includes(perm.id) 
+                              ? 'bg-gradient-to-r from-[#FAF8F5] to-amber-50 border-[#D4A373]/50 shadow-sm' 
+                              : 'bg-white border-[#E9E5D9] hover:bg-neutral-50/50'
+                          }`}
+                        >
+                          <div className="flex flex-col gap-0.5">
+                            <span className={`text-xs font-black transition-colors ${permissions.includes(perm.id) ? 'text-[#1E2420]' : 'text-neutral-600'}`}>
+                              {perm.label}
+                            </span>
+                            <span className="text-[10px] font-bold text-neutral-400">{perm.info}</span>
+                          </div>
+                          
+                          <div className={`w-9 h-5 rounded-full p-0.5 transition-colors ${permissions.includes(perm.id) ? 'bg-[#D4A373]' : 'bg-neutral-200'}`}>
+                            <div className={`w-4 h-4 bg-white rounded-full transition-transform ${permissions.includes(perm.id) ? 'translate-x-4' : 'translate-x-0'}`}></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
-                <div>
-                  <label className="block text-sm font-bold text-[#1E2420] mb-2">ئەرک</label>
-                  <select value={role} onChange={e => setRole(e.target.value)} className="w-full bg-[#F9F7F2] border-0 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#D4A373] outline-none text-[#1E2420]">
-                    <option value="cashier">کاشێر</option>
-                    <option value="admin">ئەدمین</option>
-                  </select>
-                </div>
+
+                {role === 'admin' && (
+                  <div className="pt-4 border-t border-dashed border-[#E9E5D9]">
+                    <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-center gap-3">
+                      <div className="text-emerald-500 bg-white p-2 rounded-lg shadow-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-black text-emerald-900">سەرپەرشتیاری گشتی (Full Access)</h4>
+                        <p className="text-[10px] font-bold text-emerald-700/80 mt-0.5">ئەم بەکارهێنەرە دەسەڵاتی تەواوی بەسەر هەموو بەشەکانی سیستەمەکەدا هەیە.</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </form>
             </div>
 
-            <div className="p-6 bg-[#FDFBF7] border-t border-[#E9E5D9] flex gap-4">
+            <div className="p-6 bg-[#FDFBF7] border-t border-[#E9E5D9] flex gap-4 shrink-0">
               <button 
                 onClick={() => setShowModal(false)}
                 className="flex-1 bg-white border border-[#E9E5D9] hover:bg-[#F9F7F2] text-[#1E2420] font-bold py-3.5 rounded-xl transition-all"

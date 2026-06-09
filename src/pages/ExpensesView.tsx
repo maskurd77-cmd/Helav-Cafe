@@ -68,9 +68,57 @@ export function ExpensesView() {
     }
   };
 
+  const totalAmount = expenses.reduce((sum, ex) => sum + ex.amount, 0);
+  const todayStr = new Date().toISOString().split('T')[0];
+  const todayExpenses = expenses.filter(ex => ex.date && ex.date.startsWith(todayStr));
+  const totalToday = todayExpenses.reduce((sum, ex) => sum + ex.amount, 0);
+
   return (
-    <div className="space-y-6 max-w-6xl mx-auto h-full flex flex-col min-w-0">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0 bg-white p-5 rounded-[24px] border border-[#E9E5D9] shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
+    <div className="space-y-6 max-w-6xl mx-auto h-full flex flex-col min-w-0 animate-in fade-in duration-300">
+      
+      {/* Premium Live Expense Metrics */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 shrink-0 px-1">
+        <div className="bg-white p-5 rounded-[24px] border border-[#E9E5D9] shadow-sm flex items-center justify-between">
+          <div className="text-right">
+            <span className="text-[11px] font-bold text-[#8B8378] block">کۆی سەرجەم خەرجییەکان</span>
+            <span className="text-2xl font-black text-rose-600 mt-1 font-mono inline-block">
+              {totalAmount.toLocaleString('en-US')}
+            </span>
+            <span className="text-xs text-gray-400 block mt-0.5">تۆماری گشتی خەرجییەکان</span>
+          </div>
+          <div className="p-3.5 bg-rose-50 rounded-2xl text-rose-600 border border-rose-100">
+            <Wallet size={22} className="stroke-[2.5]" />
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-[24px] border border-[#E9E5D9] shadow-sm flex items-center justify-between">
+          <div className="text-right">
+            <span className="text-[11px] font-bold text-[#8B8378] block">خەرجییەکانی ئەمڕۆ</span>
+            <span className="text-2xl font-black text-[#1E2420] mt-1 font-mono inline-block">
+              {totalToday.toLocaleString('en-US')}
+            </span>
+            <span className="text-xs text-gray-400 block mt-0.5">کۆی گشتی ئەمڕۆ</span>
+          </div>
+          <div className="p-3.5 bg-amber-50 rounded-2xl text-amber-600 border border-amber-100">
+            <Plus size={22} className="stroke-[2.5]" />
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-[24px] border border-[#E9E5D9] shadow-sm flex items-center justify-between">
+          <div className="text-right">
+            <span className="text-[11px] font-bold text-[#8B8378] block">ژمارەی تۆماری خەرجی</span>
+            <span className="text-2xl font-black text-[#2D2D2D] mt-1 font-mono inline-block">
+              {expenses.length}
+            </span>
+            <span className="text-xs text-gray-400 block mt-0.5">تۆماری جیاواز</span>
+          </div>
+          <div className="p-3.5 bg-[#FAF8F5] rounded-2xl text-gray-600 border border-gray-100">
+            <Tag size={22} className="stroke-[2.5]" />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0 bg-white p-5 rounded-[24px] border border-[#E9E5D9] shadow-[0_4px_20px_rgba(0,0,0,0.03)] m-1">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-gradient-to-br from-[#1E2420] to-[#2D3631] text-[#E11D48] rounded-[18px] shadow-md border border-[#E11D48]/20">
              <Wallet size={24} className="stroke-[2]" />

@@ -32,26 +32,20 @@ import { useSettingsStore } from '@/store/useSettingsStore';
 import { useBranchStore } from '@/store/useBranchStore';
 import { VirtualKeyboard } from './VirtualKeyboard';
 
-const adminNavItems = [
-  { text: 'داشبۆرد', icon: LayoutDashboard, path: '/' },
-  { text: 'فرۆشتن (POS)', icon: ShoppingCart, path: '/pos' },
-  { text: 'مێنۆ', icon: MenuSquare, path: '/menu' },
-  { text: 'شاشەی کڕیار', icon: MonitorSmartphone, path: '/customer' },
-  { text: 'خەرجییەکان', icon: Wallet, path: '/expenses' },
-  { text: 'پسوڵەکان', icon: Receipt, path: '/receipts' },
-  { text: 'ڕاپۆرتەکان', icon: BarChart3, path: '/reports' },
-  { text: 'بەکارهێنەران', icon: Users, path: '/users' },
-  { text: 'ڕێکخستنەکان', icon: Settings, path: '/settings' },
-];
-
-const cashierNavItems = [
-  { text: 'فرۆشتن (POS)', icon: ShoppingCart, path: '/pos' },
-  { text: 'مێنۆ', icon: MenuSquare, path: '/menu' },
-  { text: 'شاشەی کڕیار', icon: MonitorSmartphone, path: '/customer' },
+const allNavItems = [
+  { text: 'داشبۆرد', icon: LayoutDashboard, path: '/', permission: 'dashboard' },
+  { text: 'فرۆشتن (POS)', icon: ShoppingCart, path: '/pos', permission: 'pos' },
+  { text: 'مێنۆ', icon: MenuSquare, path: '/menu', permission: 'menu' },
+  { text: 'شاشەی کڕیار', icon: MonitorSmartphone, path: '/customer', permission: 'customer' },
+  { text: 'خەرجییەکان', icon: Wallet, path: '/expenses', permission: 'expenses' },
+  { text: 'پسوڵەکان', icon: Receipt, path: '/receipts', permission: 'receipts' },
+  { text: 'ڕاپۆرتەکان', icon: BarChart3, path: '/reports', permission: 'reports' },
+  { text: 'بەکارهێنەران', icon: Users, path: '/users', permission: 'users' },
+  { text: 'ڕێکخستنەکان', icon: Settings, path: '/settings', permission: 'settings' },
 ];
 
 export function Layout() {
-  const { user, role } = useAuth();
+  const { user, role, permissions } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -160,11 +154,17 @@ export function Layout() {
     signOut(auth);
   };
 
-  let navItems = role === 'admin' ? [...adminNavItems] : [...cashierNavItems];
+  let navItems = allNavItems;
+  if (role !== 'admin' && permissions && permissions.length > 0) {
+    navItems = allNavItems.filter((item) => permissions.includes(item.permission));
+  } else if (role !== 'admin') {
+     navItems = allNavItems.filter((item) => ['pos', 'menu', 'customer'].includes(item.permission));
+  }
 
-  // Protect routes based on role
-  if (role === 'cashier' && location.pathname === '/') {
-    return <Navigate to="/pos" replace />;
+  // Protect routes based on role (if not admin and lacks dashboard permission, redirect to first allowed or /pos)
+  if (role !== 'admin' && location.pathname === '/' && (!permissions || !permissions.includes('dashboard'))) {
+    const firstAllowed = navItems.length > 0 ? navItems[0].path : '/pos';
+    return <Navigate to={firstAllowed} replace />;
   }
 
   return (

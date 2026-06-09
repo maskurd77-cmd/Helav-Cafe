@@ -1,48 +1,61 @@
 import React, { useEffect, useState } from 'react';
-import { CartItem } from '@/types';
-import { Coffee, ShoppingBag, ArrowRight, Clock, Star, Heart, Volume2 } from 'lucide-react';
+import { CartItem, Product } from '@/types';
+import { Coffee, Clock, ArrowRight, ArrowLeft } from 'lucide-react';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/firebase';
 import { Link } from 'react-router-dom';
 import { useBranchStore } from '@/store/useBranchStore';
+import { useProductStore } from '@/store/useProductStore';
 import { motion, AnimatePresence } from 'motion/react';
 
 export function CustomerDisplay() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const { currentBranch } = useBranchStore();
+  const { products, initProducts } = useProductStore();
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [settings, setSettings] = useState({
+
+  // Settings read dynamically in real-time
+  const [settings, setSettings] = useState<any>({
     storeName: 'MAS MENU',
     logoUrl: '',
-    greetingMessage: 'بەخێربێیت بۆ کافێکەمان',
-    subGreeting: 'ئێمە لێرەین بۆ پێشکەشکردنی باشترین تام و چێژ بۆ ئێوەی ئازیز.'
+    greetingMessage: 'بەخێربێیت بۆ جیهانی تام و چێژ',
+    subGreeting: 'ئێمە لێرەین بۆ پێشکەشکردنی باشترین تام بە بەرزترین کوالیتی بۆ ئێوەی بەڕێز.',
+    customerDisplayTheme: 'dark',
+    customerDisplayShowPromo: true,
+    customerDisplayShowMenu: true,
+    customerDisplayAccentColor: 'bronze',
+    promoSlides: []
   });
 
   const [activeSlide, setActiveSlide] = useState(0);
+  const [activeCategory, setActiveCategory] = useState('هەمووی');
 
-  // Settings structure now includes promoSlides, but we should safely default
-  const promoSlides = settings?.promoSlides && settings.promoSlides.length > 0 
+  // Load products store
+  useEffect(() => {
+    initProducts();
+  }, [currentBranch]);
+
+  // Premium fallback slides if none are defined
+  const defaultPromoSlides = [
+    {
+      title: 'قاوەی داخی MAS MENU',
+      desc: 'بۆن و تامی ڕەسەنی قاوەی کوردی و جیهانی لەگەڵ شیری سروشتی گەرم.',
+      tag: 'کارامەی گەرم...',
+      price: '٣,٥٠٠ د.ع',
+      image: 'https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&q=80&w=800'
+    },
+    {
+      title: 'کێکی شوکولاتەی گەرمی لۆڤەر',
+      desc: 'پارچەیەکی بێوێنە لە شەربەتی شوکولاتەی سویسری گەرم لەگەڵ کێکی فڕنی دەستی.',
+      tag: 'شیرینی ڕۆژ...',
+      price: '٤,٥٠٠ د.ع',
+      image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=800'
+    }
+  ];
+
+  const activeSlides = settings.promoSlides && settings.promoSlides.length > 0 
     ? settings.promoSlides 
-    : [
-        {
-          title: 'قاوەی داخی هێلاڤ',
-          desc: 'بۆن و تامی ڕەسەنی قاوەی کوردی و جیهانی لەگەڵ شیری سروشتی گەرم.',
-          tag: 'خواستی زۆری لەسەرە 🔥',
-          image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&q=80&w=400'
-        },
-        {
-          title: 'شیرینی و کێکە تازەکانمان',
-          desc: 'هەموو بەیانییەک بە گەرمی و تازەیی بە کوالیتییەکی بەرز و بێوێنە ئامادە دەکرێن.',
-          tag: 'هەمیشە تازە 🍰',
-          image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=400'
-        },
-        {
-          title: 'ژینگەیەکی ئارام و بێدەنگ',
-          desc: 'شوێنێکی گونجاو پێشکەش دەکەین بۆ کۆبوونەوە، خوێندنەوە، و بەسەربردنی کاتی ناوازە.',
-          tag: 'ئاسودەیی دڵ ☕',
-          image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=400'
-        }
-      ];
+    : defaultPromoSlides;
 
   // Live clock
   useEffect(() => {
@@ -50,35 +63,27 @@ export function CustomerDisplay() {
     return () => clearInterval(timer);
   }, []);
 
-  // Slide loop timer
+  // Slide transition timer
   useEffect(() => {
-    if (promoSlides.length <= 1) {
-      setActiveSlide(0);
-      return;
-    }
+    if (activeSlides.length <= 1) return;
+    const intervalSec = settings.customerDisplaySlideInterval || 7;
     const slideTimer = setInterval(() => {
-      setActiveSlide((prev) => (prev + 1) % promoSlides.length);
-    }, 6000);
+      setActiveSlide((prev) => (prev + 1) % activeSlides.length);
+    }, intervalSec * 1000);
     return () => clearInterval(slideTimer);
-  }, [promoSlides.length]);
-
-  // Clamp activeSlide if slides are deleted and index becomes out of bound
-  useEffect(() => {
-    if (activeSlide >= promoSlides.length) {
-      setActiveSlide(0);
-    }
-  }, [promoSlides.length, activeSlide]);
+  }, [activeSlides.length, settings.customerDisplaySlideInterval]);
 
   useEffect(() => {
-    // Load remote settings via snapshot so it updates live
-    const unsubscribeSettings = onSnapshot(doc(db, 'settings', 'general'), (doc) => {
-       if (doc.exists()) {
-           setSettings(prev => ({ ...prev, ...doc.data() }));
+    const docName = currentBranch === 'cafe' ? 'general' : 'hospital';
+    const unsubscribeSettings = onSnapshot(doc(db, 'settings', docName), (docSnap) => {
+       if (docSnap.exists()) {
+           setSettings(prev => ({ ...prev, ...docSnap.data() }));
        }
     }, (err) => {
        console.error("Failed to fetch settings", err);
     });
 
+    // Load active branch cart live
     const unsubscribeCart = onSnapshot(doc(db, 'settings', `customer_display_cart_${currentBranch}`), (docSnap) => {
         if (docSnap.exists()) {
             const data = docSnap.data();
@@ -108,219 +113,359 @@ export function CustomerDisplay() {
     return `${days[now.getDay()]} - ${now.toLocaleDateString('ku-IQ', { day: 'numeric', month: 'long', year: 'numeric' })}`;
   };
 
-  return (
-    <div className="min-h-screen bg-[#FDFBF7] flex flex-col font-sans select-none overflow-hidden h-screen text-right" dir="rtl">
-      
-      {/* Header Optimized for 13.3" Screens */}
-      <header className="bg-[#1E2420] text-white py-3 px-6 border-b-2 border-[#D4A373]/30 shadow-xl shrink-0 flex items-center justify-between relative z-20">
-         <div className="absolute top-0 right-0 w-32 h-20 bg-gradient-to-l from-[#D4A373]/10 to-transparent pointer-events-none"></div>
-         <div className="flex items-center gap-4">
-             {settings?.logoUrl ? (
-                <img src={settings.logoUrl} alt="Logo" className="w-12 h-12 object-contain rounded-xl bg-white/10 p-1 border border-white/10 shadow-md" />
-             ) : (
-                <div className="w-12 h-12 rounded-xl bg-[#D4A373]/20 flex items-center justify-center text-[#D4A373] border border-[#D4A373]/40 shadow-inner">
-                   <Coffee size={24} className="animate-pulse" />
-                </div>
-             )}
-             <div>
-                <h1 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-[#F5E6CA] to-[#D4A373] tracking-tight">{settings?.storeName}</h1>
-                <p className="text-xs text-[#8B8378] font-bold mt-0.5">{settings?.greetingMessage}</p>
-             </div>
-         </div>
+  const isLightMode = settings.customerDisplayTheme === 'light';
+  const accent = settings.customerDisplayAccentColor || 'bronze';
 
-         {/* Right Side Info (Kurdish Date & Live Clock) */}
-         <div className="flex items-center gap-5">
-             <div className="hidden md:flex flex-col text-right">
-                <span className="text-[11px] text-slate-400 font-bold">{getKurdishDate()}</span>
-                <span className="text-lg font-bold font-mono text-[#D4A373] tracking-wider mt-0.5 flex items-center gap-1.5 justify-end">
-                  <Clock size={14} className="text-[#D4A373]" />
-                  {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                </span>
-             </div>
-             <Link to="/pos" className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-[#D4A373] hover:text-[#1E2420] text-white transition-all shadow-md group border border-white/10" title="گەڕانەوە بۆ سیستەم">
-                 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-             </Link>
-         </div>
+  // Map accents to values seamlessly
+  const accentText = 
+    accent === 'emerald' ? 'text-[#8DAA91]' :
+    accent === 'azure' ? 'text-sky-500' :
+    accent === 'rose' ? 'text-rose-500' :
+    'text-[#D4A373]';
+
+  const accentBg = 
+    accent === 'emerald' ? 'bg-[#8DAA91]' :
+    accent === 'azure' ? 'bg-sky-500' :
+    accent === 'rose' ? 'bg-rose-500' :
+    'bg-[#D4A373]';
+
+  const accentBorder = 
+    accent === 'emerald' ? 'border-[#8DAA91]' :
+    accent === 'azure' ? 'border-sky-500' :
+    accent === 'rose' ? 'border-rose-500' :
+    'border-[#D4A373]';
+
+  const accentRing = 
+    accent === 'emerald' ? 'focus:ring-[#8DAA91]' :
+    accent === 'azure' ? 'focus:ring-sky-500' :
+    accent === 'rose' ? 'focus:ring-rose-500' :
+    'focus:ring-[#D4A373]';
+
+  const availableCategories = ['هەمووی', ...Array.from(new Set(products.map(p => p.category)))];
+  
+  const filteredProducts = activeCategory === 'هەمووی'
+    ? products
+    : products.filter(p => p.category === activeCategory);
+
+  return (
+    <div 
+      className={`min-h-screen flex flex-col font-sans select-none overflow-hidden h-screen text-right transition-colors duration-500 ${
+        isLightMode 
+          ? 'bg-[#FAF8F5] text-[#2D3631]' 
+          : 'bg-[#0A0F0D] text-[#E9E5D9]'
+      }`} 
+      dir="rtl"
+    >
+      {/* 1. TOP PREMIUM HEADER */}
+      <header className={`py-4 px-8 border-b flex items-center justify-between shrink-0 z-20 ${
+        isLightMode 
+          ? 'bg-white/80 backdrop-blur border-[#E9E5D9]' 
+          : 'bg-[#111613]/90 backdrop-blur border-[#E9E5D9]/10'
+      }`}>
+        <div className="flex items-center gap-4">
+          {settings?.logoUrl ? (
+            <img src={settings.logoUrl} alt="Logo" className="w-10 h-10 object-contain rounded-xl" />
+          ) : (
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${accentBg} text-white`}>
+              <Coffee size={20} />
+            </div>
+          )}
+          <div>
+            <h1 className="text-xl font-black tracking-wide font-mono leading-none">
+              {settings?.storeName}
+            </h1>
+            <p className={`text-[10px] mt-1 font-bold ${isLightMode ? 'text-gray-500' : 'text-gray-400'}`}>
+              {settings?.greetingMessage}
+            </p>
+          </div>
+        </div>
+
+        {/* Live Clock / System Status */}
+        <div className="flex items-center gap-6">
+          {settings.customerDisplayShowClock !== false && (
+            <div className="text-right">
+              <span className={`text-[10px] font-bold block ${isLightMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                {getKurdishDate()}
+              </span>
+              <span className="text-sm font-black font-mono tracking-widest mt-0.5 inline-block">
+                {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+              </span>
+            </div>
+          )}
+
+          {/* Minimal Live Status Tag */}
+          <div className="flex items-center gap-1.5 bg-emerald-500/10 text-emerald-500 px-2.5 py-1 rounded-full text-[10px] font-bold border border-emerald-500/10">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>ڕاستەوخۆ</span>
+          </div>
+
+          <Link 
+            to="/pos" 
+            className={`w-9 h-9 flex items-center justify-center rounded-xl transition-all border ${
+              isLightMode 
+                ? 'bg-white hover:bg-gray-150 text-gray-700 border-gray-200' 
+                : 'bg-white/5 hover:bg-white/10 text-white/90 border-[#E9E5D9]/10'
+            }`}
+          >
+            <ArrowLeft size={16} />
+          </Link>
+        </div>
       </header>
 
-      {/* Main Content Pane - High Density Layout for 13.3" Screens */}
-      <main className="flex-1 flex overflow-hidden p-4 lg:p-5 gap-4 lg:gap-5 h-full max-h-[calc(100vh-76px)]">
-         
-         {/* Left Side: Premium Live Display Carousel */}
-         <div className="hidden lg:flex w-[260px] shrink-0 bg-[#1E2420] text-white rounded-[32px] overflow-hidden border-2 border-[#D4A373]/15 shadow-2xl relative flex-col justify-between p-5 group-promo">
-              <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#D4A373_1px,transparent_1px)] [background-size:16px_16px]"></div>
-              
-              <div className="absolute top-0 right-0 w-[180px] h-[180px] bg-[#D4A373]/5 rounded-full blur-3xl -mr-16 -mt-16"></div>
-              <div className="absolute bottom-0 left-0 w-[180px] h-[180px] bg-black/30 rounded-full blur-3xl -ml-16 -mb-16"></div>
-              
-              <div className="relative z-10 w-full h-full flex flex-col justify-between">
-                
-                {/* Header Welcome Title */}
-                <div className="flex items-center justify-between w-full shrink-0">
-                  <div className="bg-white/5 border border-white/10 py-1.5 px-3 rounded-full flex items-center gap-1.5">
-                    <Star size={10} className="text-[#D4A373] fill-[#D4A373]" />
-                    <span className="text-[9px] text-[#D4A373] font-bold">هەمیشە باشترین پێشکەش دەکەین</span>
-                  </div>
-                  <div className="flex gap-1.5">
-                    {promoSlides.map((_, i) => (
-                      <button 
-                        key={i}
-                        onClick={() => setActiveSlide(i)}
-                        className={`h-1.5 rounded-full transition-all duration-300 ${activeSlide === i ? 'w-5 bg-[#D4A373]' : 'w-1.5 bg-white/20'}`}
-                      />
-                    ))}
-                  </div>
-                </div>
+      {/* 2. MAIN SPLIT GRID (Sleek side-by-side design) */}
+      <main className="flex-1 flex overflow-hidden p-6 gap-6 h-full max-h-[calc(100vh-73px)]">
+        
+        {/* Left Hand: Promotion Slider / Big Brand Card */}
+        {settings.customerDisplayShowPromo !== false && (
+          <div className={`hidden lg:flex w-[400px] shrink-0 rounded-[28px] overflow-hidden border p-6 flex-col justify-between transition-all ${
+            isLightMode 
+              ? 'bg-white border-[#E9E5D9]' 
+              : 'bg-[#111613] border-[#E9E5D9]/10'
+          }`}>
+            {/* Top Indicator */}
+            <div className="flex justify-between items-center">
+              <span className={`text-[10px] font-black uppercase tracking-wider ${accentText}`}>
+                تایبەت پێشنیار کراوە
+              </span>
+              {/* Pagination indicators */}
+              <div className="flex gap-1.5">
+                {activeSlides.map((_, i) => (
+                  <button 
+                    key={i}
+                    onClick={() => setActiveSlide(i)}
+                    className={`h-1.5 rounded-full transition-all duration-300 ${
+                      activeSlide === i 
+                        ? `w-4 ${accentBg}` 
+                        : (isLightMode ? 'w-1.5 bg-gray-200' : 'w-1.5 bg-white/10')
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
 
-                {/* Sliding Card Content - Slimmer for 13.3" Screen height restrictions */}
-                <div className="my-2 flex-1 flex flex-col items-center gap-3 justify-center">
-                  
-                  {/* Photo Frame - Formatted for 13.3" Screen ratio */}
-                  <div className="w-[140px] h-[140px] shrink-0 rounded-[20px] overflow-hidden border-2 border-[#D4A373]/20 shadow-2xl relative group">
+            {/* Slider Content */}
+            <div className="my-auto flex flex-col items-center text-center">
+              <AnimatePresence mode="wait">
+                <motion.div 
+                  key={activeSlide}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.3 }}
+                  className="w-full flex flex-col items-center"
+                >
+                  <div className="w-[280px] h-[200px] rounded-2xl overflow-hidden mb-5 shadow-sm border border-black/5">
                     <img 
-                      src={promoSlides[activeSlide].image} 
-                      alt="promo" 
-                      className="w-full h-full object-cover transform scale-100 duration-1000 group-hover:scale-105"
+                      src={activeSlides[activeSlide]?.image} 
+                      alt="" 
+                      className="w-full h-full object-cover"
                       referrerPolicy="no-referrer"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#1e2420] via-transparent to-transparent"></div>
                   </div>
-
-                  <div className="flex-1 space-y-1.5 text-center mt-2">
-                    <h2 className="text-xl lg:text-2xl font-extrabold text-white leading-tight min-h-[60px]">
-                      {promoSlides[activeSlide].title}
-                    </h2>
-                    <p className="text-slate-300 text-xs leading-relaxed line-clamp-3">
-                      {promoSlides[activeSlide].desc}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Bottom luxury slogan */}
-                <div className="p-3 bg-white/5 rounded-2xl border border-white/10 flex items-center gap-4 justify-between shrink-0 backdrop-blur-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#D4A373]/30 to-transparent flex items-center justify-center text-[#D4A373] shrink-0 border border-[#D4A373]/20">
-                      <Star size={18} className="fill-[#D4A373]" />
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[10px] text-slate-400 font-bold tracking-widest uppercase mb-0.5">PREMIUM EXPERIENCE</p>
-                      <p className="text-sm font-black text-white tracking-widest">POWERED BY MAS MENU</p>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-         </div>
-
-         {/* Right Side: Dynamic Real-time Order Cart Bill */}
-         <div className="flex-1 flex flex-col bg-white rounded-[32px] shadow-2xl border-2 border-[#E9E5D9] overflow-hidden max-h-full">
-            
-            <div className="p-6 bg-[#FDFBF7] border-b-2 border-[#E9E5D9] flex items-center justify-between shrink-0 relative overflow-hidden">
-               <div className="absolute top-0 right-0 w-32 h-32 bg-[#D4A373]/10 rounded-full blur-3xl pointer-events-none"></div>
-               <div className="flex items-center gap-4 relative z-10">
-                  <div className="p-3 bg-[#1E2420] rounded-2xl shadow-lg border border-[#D4A373]/30 text-[#D4A373]">
-                     <ShoppingBag size={24} />
-                  </div>
-                  <div className="text-right">
-                    <h2 className="text-2xl font-black text-[#1E2420] tracking-tight">هەژماری داواکارییەکانتان</h2>
-                    <p className="text-[10px] text-[#8B8378] font-bold mt-1 tracking-widest uppercase">POWERED BY MAS MENU</p>
-                  </div>
-               </div>
-               <div className="bg-white border text-[#D4A373] border-[#E9E5D9] font-mono text-xs px-4 py-2 rounded-xl font-bold shadow-sm flex items-center gap-2 relative z-10">
-                 <span className="relative flex h-2.5 w-2.5">
-                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D4A373] opacity-75"></span>
-                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#D4A373]"></span>
-                 </span>
-                 LIVE CALCULATION
-               </div>
+                  <h3 className="text-xl font-black mb-1.5">
+                    {activeSlides[activeSlide]?.title}
+                  </h3>
+                  <p className={`text-[11px] leading-relaxed max-w-xs mb-3.5 ${isLightMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                    {activeSlides[activeSlide]?.desc}
+                  </p>
+                  {activeSlides[activeSlide]?.price && (
+                    <span className={`text-sm font-black font-mono px-3.5 py-1 rounded-xl bg-black/5`}>
+                      {activeSlides[activeSlide].price}
+                    </span>
+                  )}
+                </motion.div>
+              </AnimatePresence>
             </div>
 
-            {/* List of items - Ultra high density padding, auto-scaling to fit 10 items without scroll */}
-            <div className={`flex-1 p-2 lg:p-3 bg-gradient-to-b from-white to-[#FDFBF7] flex flex-col justify-start`}>
-                <AnimatePresence initial={false}>
-                  {cart.length === 0 ? (
-                      <motion.div 
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="h-full flex flex-col items-center justify-center text-[#8B8378] gap-4"
-                      >
-                          <div className="p-6 bg-gradient-to-br from-[#FDFBF7] to-[#F9F7F2] rounded-full text-[#D4A373] shadow-inner border border-[#E9E5D9] relative">
-                              <ShoppingBag size={48} className="stroke-[1.5]" />
-                              <div className="absolute top-0 right-0 w-4 h-4 bg-[#E11D48] rounded-full animate-ping opacity-75"></div>
-                          </div>
-                          <div className="text-center">
-                            <span className="text-2xl font-black text-[#1E2420] block mb-2">بەخێربێن بۆ {settings?.storeName}</span>
-                            <span className="text-[12px] font-bold text-[#8B8378] px-8 leading-relaxed max-w-sm block">
-                              تکایە داواکارییەکەت لای کاشێر تۆمار بکە. هەرکە تۆمارکرا، لێرەدا بە ڕوونی دەیدەبینیت.
-                            </span>
-                          </div>
-                      </motion.div>
-                  ) : (
-                    <div className="grid grid-cols-2 gap-2 h-full content-start items-start auto-rows-max">
-                      {cart.map((item, index) => (
-                          <motion.div 
-                            key={item.id} 
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            transition={{ duration: 0.15, delay: index * 0.02 }}
-                            className="flex items-stretch bg-white rounded-xl border border-[#E9E5D9] shadow-sm relative overflow-hidden group h-[52px]"
-                          >
-                              {/* Left decorative color bar */}
-                              <div className="absolute top-0 right-0 w-1 bg-gradient-to-b from-[#1E2420] to-[#2D3631] h-full object-cover"></div>
-                              
-                              <div className="flex-1 text-right min-w-0 px-3 py-1.5 flex flex-col justify-center">
-                                  {/* Giant product name */}
-                                  <h3 className="text-[13px] font-black text-[#1E2420] truncate leading-tight">{item.name}</h3>
-                                  
-                                  {/* Massive item unit price */}
-                                  <div className="text-[10px] text-[#8B8378] font-bold mt-0.5 flex items-center justify-start gap-1">
-                                      <span className="text-[9px] text-[#8B8378]">نرخی دانە:</span>
-                                      <span className="font-mono text-[#D4A373] text-[11px] font-black">{item.price.toLocaleString('en-US')}</span>
-                                  </div>
-                              </div>
+            {/* Signature Area (Optional) */}
+            {settings.customerDisplayShowSignature !== false && (
+              <div className={`p-3.5 rounded-2xl border text-center text-xs font-bold ${
+                isLightMode ? 'bg-[#FAF8F5] border-gray-100 text-gray-500' : 'bg-white/5 border-white/5 text-gray-400'
+              }`}>
+                تام و چێژێکی ناوازە هەمیشە ١٠٠٪ سروشتی 🌾
+              </div>
+            )}
+          </div>
+        )}
 
-                              {/* Quantity Badge Container */}
-                              <div className="flex flex-col items-center justify-center shrink-0 border-r border-l border-[#E9E5D9] bg-[#FDFBF7] px-3">
-                                  <span className="text-xs text-[#8B8378] font-bold mb-0.5">دانە</span>
-                                  <span className="text-[15px] font-black text-[#1E2420] font-mono leading-none">{item.quantity}</span>
-                              </div>
+        {/* Right Hand: Order Details List or Menu Catalog */}
+        <div className={`flex-1 flex flex-col rounded-[28px] border overflow-hidden h-full ${
+          isLightMode 
+            ? 'bg-white border-[#E9E5D9]' 
+            : 'bg-[#111613] border-[#E9E5D9]/10'
+        }`}>
+          
+          {/* Section banner */}
+          <div className="p-6 border-b flex items-center justify-between shrink-0">
+            <div>
+              <h2 className="text-lg font-black">
+                {cart.length > 0 ? 'لیستی داواکارییەکانتان' : 'بەخێربێن بۆ لقەکەمان'}
+              </h2>
+              <p className={`text-[10px] mt-0.5 ${isLightMode ? 'text-gray-405 text-gray-500' : 'text-gray-400'}`}>
+                {cart.length > 0 ? 'لێرەوە تەواوی داواکارییەکەت بە دروستی و ڕاستەوخۆ دەبینیت' : settings.subGreeting}
+              </p>
+            </div>
+            {cart.length > 0 && (
+              <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg ${accentBg} text-white`}>
+                {cart.length} بابەت
+              </span>
+            )}
+          </div>
 
-                              {/* Subtotal of Item (Giant highly visible price) */}
-                              <div className="text-left shrink-0 min-w-[85px] flex flex-col justify-center items-end bg-[#1E2420] text-white px-3 relative overflow-hidden">
-                                  <div className="absolute inset-0 bg-gradient-to-br from-transparent to-white/5 pointer-events-none"></div>
-                                  <span className="text-[8px] text-[#D4A373] font-bold uppercase tracking-wider relative z-10">کۆی بڕ</span>
-                                  <span className="text-[15px] font-black font-mono text-white tracking-tight leading-none mt-0.5 relative z-10">
-                                      {(item.price * item.quantity).toLocaleString('en-US')}
-                                  </span>
-                              </div>
-                          </motion.div>
+          {/* Dynamic Content */}
+          <div className="flex-1 overflow-y-auto p-6">
+            <AnimatePresence mode="wait">
+              {cart.length === 0 ? (
+                /* Dynamic Display: Showcase available items in a modern, uncluttered grid if cart empty and showMenu settings is true */
+                settings.customerDisplayShowMenu !== false ? (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="h-full flex flex-col"
+                  >
+                    {/* Category tabs */}
+                    <div className="flex gap-2 pb-3 mb-4 overflow-x-auto shrink-0 scrollbar-none">
+                      {availableCategories.map((cat) => (
+                        <button
+                          key={cat}
+                          onClick={() => setActiveCategory(cat)}
+                          className={`px-3 py-1.5 rounded-xl font-bold text-[11px] transition-all border shrink-0 ${
+                            activeCategory === cat
+                              ? `${accentBg} text-white border-transparent shadow`
+                              : (isLightMode 
+                                  ? 'bg-[#FAF8F5] text-gray-600 border-gray-150 hover:bg-[#FAF8F5]/80' 
+                                  : 'bg-white/5 text-gray-400 border-transparent hover:bg-white/10')
+                          }`}
+                        >
+                          {cat}
+                        </button>
                       ))}
                     </div>
-                  )}
-                </AnimatePresence>
-            </div>
 
-            {/* Total Footer bill - HUGE DISPLAY for readability */}
-            <div className="p-3 lg:p-4 bg-[#1E2420] text-white mt-auto relative overflow-hidden shrink-0 border-t-4 border-[#D4A373] shadow-[0_-10px_30px_rgba(30,36,32,0.1)]">
-               <div className="absolute top-0 right-0 w-80 h-80 bg-[#D4A373]/10 rounded-full blur-3xl pointer-events-none"></div>
-               <div className="absolute bottom-0 left-10 w-40 h-40 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
-               <div className="flex justify-between items-center relative z-10">
-                   <div className="text-right">
-                      <span className="text-[9px] lg:text-[10px] text-[#D4A373] font-bold tracking-[0.2em] uppercase">کۆی سەرجەم داواکارییەکان</span>
-                      <p className="text-lg lg:text-xl font-black text-white mt-0.5">بڕی کۆتایی بۆ پارەدان</p>
-                   </div>
-                   <div className="text-left flex flex-col items-end">
-                      <div className="text-4xl lg:text-5xl font-black font-mono tracking-tight text-[#D4A373] flex items-baseline gap-1.5">
-                          {total.toLocaleString('en-US')}
-                          <span className="text-sm lg:text-base text-white font-sans font-bold ml-1">د.ع</span>
+                    {/* Products minimalist list */}
+                    <div className="flex-1 overflow-y-auto pr-1 font-sans">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-2">
+                        {filteredProducts.map((prod) => (
+                          <div 
+                            key={prod.id}
+                            className={`p-3 rounded-2xl flex items-center justify-between border transition-all ${
+                              isLightMode 
+                                ? 'bg-[#FAF8F5] border-gray-150 hover:bg-[#FAF8F5]/80' 
+                                : 'bg-white/5 border-transparent hover:bg-white/10'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              {prod.image ? (
+                                <img src={prod.image} alt={prod.name} className="w-10 h-10 object-cover rounded-xl border border-gray-200/55" referrerPolicy="no-referrer" />
+                              ) : (
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-[#D4A373]/10 text-[#D4A373] shrink-0`}>
+                                  <Coffee size={18} />
+                                </div>
+                              )}
+                              <div className="text-right">
+                                <span className={`text-[9px] font-bold block mb-0.5 opacity-60 ${isLightMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                                  {prod.category}
+                                </span>
+                                <span className={`text-sm font-black ${isLightMode ? 'text-neutral-900 font-extrabold' : 'text-white/95'}`}>{prod.name}</span>
+                              </div>
+                            </div>
+                            <span className={`text-xs font-black font-mono ${accentText}`}>
+                              {prod.price.toLocaleString('en-US')} <span className="text-[9px] font-sans">د.ع</span>
+                            </span>
+                          </div>
+                        ))}
                       </div>
-                   </div>
-               </div>
-            </div>
+                    </div>
+                  </motion.div>
+                ) : (
+                  /* Elegant empty screen fallback */
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="h-full flex flex-col items-center justify-center text-center p-6"
+                  >
+                    <div className={`p-6 rounded-full ${accentBg} text-white mb-4`}>
+                      <Coffee size={36} />
+                    </div>
+                    <h3 className="text-xl font-black mb-1">{settings?.greetingMessage}</h3>
+                    <p className={`text-xs max-w-md ${isLightMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                      {settings?.subGreeting || 'تکایە کاروبار و داواکەت لای کارمەندی لقەکەمان تۆمار بکە.'}
+                    </p>
+                  </motion.div>
+                )
+              ) : (
+                /* Sleek Active order list style (typography focused, simple, spacing-rich) */
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="space-y-3"
+                >
+                  {cart.map((item, index) => (
+                    <motion.div 
+                      key={item.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.02 }}
+                      className={`flex items-center justify-between pb-3.5 border-b ${
+                        isLightMode ? 'border-gray-100' : 'border-white/5'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        {/* Elegant quantity circle */}
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black font-mono text-xs ${accentBg} text-white`}>
+                          {item.quantity}x
+                        </div>
+                        <div className="text-right">
+                          <h4 className="text-[15px] font-black">{item.name}</h4>
+                          <span className={`text-[10px] font-mono opacity-50`}>
+                            {item.price.toLocaleString('en-US')} د.ع
+                          </span>
+                        </div>
+                      </div>
 
-         </div>
+                      {/* Line subtotal */}
+                      <span className="text-base font-black font-mono tracking-wider">
+                        {(item.price * item.quantity).toLocaleString('en-US')} <span className="text-[10px] font-sans font-bold">د.ع</span>
+                      </span>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* 3. GRAND TOTAL FOOTER (Massive clean numbers) */}
+          <div className={`p-6 border-t ${
+            isLightMode 
+              ? 'bg-[#FAF8F5] border-[#E9E5D9]' 
+              : 'bg-[#151D19] border-[#E9E5D9]/10'
+          }`}>
+            <div className="flex justify-between items-center">
+              <div>
+                <span className="text-[11px] font-black uppercase tracking-wider block opacity-50 mb-0.5">
+                  کۆی گشتی داواکاری (Total)
+                </span>
+                <span className={`text-xs font-bold leading-none ${isLightMode ? 'text-gray-500' : 'text-gray-400'}`}>
+                  {cart.length > 0 ? 'تکایە دڵنیابەرەوە لە بڕی دیاریکراو پێش پارەدان' : 'بەخێربێن هەمیشە'}
+                </span>
+              </div>
+
+              <div className="text-left flex flex-col items-end">
+                <div className="flex items-baseline gap-1 bg-black/5 dark:bg-white/5 px-5 py-2.5 rounded-2xl border border-black/10 dark:border-white/5">
+                  <span className={`text-3xl lg:text-4xl font-black font-mono tracking-wider ${accentText}`}>
+                    {total.toLocaleString('en-US')}
+                  </span>
+                  <span className="text-xs font-bold opacity-60">د.ع</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
       </main>
     </div>
   );

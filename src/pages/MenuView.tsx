@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Pencil, Trash2, Search, X, Coffee } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, X, Coffee, LayoutGrid, TrendingUp } from 'lucide-react';
 import { Product } from '@/types';
 import { addProduct, deleteProduct, updateProduct, updateCategoryName } from '@/services/productService';
 import { handleFirestoreError, OperationType } from '@/firebase';
@@ -18,6 +18,7 @@ export function MenuView() {
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState('');
   const [status, setStatus] = useState('بەردەستە');
+  const [image, setImage] = useState('');
 
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
@@ -55,6 +56,7 @@ export function MenuView() {
     setPrice('');
     setCategory('');
     setStatus('بەردەستە');
+    setImage('');
     setShowModal(true);
   };
 
@@ -64,6 +66,7 @@ export function MenuView() {
     setPrice(product.price.toString());
     setCategory(product.category);
     setStatus(product.status || 'بەردەستە');
+    setImage(product.image || '');
     setShowModal(true);
   };
 
@@ -78,14 +81,16 @@ export function MenuView() {
           name,
           price: Number(price),
           category,
-          status
+          status,
+          image
         });
       } else {
         await addProduct({
           name,
           price: Number(price),
           category,
-          status
+          status,
+          image
         });
       }
       setShowModal(false);
@@ -93,6 +98,7 @@ export function MenuView() {
       setPrice('');
       setCategory('');
       setStatus('بەردەستە');
+      setImage('');
       setEditId(null);
     } catch (error) {
       console.error(error);
@@ -117,8 +123,47 @@ export function MenuView() {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto h-full flex flex-col min-w-0">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0 bg-white p-5 rounded-[24px] border border-[#E9E5D9] shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
+    <div className="space-y-6 max-w-6xl mx-auto h-full flex flex-col min-w-0 animate-in fade-in duration-300">
+      
+      {/* Dynamic Statistics Panel */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 shrink-0 px-1">
+        <div className="bg-white p-5 rounded-[24px] border border-[#E9E5D9] shadow-sm flex items-center justify-between">
+          <div className="text-right">
+            <span className="text-[11px] font-bold text-[#8B8378] block">تەواوی بەرهەمە زیندوەکان</span>
+            <span className="text-2xl font-black text-[#1E2420] mt-1 font-mono inline-block">{products.length}</span>
+            <span className="text-[10px] text-emerald-600 font-bold block mt-0.5">بە فەرمی لە مێنوو</span>
+          </div>
+          <div className="p-3.5 bg-emerald-50 rounded-2xl text-emerald-600 border border-emerald-100">
+            <Coffee size={22} className="stroke-[2.5]" />
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-[24px] border border-[#E9E5D9] shadow-sm flex items-center justify-between">
+          <div className="text-right">
+            <span className="text-[11px] font-bold text-[#8B8378] block">کۆی گشتی پۆلێنەکان</span>
+            <span className="text-2xl font-black text-[#1E2420] mt-1 font-mono inline-block">{categories.length}</span>
+            <span className="text-[10px] text-[#A37B4D] font-bold block mt-0.5">پۆلێنە چالاکەکان</span>
+          </div>
+          <div className="p-3.5 bg-[#FAF8F5] rounded-2xl text-[#A37B4D] border border-gray-100">
+            <LayoutGrid size={22} className="stroke-[2.5]" />
+          </div>
+        </div>
+
+        <div className="bg-white p-5 rounded-[24px] border border-[#E9E5D9] shadow-sm flex items-center justify-between">
+          <div className="text-right">
+            <span className="text-[11px] font-bold text-[#8B8378] block">موادە تەواوبووەکان</span>
+            <span className="text-2xl font-black text-rose-600 mt-1 font-mono inline-block">
+              {products.filter(p => p.status !== 'بەردەستە').length}
+            </span>
+            <span className="text-[10px] text-rose-500 font-bold block mt-0.5">پێویستی بە کڕین و نوێکرنەوەیە</span>
+          </div>
+          <div className="p-3.5 bg-rose-50 rounded-2xl text-rose-600 border border-rose-100">
+            <TrendingUp size={22} className="stroke-[2.5]" />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0 bg-white p-5 rounded-[24px] border border-[#E9E5D9] shadow-[0_4px_20px_rgba(0,0,0,0.03)] m-1">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-gradient-to-br from-[#1E2420] to-[#2D3631] text-[#D4A373] rounded-[18px] shadow-md border border-[#D4A373]/20">
              <Coffee size={24} className="stroke-[2]" />
@@ -210,8 +255,12 @@ export function MenuView() {
                 <tr key={product.id} className="hover:bg-white transition-all duration-300 group hover:shadow-[0_4px_20px_rgba(0,0,0,0.03)] relative">
                   <td className="px-6 py-4">
                       <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-gradient-to-br from-[#FDFBF7] to-[#F9F7F2] rounded-xl flex items-center justify-center text-[#D4A373] flex-shrink-0 group-hover:bg-gradient-to-br group-hover:from-[#1E2420] group-hover:to-[#2D3631] transition-all duration-300 shadow-sm border border-[#E9E5D9]">
-                              <Coffee size={20} className="stroke-[2.5]" />
+                          <div className="w-12 h-12 bg-gradient-to-br from-[#FDFBF7] to-[#F9F7F2] rounded-xl flex items-center justify-center text-[#D4A373] flex-shrink-0 group-hover:bg-gradient-to-br group-hover:from-[#1E2420] group-hover:to-[#2D3631] transition-all duration-300 shadow-sm border border-[#E9E5D9] overflow-hidden">
+                              {product.image ? (
+                                <img src={product.image} alt={product.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                              ) : (
+                                <Coffee size={20} className="stroke-[2.5]" />
+                              )}
                           </div>
                           <span className="font-black text-[#1E2420] text-base group-hover:text-[#D4A373] transition-colors">{product.name}</span>
                       </div>
@@ -297,6 +346,19 @@ export function MenuView() {
                         <option>بەردەستە</option>
                         <option>تەواو بووە</option>
                     </select>
+                    </div>
+                </div>
+                <div>
+                    <label className="block text-sm font-bold text-[#1E2420] mb-2">وێنەی بابەت <span className="text-gray-400 font-normal text-xs">(لینکی وێنە یان نموونەکان لە خوارەوە هەڵبژێرە)</span></label>
+                    <input value={image} onChange={e => setImage(e.target.value)} type="url" className="w-full bg-[#F9F7F2] border border-transparent focus:bg-white focus:border-[#D4A373] rounded-xl px-4 py-2.5 outline-none text-[#1E2420] text-sm transition-colors" placeholder="https://example.com/item.jpg" />
+                    
+                    {/* Premium Preset Image selection */}
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      <button type="button" onClick={() => setImage('https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&q=80&w=300')} className="px-2 py-1 text-[10px] font-bold bg-neutral-100 hover:bg-[#D4A373]/10 hover:text-[#A37B4D] rounded-lg transition-colors border border-transparent hover:border-[#D4A373]/30">☕️ قاوە</button>
+                      <button type="button" onClick={() => setImage('https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&q=80&w=300')} className="px-2 py-1 text-[10px] font-bold bg-neutral-100 hover:bg-[#D4A373]/10 hover:text-[#A37B4D] rounded-lg transition-colors border border-transparent hover:border-[#D4A373]/30">🍵 چا</button>
+                      <button type="button" onClick={() => setImage('https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&q=80&w=300')} className="px-2 py-1 text-[10px] font-bold bg-neutral-100 hover:bg-[#D4A373]/10 hover:text-[#A37B4D] rounded-lg transition-colors border border-transparent hover:border-[#D4A373]/30">🍰 کێک</button>
+                      <button type="button" onClick={() => setImage('https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&q=80&w=300')} className="px-2 py-1 text-[10px] font-bold bg-neutral-100 hover:bg-[#D4A373]/10 hover:text-[#A37B4D] rounded-lg transition-colors border border-transparent hover:border-[#D4A373]/30">🍹 شەربەت</button>
+                      <button type="button" onClick={() => setImage('https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=300')} className="px-2 py-1 text-[10px] font-bold bg-neutral-100 hover:bg-[#D4A373]/10 hover:text-[#A37B4D] rounded-lg transition-colors border border-transparent hover:border-[#D4A373]/30">🍔 بەرگر/خواردن</button>
                     </div>
                 </div>
                 <div>

@@ -13,6 +13,7 @@ interface SettingsState {
     greetingMessage: string;
     subGreeting: string;
     enableVirtualKeyboard: boolean;
+    autoPrintReceipt?: boolean;
     promoSlides: { title: string; desc: string; tag: string; image: string; }[];
     invoicePrefix?: string;
     invoiceStartNumber?: number;
@@ -58,6 +59,7 @@ const defaultSettings = {
     subGreeting: 'تامێکی جیاواز لە هەموو لایەکەوە بۆ ئارامبوونەوە تاقیبکەرەوە.',
     promoSlides: defaultSlides,
     enableVirtualKeyboard: false,
+    autoPrintReceipt: false,
     invoicePrefix: '#',
     invoiceStartNumber: 1000,
     invoiceNextNumber: 1001
@@ -75,6 +77,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     subGreeting: 'ئێمە لێرەین بۆ پێشکەشکردنی باشترین تام و چێژ بۆ ئێوەی ئازیز.',
     promoSlides: defaultSlides,
     enableVirtualKeyboard: false,
+    autoPrintReceipt: false,
     invoicePrefix: '#',
     invoiceStartNumber: 1000,
     invoiceNextNumber: 1001
