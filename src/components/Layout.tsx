@@ -25,7 +25,9 @@ import {
   WifiOff,
   Lock,
   Monitor,
-  Sun
+  Sun,
+  Zap,
+  ZapOff
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from './AuthProvider';
@@ -135,6 +137,56 @@ export function Layout() {
       }
     }
   }, [isAntiGlare]);
+
+  const [isPerformanceMode, setIsPerformanceMode] = useState(() => {
+    const saved = localStorage.getItem('system_performance_mode');
+    return saved !== 'false'; // Defaults to true (high performance)
+  });
+
+  useEffect(() => {
+    localStorage.setItem('system_performance_mode', isPerformanceMode ? 'true' : 'false');
+    
+    const styleId = 'performance-mode-styles';
+    let styleEl = document.getElementById(styleId);
+    
+    if (isPerformanceMode) {
+      if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = styleId;
+        document.head.appendChild(styleEl);
+      }
+      styleEl.innerHTML = `
+        /* GPU hardware acceleration, backface visibility and will-change layers */
+        .performance-mode-active, .performance-mode-active * {
+          backface-visibility: hidden !important;
+          perspective: 1000px !important;
+          transform: translate3d(0,0,0) !important;
+          will-change: transform, opacity !important;
+        }
+        
+        /* Bypass complex shadow-paint iterations on low-end hardware */
+        .performance-mode-active .shadow-2xl,
+        .performance-mode-active .shadow-xl,
+        .performance-mode-active .shadow-lg,
+        .performance-mode-active .shadow-md,
+        .performance-mode-active .shadow-sm,
+        .performance-mode-active .shadow {
+          box-shadow: none !important;
+          text-shadow: none !important;
+        }
+
+        /* Speed up visual changes and transitions for snappier experience (50ms render loop) */
+        .performance-mode-active * {
+          transition-duration: 50ms !important;
+          animation-duration: 50ms !important;
+        }
+      `;
+    } else {
+      if (styleEl) {
+        styleEl.remove();
+      }
+    }
+  }, [isPerformanceMode]);
 
   const [isLocked, setIsLocked] = useState(() => {
     return localStorage.getItem('isAppLocked') === 'true';
@@ -271,7 +323,8 @@ export function Layout() {
     <div 
       className={cn(
         "flex h-screen overflow-hidden bg-[var(--bg-lighter)] text-[#3D3D3D]",
-        isAntiGlare && "anti-glare-active"
+        isAntiGlare && "anti-glare-active",
+        isPerformanceMode && "performance-mode-active"
       )}
       style={{ zoom: scale / 100 } as any}
     >
@@ -363,6 +416,20 @@ export function Layout() {
                 <Monitor size={12} />
               </button>
 
+              {/* Performance Mode (GPU Acceleration) Toggle button */}
+              <button 
+                onClick={() => setIsPerformanceMode(!isPerformanceMode)}
+                title={isPerformanceMode ? "GPU Speed: ON (خێراکردنی سیستەم)" : "GPU Speed: OFF (دۆخی ئاسایی)"}
+                className={cn(
+                  "flex items-center justify-center rounded-md border transition-all cursor-pointer h-7 w-7",
+                  isPerformanceMode
+                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.15)]"
+                    : "bg-white/5 text-gray-450 border-white/5 hover:bg-white/10"
+                )}
+              >
+                {isPerformanceMode ? <Zap size={12} className="animate-pulse" /> : <ZapOff size={12} />}
+              </button>
+
               {/* Kiosk Fullscreen Toggle icon button */}
               <button 
                 onClick={toggleFullscreen}
@@ -448,6 +515,26 @@ export function Layout() {
                       className={cn(
                         "pointer-events-none inline-block h-2 w-2 transform rounded-full bg-white shadow transition duration-150 ease-in-out",
                         isAntiGlare ? "-translate-x-2.5" : "translate-x-0"
+                      )}
+                    />
+                  </button>
+                </div>
+
+                <div className="pt-1.5 border-t border-white/5 flex items-center justify-between gap-1">
+                  <div className="text-right">
+                    <span className="block font-bold text-white text-[8px]">⚡ خێراکردنی GPU</span>
+                  </div>
+                  <button
+                    onClick={() => setIsPerformanceMode(!isPerformanceMode)}
+                    className={cn(
+                      "relative inline-flex h-3 w-6 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-150 ease-in-out focus:outline-none",
+                      isPerformanceMode ? "bg-emerald-500" : "bg-white/15"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "pointer-events-none inline-block h-2 w-2 transform rounded-full bg-white shadow transition duration-150 ease-in-out",
+                        isPerformanceMode ? "-translate-x-2.5" : "translate-x-0"
                       )}
                     />
                   </button>
