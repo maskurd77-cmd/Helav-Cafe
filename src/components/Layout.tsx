@@ -344,46 +344,60 @@ export function Layout() {
           ))}
         </nav>
         
-        <div className={cn("p-6 bg-[#181D1A]", isDesktopSidebarCollapsed && "p-4 flex flex-col items-center gap-4")}>
-          {!isDesktopSidebarCollapsed && (
-            <div className="bg-[var(--text-dark)] p-4 rounded-2xl border border-[#3D4741] mb-4">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-2.5 h-2.5 bg-[#4ADE80] rounded-full animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.5)]"></div>
-                <span className="text-[10px] uppercase tracking-widest text-[#A3B1A7] font-bold">
-                  {role === 'admin' ? 'ئەدمین' : 'کاشێر'}
-                </span>
-              </div>
-              <p className="text-xs font-medium text-white truncate">{user?.email}</p>
-            </div>
-          )}
-
+        <div className={cn("p-3 bg-[#181D1A] border-t border-white/5", isDesktopSidebarCollapsed ? "p-2 flex flex-col items-center gap-2" : "flex items-center justify-between gap-2")}>
           {/* Screen & Sunlight Assistance Button */}
-          <button 
-            onClick={() => setShowScreenSettings(!showScreenSettings)}
-            title={isDesktopSidebarCollapsed ? "شاشە و دژەخۆر" : "ڕێکخستنی شاشە و دژە-ڕەنگدانەوە"}
-            className={cn(
-              "flex items-center justify-center transition-all duration-300 font-medium border mb-3 cursor-pointer",
-              isDesktopSidebarCollapsed 
-                ? "w-12 h-12 rounded-xl bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 border-amber-500/20" 
-                : "gap-2 w-full px-4 py-3 bg-amber-500/10 hover:bg-amber-500/20 text-[#FEF2F2] rounded-xl border-amber-500/20 text-sm"
-            )}
-          >
-            <Monitor size={isDesktopSidebarCollapsed ? 20 : 16} />
-            {!isDesktopSidebarCollapsed && <span>ڕوونی شاشە و دژە-خۆر</span>}
-          </button>
+          <div className="relative flex items-center justify-center gap-1.5 w-full">
+            {/* Symmetrical Tiny Icons Control Row */}
+            <div className="flex items-center justify-center gap-1.5 w-full">
+              {/* Screen Settings Toggle icon button */}
+              <button 
+                onClick={() => setShowScreenSettings(!showScreenSettings)}
+                title="DPI / 4K"
+                className={cn(
+                  "flex items-center justify-center rounded-md border transition-all cursor-pointer h-7 w-7",
+                  showScreenSettings
+                    ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                    : "bg-white/5 text-gray-400 border-white/5 hover:bg-white/10"
+                )}
+              >
+                <Monitor size={12} />
+              </button>
 
-          {showScreenSettings && !isDesktopSidebarCollapsed && (
-            <div className="bg-[#1e2521] border border-white/5 rounded-2xl p-4 mb-3 space-y-3 text-right text-xs">
-              <div>
-                <span className="block font-bold text-white mb-2 text-[10px] flex justify-between items-center">
-                  <span>🖥️ زوومکردنی 4K سیستەم</span>
-                  <span className="text-[var(--accent-gold)] font-mono">{scale}%</span>
-                </span>
+              {/* Kiosk Fullscreen Toggle icon button */}
+              <button 
+                onClick={toggleFullscreen}
+                title="Fullscreen"
+                className="flex items-center justify-center rounded-md border bg-white/5 text-gray-400 border-white/5 hover:bg-white/10 transition-all cursor-pointer h-7 w-7"
+              >
+                {isFullscreen ? <Minimize2 size={12} /> : <Maximize2 size={12} />}
+              </button>
+
+              {/* Logout icon button */}
+              <button 
+                onClick={handleLogout}
+                title="Logout"
+                className="flex items-center justify-center rounded-md border bg-rose-950/10 text-rose-400 border-rose-500/10 hover:bg-rose-950/25 transition-all cursor-pointer h-7 w-7"
+              >
+                <LogOut size={12} />
+              </button>
+            </div>
+
+            {/* Screen Settings dropdown style sub-panel */}
+            {showScreenSettings && (
+              <div className={cn(
+                "bg-[#131a15] border border-white/10 rounded-lg p-2 absolute bottom-9 right-0 w-44 space-y-2 text-right text-[9px] shadow-2xl text-gray-200 z-50",
+                isDesktopSidebarCollapsed && "right-10 bottom-0"
+              )}>
+                <div className="flex justify-between items-center border-b border-white/5 pb-1 mb-1">
+                  <span className="font-bold text-white text-[9px]">DPI / 4K</span>
+                  <span className="text-[var(--accent-gold)] font-mono font-bold">{scale}%</span>
+                </div>
+                
                 <div className="grid grid-cols-3 gap-1">
                   {[
-                    { val: 75, label: '4K (75%)' },
-                    { val: 85, label: '2K (85%)' },
-                    { val: 100, label: 'Standard' }
+                    { val: 75, label: '75%' },
+                    { val: 85, label: '85%' },
+                    { val: 100, label: '100' }
                   ].map((opt) => (
                     <button
                       key={opt.val}
@@ -392,9 +406,9 @@ export function Layout() {
                         localStorage.setItem('system_display_scale', opt.val.toString());
                       }}
                       className={cn(
-                        "py-1 rounded-md text-[9px] font-black text-center transition-all cursor-pointer",
+                        "py-0.5 rounded text-[8px] font-black text-center transition-all cursor-pointer",
                         scale === opt.val 
-                          ? "bg-[var(--accent-gold)] text-gray-900" 
+                          ? "bg-[var(--accent-gold)] text-gray-900 font-extrabold shadow-sm" 
                           : "bg-white/5 text-gray-300 hover:bg-white/10"
                       )}
                     >
@@ -402,59 +416,45 @@ export function Layout() {
                     </button>
                   ))}
                 </div>
-              </div>
 
-              <div className="pt-2 border-t border-white/5 flex items-center justify-between gap-2">
-                <div className="text-right">
-                  <span className="block font-bold text-white text-[10.5px] mb-0.5">☀️ دۆخی دژە-خۆر</span>
-                  <span className="block text-[9px] text-[#A3B1A7]">کۆنتراستی بەرز لۆ سەر شاشە</span>
-                </div>
-                <button
-                  onClick={() => setIsAntiGlare(!isAntiGlare)}
-                  className={cn(
-                    "relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
-                    isAntiGlare ? "bg-amber-400" : "bg-white/15"
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                      isAntiGlare ? "-translate-x-5" : "translate-x-0"
-                    )}
+                {/* Slider option for even more precise adjusting */}
+                <div className="pt-1 border-t border-white/5">
+                  <input 
+                    type="range"
+                    min="50"
+                    max="110"
+                    value={scale}
+                    onChange={(e) => {
+                      const val = Number(e.target.value);
+                      setScale(val);
+                      localStorage.setItem('system_display_scale', val.toString());
+                    }}
+                    className="w-full accent-[var(--accent-gold)] bg-white/10 rounded h-0.5 cursor-pointer"
                   />
-                </button>
+                </div>
+
+                <div className="pt-1.5 border-t border-white/5 flex items-center justify-between gap-1">
+                  <div className="text-right">
+                    <span className="block font-bold text-white text-[8px]">☀️ دۆخی دژە-خۆر</span>
+                  </div>
+                  <button
+                    onClick={() => setIsAntiGlare(!isAntiGlare)}
+                    className={cn(
+                      "relative inline-flex h-3 w-6 shrink-0 cursor-pointer rounded-full border border-transparent transition-colors duration-150 ease-in-out focus:outline-none",
+                      isAntiGlare ? "bg-amber-400" : "bg-white/15"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "pointer-events-none inline-block h-2 w-2 transform rounded-full bg-white shadow transition duration-150 ease-in-out",
+                        isAntiGlare ? "-translate-x-2.5" : "translate-x-0"
+                      )}
+                    />
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
-
-          {/* Full Screen (Kiosk) button */}
-          <button 
-            onClick={toggleFullscreen}
-            title={isDesktopSidebarCollapsed ? "شاشەی تەواو" : "پڕکردنی شاشە (Full Screen)"}
-            className={cn(
-              "flex items-center justify-center transition-all duration-300 font-medium border mb-3 cursor-pointer",
-              isDesktopSidebarCollapsed 
-                ? "w-12 h-12 rounded-xl bg-[var(--accent-gold)]/10 text-[var(--accent-gold)] hover:bg-[var(--accent-gold)]/20 border-[var(--accent-gold)]/20" 
-                : "gap-2 w-full px-4 py-3 bg-[var(--accent-gold)]/10 hover:bg-[var(--accent-gold)]/20 text-[var(--border-color)] hover:text-white rounded-xl border-[var(--accent-gold)]/20 text-sm"
             )}
-          >
-            {isFullscreen ? <Minimize2 size={isDesktopSidebarCollapsed ? 20 : 16} /> : <Maximize2 size={isDesktopSidebarCollapsed ? 20 : 16} />}
-            {!isDesktopSidebarCollapsed && <span>شاشەی تەواو (Kiosk)</span>}
-          </button>
-
-          <button 
-            onClick={handleLogout}
-            title={isDesktopSidebarCollapsed ? "چوونە دەرەوە" : undefined}
-            className={cn(
-              "flex items-center justify-center transition-colors font-medium border",
-              isDesktopSidebarCollapsed 
-                ? "w-12 h-12 rounded-xl bg-[#E11D48]/10 text-[#E11D48] hover:bg-[#E11D48]/20 border-[#E11D48]/20" 
-                : "gap-2 w-full px-4 py-3 bg-[#E11D48]/10 hover:bg-[#E11D48]/20 text-[#FEF2F2] rounded-xl border-[#E11D48]/20 text-sm"
-            )}
-          >
-            <LogOut size={isDesktopSidebarCollapsed ? 20 : 16} />
-            {!isDesktopSidebarCollapsed && <span>چوونە دەرەوە</span>}
-          </button>
+          </div>
         </div>
       </aside>
 

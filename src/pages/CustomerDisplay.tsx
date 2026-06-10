@@ -360,15 +360,15 @@ export function CustomerDisplay() {
           <div className="relative">
             <button 
               onClick={() => setShowResolutionMenu(!showResolutionMenu)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-black transition-all cursor-pointer ${
+              className={`flex items-center gap-1 px-2 py-1 rounded-lg border text-[10px] font-bold transition-all cursor-pointer ${
                 isLightMode 
                   ? 'bg-white hover:bg-gray-150 text-gray-700 border-gray-200' 
                   : 'bg-white/5 hover:bg-white/10 text-white/90 border-white/10'
               }`}
               title="ڕێکخستنی جۆری شاشە و کوالێتی 4K"
             >
-              <Monitor size={13} className={scale !== 100 ? 'text-[var(--accent-gold)] animate-pulse' : 'text-gray-400'} />
-              <span>{scale === 100 ? 'HD ئاسایی (100%)' : scale === 85 ? '2K خاوێن (85%)' : scale === 75 ? '4K نایاب (75%)' : `${scale}% دیمەن`}</span>
+              <Monitor size={12} className={scale !== 100 ? 'text-[var(--accent-gold)]' : 'text-gray-450'} />
+              <span className="font-bold text-amber-500">⚙️ DPI ({scale}%)</span>
             </button>
 
             {showResolutionMenu && (
