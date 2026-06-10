@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { CartItem, Product } from '@/types';
-import { Coffee, Clock, ArrowRight, ArrowLeft, Maximize, Minimize } from 'lucide-react';
+import { Coffee, Clock, ArrowRight, ArrowLeft, Maximize, Minimize, Monitor, Sliders, Check, Sparkles } from 'lucide-react';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/firebase';
 import { Link } from 'react-router-dom';
@@ -72,6 +72,69 @@ export function CustomerDisplay() {
 
   const [activeSlide, setActiveSlide] = useState(0);
   const [activeCategory, setActiveCategory] = useState('هەمووی');
+  const [scale, setScale] = useState<number>(() => {
+    const saved = localStorage.getItem('customer_display_scale');
+    return saved ? parseInt(saved, 10) : 75; // Default to 75% for 4K downscale on 1366x768!
+  });
+  const [showResolutionMenu, setShowResolutionMenu] = useState(false);
+  const [isBannerDismissed, setIsBannerDismissed] = useState(false);
+  const [isAntiGlare, setIsAntiGlare] = useState(() => {
+    return localStorage.getItem('customer_anti_glare') === 'true';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('customer_anti_glare', isAntiGlare ? 'true' : 'false');
+    
+    const styleId = 'customer-anti-glare-styles';
+    let styleEl = document.getElementById(styleId);
+    
+    if (isAntiGlare) {
+      if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = styleId;
+        document.head.appendChild(styleEl);
+      }
+      styleEl.innerHTML = `
+        /* Extreme contrast sunlight reading mode */
+        .anti-glare-active, .anti-glare-active * {
+          background-color: #ffffff !important;
+          color: #000000 !important;
+          border-color: #000000 !important;
+          text-shadow: none !important;
+          box-shadow: none !important;
+          font-weight: 900 !important;
+        }
+        .anti-glare-active button, 
+        .anti-glare-active select, 
+        .anti-glare-active .bg-emerald-600, 
+        .anti-glare-active .bg-amber-600, 
+        .anti-glare-active .bg-sky-500,
+        .anti-glare-active .bg-rose-500,
+        .anti-glare-active .bg-\\[var\\(--accent-gold\\)\\],
+        .anti-glare-active .bg-black {
+          background-color: #000000 !important;
+          color: #ffffff !important;
+          border: 3.5px solid #000000 !important;
+        }
+        .anti-glare-active svg {
+          stroke: #000000 !important;
+          stroke-width: 3.5px !important;
+        }
+        .anti-glare-active button svg, 
+        .anti-glare-active a svg {
+          stroke: #ffffff !important;
+          stroke-width: 3.5px !important;
+        }
+        .anti-glare-active img {
+          filter: grayscale(1) contrast(3) !important;
+        }
+      `;
+    } else {
+      if (styleEl) {
+        styleEl.remove();
+      }
+    }
+  }, [isAntiGlare]);
 
   // Load products store
   useEffect(() => {
@@ -210,13 +273,46 @@ export function CustomerDisplay() {
 
   return (
     <div 
-      className={`min-h-screen flex flex-col font-sans select-none overflow-hidden h-screen text-right transition-colors duration-500 ${
+      className={`min-h-screen flex flex-col font-sans select-none overflow-hidden h-screen text-right transition-all duration-500 ${
+        isAntiGlare ? 'anti-glare-active' : ''
+      } ${
         isLightMode 
           ? 'bg-[var(--bg-primary)] text-[var(--text-dark)]' 
           : 'bg-[#0A0F0D] text-[var(--border-color)]'
       }`} 
       dir="rtl"
+      style={{ zoom: scale / 100 } as any}
     >
+      {/* 4K Optimization & True Fullscreen Assistant Banner */}
+      <AnimatePresence>
+        {!isFullscreenOn && !isBannerDismissed && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="bg-gradient-to-r from-amber-600 via-amber-500 to-amber-600 text-white text-xs font-bold py-2.5 px-6 flex items-center justify-between gap-4 shadow-md z-50 shrink-0 relative border-b border-white/10"
+          >
+            <div className="flex items-center gap-3.5 mx-auto">
+              <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse shrink-0"></span>
+              <span className="text-right">
+                🖥️ دۆخی کوالێتی بەرز و شاشەی تەواوی 4K ئامادەیە! تکایە لێرە کلیک بکە بۆ جوانترین و وردترین کوالێتی نیشاندان و شاردنەوەی بارەکانی سەرەوە.
+              </span>
+              <button
+                onClick={toggleFullscreen}
+                className="bg-white text-amber-700 hover:bg-amber-50 px-4 py-1 rounded-full text-[10px] font-black shadow-sm transition-all duration-200 active:scale-95 cursor-pointer shrink-0"
+              >
+                چالاککردنی وێنەی 4K بە شاشەی تەواو 🖥️
+              </button>
+            </div>
+            <button 
+              onClick={() => setIsBannerDismissed(true)} 
+              className="hover:bg-white/15 p-1 rounded-lg text-white/80 hover:text-white transition-colors text-sm font-bold w-6 h-6 flex items-center justify-center shrink-0 cursor-pointer"
+            >
+              ×
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* 1. TOP PREMIUM HEADER */}
       <header className={`py-4 px-8 border-b flex items-center justify-between shrink-0 z-20 ${
         isLightMode 
@@ -258,6 +354,123 @@ export function CustomerDisplay() {
           <div className="flex items-center gap-1.5 bg-emerald-500/10 text-emerald-500 px-2.5 py-1 rounded-full text-[10px] font-bold border border-emerald-500/10">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
             <span>ڕاستەوخۆ</span>
+          </div>
+
+          {/* 4K Resolution & Zoom Selector */}
+          <div className="relative">
+            <button 
+              onClick={() => setShowResolutionMenu(!showResolutionMenu)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[11px] font-black transition-all cursor-pointer ${
+                isLightMode 
+                  ? 'bg-white hover:bg-gray-150 text-gray-700 border-gray-200' 
+                  : 'bg-white/5 hover:bg-white/10 text-white/90 border-white/10'
+              }`}
+              title="ڕێکخستنی جۆری شاشە و کوالێتی 4K"
+            >
+              <Monitor size={13} className={scale !== 100 ? 'text-[var(--accent-gold)] animate-pulse' : 'text-gray-400'} />
+              <span>{scale === 100 ? 'HD ئاسایی (100%)' : scale === 85 ? '2K خاوێن (85%)' : scale === 75 ? '4K نایاب (75%)' : `${scale}% دیمەن`}</span>
+            </button>
+
+            {showResolutionMenu && (
+              <>
+                {/* Backdrop overlay to close menu */}
+                <div 
+                  className="fixed inset-0 z-40 cursor-default" 
+                  onClick={() => setShowResolutionMenu(false)}
+                />
+                
+                {/* Menu items card container */}
+                <div className={`absolute left-0 mt-2 w-72 rounded-2xl shadow-xl border p-4 z-50 text-right ${
+                  isLightMode 
+                    ? 'bg-white border-gray-200 text-gray-800' 
+                    : 'bg-[#121815] border-white/5 text-[var(--border-color)]'
+                }`}>
+                  <div className="flex items-center gap-1.5 mb-2.5 border-b pb-2 border-black/5 dark:border-white/5">
+                    <Sparkles size={14} className="text-[var(--accent-gold)]" />
+                    <h5 className="font-extrabold text-[12px]">کوالێتی و چڕی نیشاندان (4K Mode)</h5>
+                  </div>
+
+                  <p className="text-[10px] opacity-70 leading-relaxed mb-3">
+                    ئەم بژاردەیە کاردەکات بە فێڵی بچووککردنەوە بۆ ئەوەی لە شاشە سادەکانی وەک ١٣٦٦ مۆنیتەرەکە بە ڕوونیی فۆڕکەی (4K UHD) و زۆر ورد دەربکەوێت.
+                  </p>
+
+                  <div className="space-y-1.5 mb-3.5">
+                    {[
+                      { val: 70, name: '🖥️ 4K Ultra High Density', desc: 'زۆرترین چڕی بۆ شاشەی ١٣٦٦ (70%)' },
+                      { val: 75, name: '🌟 4K High Density', desc: 'پێشنیارکری لۆکاڵی (75%)' },
+                      { val: 85, name: '✨ 2K Premium Density', desc: 'گونجاو بۆ شاشەی مامناوەند (85%)' },
+                      { val: 100, name: '📺 HD Standard', desc: 'دوگمەی گەورە و سادە (100%)' }
+                    ].map((opt) => (
+                      <button
+                        key={opt.val}
+                        onClick={() => {
+                          setScale(opt.val);
+                          localStorage.setItem('customer_display_scale', opt.val.toString());
+                          setShowResolutionMenu(false);
+                        }}
+                        className={`w-full flex items-center justify-between p-2 rounded-xl text-xs font-bold transition-all text-right cursor-pointer ${
+                          scale === opt.val
+                            ? `${accentBg} text-white`
+                            : isLightMode 
+                              ? 'hover:bg-gray-100 bg-gray-50/50' 
+                              : 'hover:bg-white/5 bg-white/5'
+                        }`}
+                      >
+                        <div className="text-right">
+                          <span className="block text-[11px] font-black">{opt.name}</span>
+                          <span className={`text-[9px] block font-medium opacity-75 ${scale === opt.val ? 'text-white/90' : ''}`}>
+                            {opt.desc}
+                          </span>
+                        </div>
+                        {scale === opt.val && <Check size={14} className="shrink-0" />}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Slider option for precise adjustments */}
+                  <div className="border-t pt-3 border-black/5 dark:border-white/5">
+                    <div className="flex justify-between items-center mb-1.5">
+                      <span className="text-[10px] font-bold">دەستکاری وردی دایمەنشن:</span>
+                      <span className="text-[11px] font-mono font-bold text-[var(--accent-gold)]">{scale}%</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input 
+                        type="range"
+                        min="50"
+                        max="120"
+                        value={scale}
+                        onChange={(e) => {
+                          const val = Number(e.target.value);
+                          setScale(val);
+                          localStorage.setItem('customer_display_scale', val.toString());
+                        }}
+                        className="w-full accent-[var(--accent-gold)] bg-gray-200 dark:bg-white/10 rounded-lg h-1.5 cursor-pointer"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Sunlight Mode Toggle */}
+                  <div className="pt-3 mt-3 border-t border-black/5 dark:border-white/5 flex items-center justify-between gap-2 text-right">
+                    <div className="text-right">
+                      <span className="block font-black text-[11px] mb-0.5">☀️ دۆخی دژە-خۆر و کۆنتراستی بەرز</span>
+                      <span className="block text-[9px] opacity-70">بۆ بەردەم ڕەنگدانەوەی بەتاوی خۆر</span>
+                    </div>
+                    <button
+                      onClick={() => setIsAntiGlare(!isAntiGlare)}
+                      className={`relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                        isAntiGlare ? 'bg-amber-500' : 'bg-gray-200 dark:bg-white/10'
+                      }`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                          isAntiGlare ? '-translate-x-5' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Fullscreen Toggle Button */}

@@ -16,6 +16,7 @@ export function MenuView() {
   // New product form
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
+  const [costPrice, setCostPrice] = useState('');
   const [category, setCategory] = useState('');
   const [status, setStatus] = useState('بەردەستە');
   const [image, setImage] = useState('');
@@ -54,6 +55,7 @@ export function MenuView() {
     setEditId(null);
     setName('');
     setPrice('');
+    setCostPrice('');
     setCategory('');
     setStatus('بەردەستە');
     setImage('');
@@ -64,6 +66,7 @@ export function MenuView() {
     setEditId(product.id);
     setName(product.name);
     setPrice(product.price.toString());
+    setCostPrice(product.costPrice !== undefined ? product.costPrice.toString() : '');
     setCategory(product.category);
     setStatus(product.status || 'بەردەستە');
     setImage(product.image || '');
@@ -76,26 +79,25 @@ export function MenuView() {
     
     try {
       setIsSubmitting(true);
+      const isCostSet = costPrice && !isNaN(Number(costPrice));
+      const payload = {
+        name,
+        price: Number(price),
+        costPrice: isCostSet ? Number(costPrice) : undefined,
+        category,
+        status,
+        image
+      };
+
       if (editId) {
-        await updateProduct(editId, {
-          name,
-          price: Number(price),
-          category,
-          status,
-          image
-        });
+        await updateProduct(editId, payload);
       } else {
-        await addProduct({
-          name,
-          price: Number(price),
-          category,
-          status,
-          image
-        });
+        await addProduct(payload);
       }
       setShowModal(false);
       setName('');
       setPrice('');
+      setCostPrice('');
       setCategory('');
       setStatus('بەردەستە');
       setImage('');
@@ -245,58 +247,75 @@ export function MenuView() {
               <tr>
                 <th className="px-6 py-5 font-black text-right tracking-wider">ناو</th>
                 <th className="px-6 py-5 font-black text-right tracking-wider">پۆلێن</th>
-                <th className="px-6 py-5 font-black text-right tracking-wider">نرخ</th>
+                <th className="px-6 py-5 font-black text-right tracking-wider">نرخی فرۆشتن</th>
+                <th className="px-6 py-5 font-black text-right tracking-wider">تێچوو (کڕین)</th>
+                <th className="px-6 py-5 font-black text-right tracking-wider">قازانجی مەزەندەکراو</th>
                 <th className="px-6 py-5 font-black text-right hidden lg:table-cell tracking-wider">دۆخ</th>
                 <th className="px-6 py-5 font-black w-24 lg:w-32 text-left tracking-wider">کردارەکان</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--bg-lighter)]">
-              {filteredProducts.map((product) => (
-                <tr key={product.id} className="hover:bg-white transition-all duration-300 group hover:shadow-[0_4px_20px_rgba(0,0,0,0.03)] relative">
-                  <td className="px-6 py-4">
-                      <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-gradient-to-br from-[#FDFBF7] to-[var(--bg-lighter)] rounded-xl flex items-center justify-center text-[var(--accent-gold)] flex-shrink-0 group-hover:bg-gradient-to-br group-hover:from-[var(--bg-secondary)] group-hover:to-[var(--text-dark)] transition-all duration-300 shadow-sm border border-[var(--border-color)] overflow-hidden">
-                              {product.image ? (
-                                <img src={product.image} alt={product.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                              ) : (
-                                <Coffee size={20} className="stroke-[2.5]" />
-                              )}
-                          </div>
-                          <span className="font-black text-[var(--bg-secondary)] text-base group-hover:text-[var(--accent-gold)] transition-colors">{product.name}</span>
+              {filteredProducts.map((product) => {
+                const calculatedProfit = product.price - (product.costPrice || 0);
+                return (
+                  <tr key={product.id} className="hover:bg-white transition-all duration-300 group hover:shadow-[0_4px_20px_rgba(0,0,0,0.03)] relative">
+                    <td className="px-6 py-4">
+                        <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 bg-gradient-to-br from-[#FDFBF7] to-[var(--bg-lighter)] rounded-xl flex items-center justify-center text-[var(--accent-gold)] flex-shrink-0 group-hover:bg-gradient-to-br group-hover:from-[var(--bg-secondary)] group-hover:to-[var(--text-dark)] transition-all duration-300 shadow-sm border border-[var(--border-color)] overflow-hidden">
+                                {product.image ? (
+                                  <img src={product.image} alt={product.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                ) : (
+                                  <Coffee size={20} className="stroke-[2.5]" />
+                                )}
+                            </div>
+                            <span className="font-black text-[var(--bg-secondary)] text-base group-hover:text-[var(--accent-gold)] transition-colors">{product.name}</span>
+                        </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="bg-white text-[var(--text-muted)] border border-[var(--border-color)] px-4 py-1.5 rounded-xl text-xs font-bold shadow-sm group-hover:border-[var(--accent-gold)]/30 transition-colors">{product.category}</span>
+                    </td>
+                    <td className="px-6 py-4 font-black text-[var(--accent-gold)] text-base font-mono">{product.price.toLocaleString('en-US')} <span className="font-sans text-xs font-bold text-[var(--text-muted)] ml-1 font-sans">د.ع</span></td>
+                    <td className="px-6 py-4 font-bold text-gray-600 dark:text-gray-400 font-mono text-sm">
+                      {product.costPrice !== undefined ? `${product.costPrice.toLocaleString('en-US')} د.ع` : <span className="text-gray-400 font-sans text-xs">دیاری نەکراوە</span>}
+                    </td>
+                    <td className="px-6 py-4 font-mono">
+                      {product.costPrice !== undefined ? (
+                        <span className={`font-black text-sm ${calculatedProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                          {calculatedProfit.toLocaleString('en-US')} د.ع
+                        </span>
+                      ) : (
+                        <span className="text-gray-300 font-sans text-xs">-</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 hidden lg:table-cell">
+                      <span className={`px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center w-max gap-2 shadow-sm ${
+                        product.status === 'بەردەستە' ? 'bg-[#4ADE80]/10 text-green-700 border border-[#4ADE80]/30' : 'bg-[#EF4444]/10 text-red-700 border border-[#EF4444]/30'
+                      }`}>
+                        <div className={`w-2 h-2 rounded-full ${product.status === 'بەردەستە' ? 'bg-[#22C55E] animate-pulse' : 'bg-[#EF4444]'}`}></div>  
+                        {product.status || 'بەردەستە'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-left">
+                      <div className="flex items-center justify-end gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-300 transform lg:translate-x-4 lg:group-hover:translate-x-0">
+                        <button 
+                          onClick={() => openEditModal(product)}
+                          className="p-2.5 text-[#8DAA91] bg-green-50 hover:bg-[#8DAA91] hover:text-white rounded-xl transition-all shadow-sm border border-green-100"
+                          title="دەستکاری"
+                        >
+                          <Pencil size={18} className="stroke-[2.5]" />
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(product.id)}
+                          className="p-2.5 text-[#E11D48] bg-red-50 hover:bg-[#E11D48] hover:text-white rounded-xl transition-all shadow-sm border border-red-100"
+                          title="sڕینەوە"
+                        >
+                          <Trash2 size={18} className="stroke-[2.5]" />
+                        </button>
                       </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="bg-white text-[var(--text-muted)] border border-[var(--border-color)] px-4 py-1.5 rounded-xl text-xs font-bold shadow-sm group-hover:border-[var(--accent-gold)]/30 transition-colors">{product.category}</span>
-                  </td>
-                  <td className="px-6 py-4 font-black text-[var(--accent-gold)] text-base font-mono">{product.price.toLocaleString('en-US')} <span className="font-sans text-xs font-bold text-[var(--text-muted)] ml-1">د.ع</span></td>
-                  <td className="px-6 py-4 hidden lg:table-cell">
-                    <span className={`px-3 py-1.5 rounded-xl text-[11px] font-bold flex items-center w-max gap-2 shadow-sm ${
-                      product.status === 'بەردەستە' ? 'bg-[#4ADE80]/10 text-green-700 border border-[#4ADE80]/30' : 'bg-[#EF4444]/10 text-red-700 border border-[#EF4444]/30'
-                    }`}>
-                      <div className={`w-2 h-2 rounded-full ${product.status === 'بەردەستە' ? 'bg-[#22C55E] animate-pulse' : 'bg-[#EF4444]'}`}></div>  
-                      {product.status || 'بەردەستە'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-left">
-                    <div className="flex items-center justify-end gap-2 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all duration-300 transform lg:translate-x-4 lg:group-hover:translate-x-0">
-                      <button 
-                        onClick={() => openEditModal(product)}
-                        className="p-2.5 text-[#8DAA91] bg-green-50 hover:bg-[#8DAA91] hover:text-white rounded-xl transition-all shadow-sm border border-green-100"
-                        title="دەستکاری"
-                      >
-                        <Pencil size={18} className="stroke-[2.5]" />
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(product.id)}
-                        className="p-2.5 text-[#E11D48] bg-red-50 hover:bg-[#E11D48] hover:text-white rounded-xl transition-all shadow-sm border border-red-100"
-                        title="سڕینەوە"
-                      >
-                        <Trash2 size={18} className="stroke-[2.5]" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                  </tr>
+                );
+              })}
               {filteredProducts.length === 0 && (
                 <tr>
                    <td colSpan={5} className="py-20 text-center">
@@ -337,16 +356,20 @@ export function MenuView() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                    <label className="block text-sm font-bold text-[var(--bg-secondary)] mb-2">نرخ <span className="text-[var(--text-muted)] text-xs font-normal">(د.ع)</span></label>
+                    <label className="block text-sm font-bold text-[var(--bg-secondary)] mb-2">نرخی فرۆشتن <span className="text-[var(--text-muted)] text-xs font-normal">(د.ع)</span></label>
                     <input required value={price} onChange={e => setPrice(e.target.value)} type="text" inputMode="numeric" className="w-full bg-[var(--bg-lighter)] border border-transparent focus:bg-white focus:border-[var(--accent-gold)] rounded-xl px-4 py-3 outline-none text-[var(--bg-secondary)] transition-colors font-mono" placeholder="2500" />
                     </div>
                     <div>
-                    <label className="block text-sm font-bold text-[var(--bg-secondary)] mb-2">دیاریکردنی دۆخ</label>
+                    <label className="block text-sm font-bold text-[var(--bg-secondary)] mb-2">نرخی تێچوو (کڕین) <span className="text-[var(--text-muted)] text-xs font-normal">(د.ع - ئارەزوومەندانە)</span></label>
+                    <input value={costPrice} onChange={e => setCostPrice(e.target.value)} type="text" inputMode="numeric" className="w-full bg-[var(--bg-lighter)] border border-transparent focus:bg-white focus:border-[var(--accent-gold)] rounded-xl px-4 py-3 outline-none text-[var(--bg-secondary)] transition-colors font-mono" placeholder="1500" />
+                    </div>
+                </div>
+                <div>
+                    <label className="block text-sm font-bold text-[var(--bg-secondary)] mb-2">دیاریکردنی دۆخی بابەت</label>
                     <select value={status} onChange={e => setStatus(e.target.value)} className="w-full bg-[var(--bg-lighter)] border border-transparent focus:bg-white focus:border-[var(--accent-gold)] rounded-xl px-4 py-3 outline-none text-[var(--bg-secondary)] transition-colors">
                         <option>بەردەستە</option>
                         <option>تەواو بووە</option>
                     </select>
-                    </div>
                 </div>
                 <div>
                     <label className="block text-sm font-bold text-[var(--bg-secondary)] mb-2">وێنەی بابەت <span className="text-gray-400 font-normal text-xs">(لینکی وێنە یان نموونەکان لە خوارەوە هەڵبژێرە)</span></label>

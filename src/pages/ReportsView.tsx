@@ -3,6 +3,7 @@ import { getOrders } from '@/services/orderService';
 import { collection, getDocs, query, where, orderBy } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '@/firebase';
 import { Order } from '@/types';
+import { useProductStore } from '@/store/useProductStore';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, AreaChart, Area } from 'recharts';
 import { 
   Calendar, 
@@ -31,6 +32,7 @@ export function ReportsView() {
   const { user } = useAuth();
   const { settings } = useSettingsStore();
   const { currentBranch } = useBranchStore();
+  const { products, initProducts } = useProductStore();
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [expenses, setExpenses] = useState<any[]>([]);
@@ -44,6 +46,10 @@ export function ReportsView() {
   // Search state for analytical tables
   const [productQuery, setProductQuery] = useState('');
   const [expenseQuery, setExpenseQuery] = useState('');
+
+  useEffect(() => {
+    initProducts();
+  }, [currentBranch]);
 
   useEffect(() => {
     if (dateRange === 'custom' && !customDate) return;
@@ -104,9 +110,32 @@ export function ReportsView() {
     }
   };
 
+  const productCostMap = React.useMemo(() => {
+    const map: Record<string, number> = {};
+    products.forEach(p => {
+      if (p.costPrice !== undefined) {
+        map[p.name] = p.costPrice;
+      }
+    });
+    return map;
+  }, [products]);
+
   const totalSales = orders.reduce((sum, o) => sum + o.total, 0);
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
-  const netIncome = totalSales - totalExpenses;
+  
+  const totalCOGS = React.useMemo(() => {
+    let sum = 0;
+    orders.forEach(o => {
+      o.items.forEach(item => {
+        const itemCost = item.costPrice !== undefined ? item.costPrice : (productCostMap[item.name] || 0);
+        sum += (itemCost * item.quantity);
+      });
+    });
+    return sum;
+  }, [orders, productCostMap]);
+
+  const grossSalesProfit = totalSales - totalCOGS;
+  const netIncome = totalSales - totalCOGS - totalExpenses;
   const avgOrderValue = orders.length > 0 ? Math.round(totalSales / orders.length) : 0;
 
   // Analytical Category Share Calculation
@@ -534,67 +563,67 @@ export function ReportsView() {
                     </h3>
                 </div>
 
-                {/* 2. Total Expenses */}
+                {/* 2. Total COGS */}
+                <div className="bg-white p-5 rounded-[24px] shadow-sm border border-[var(--border-color)] relative overflow-hidden group hover:border-amber-500 transition-all">
+                    <div className="flex justify-between items-start mb-2.5">
+                        <div className="p-2.5 bg-amber-50 rounded-xl text-amber-600">
+                          <Layers size={20} className="stroke-[2.5]" />
+                        </div>
+                        <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md">
+                           کڕین و تێچوو
+                        </span>
+                    </div>
+                    <p className="text-[var(--text-muted)] text-[11px] font-medium mb-1">کۆتایی تێچووی لای کڕین (COGS)</p>
+                    <h3 className="text-lg lg:text-xl font-extrabold text-[var(--bg-secondary)] font-mono whitespace-nowrap">
+                        {totalCOGS.toLocaleString()} <span className="text-[10px] font-sans text-[var(--text-muted)] font-normal">د.ع</span>
+                    </h3>
+                </div>
+
+                {/* 3. Gross Sales Profit */}
+                <div className="bg-white p-5 rounded-[24px] shadow-sm border border-[var(--border-color)] relative overflow-hidden group hover:border-emerald-500 transition-all">
+                    <div className="flex justify-between items-start mb-2.5">
+                        <div className="p-2.5 bg-emerald-50 rounded-xl text-emerald-600">
+                          <Sparkles size={20} />
+                        </div>
+                        <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
+                           هامشی قازانج
+                        </span>
+                    </div>
+                    <p className="text-[var(--text-muted)] text-[11px] font-medium mb-1">کۆی قازانجی فرۆشتن (Margins)</p>
+                    <h3 className="text-lg lg:text-xl font-extrabold text-[#16A34A] font-mono whitespace-nowrap">
+                        {grossSalesProfit.toLocaleString()} <span className="text-[10px] font-sans text-[var(--text-muted)] font-normal">د.ع</span>
+                    </h3>
+                </div>
+
+                {/* 4. Total General Expenses */}
                 <div className="bg-white p-5 rounded-[24px] shadow-sm border border-[var(--border-color)] relative overflow-hidden group hover:border-[#E11D48] transition-all">
                     <div className="flex justify-between items-start mb-2.5">
                         <div className="p-2.5 bg-red-50 rounded-xl text-[#E11D48]">
                           <TrendingDown size={20} />
                         </div>
                         <span className="text-[10px] font-bold text-[#E11D48] bg-red-50 px-2 py-0.5 rounded-md">
-                           خەرجکراو
+                           مەساریف
                         </span>
                     </div>
-                    <p className="text-[var(--text-muted)] text-[11px] font-medium mb-1">خەرجی گشتی</p>
+                    <p className="text-[var(--text-muted)] text-[11px] font-medium mb-1">خەرجی گشتی ئۆپەراسیۆن</p>
                     <h3 className="text-lg lg:text-xl font-extrabold text-[var(--bg-secondary)] font-mono whitespace-nowrap">
                         {totalExpenses.toLocaleString()} <span className="text-[10px] font-sans text-[var(--text-muted)] font-normal">د.ع</span>
                     </h3>
                 </div>
 
-                {/* 3. Basket Average (AOV) */}
-                <div className="bg-white p-5 rounded-[24px] shadow-sm border border-[var(--border-color)] relative overflow-hidden group hover:border-[var(--accent-gold)] transition-all">
-                    <div className="flex justify-between items-start mb-2.5">
-                        <div className="p-2.5 bg-[var(--bg-lighter)] rounded-xl text-[var(--accent-gold)]">
-                          <Briefcase size={20} />
-                        </div>
-                        <span className="text-[10px] font-bold text-[var(--accent-gold)] bg-[var(--bg-lighter)] px-2 py-0.5 rounded-md font-mono">
-                           AOV
-                        </span>
-                    </div>
-                    <p className="text-[var(--text-muted)] text-[11px] font-medium mb-1">تێکڕای پسوولە</p>
-                    <h3 className="text-lg lg:text-xl font-extrabold text-[var(--bg-secondary)] font-mono whitespace-nowrap">
-                        {avgOrderValue.toLocaleString()} <span className="text-[10px] font-sans text-[var(--text-muted)] font-normal">د.ع</span>
-                    </h3>
-                </div>
-
-                {/* 4. Total Invoices Scale */}
-                <div className="bg-white p-5 rounded-[24px] shadow-sm border border-[var(--border-color)] relative overflow-hidden group hover:border-[#8DAA91] transition-all">
-                    <div className="flex justify-between items-start mb-2.5">
-                        <div className="p-2.5 bg-blue-50 rounded-xl text-blue-600">
-                          <ShoppingBag size={20} />
-                        </div>
-                        <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
-                           قەبارە
-                        </span>
-                    </div>
-                    <p className="text-[var(--text-muted)] text-[11px] font-medium mb-1">کۆی کارەکان</p>
-                    <h3 className="text-lg lg:text-xl font-extrabold text-[var(--bg-secondary)] font-mono whitespace-nowrap">
-                        {orders.length} <span className="text-[10px] font-sans text-[var(--text-muted)] font-normal">پسوولە</span>
-                    </h3>
-                </div>
-
                 {/* 5. Net Profit Charcoal Card */}
-                <div className="bg-[var(--bg-secondary)] p-5 rounded-[24px] shadow-md text-white relative overflow-hidden flex flex-col justify-between col-span-2 lg:col-span-1">
+                <div className="bg-[var(--bg-secondary)] p-5 rounded-[24px] shadow-md text-white relative overflow-hidden flex flex-col justify-between col-span-2 lg:col-span-1 border border-[var(--accent-gold)]/20">
                     <div className="absolute top-0 left-0 w-24 h-24 bg-white/5 rounded-full blur-xl -ml-5 -mt-5"></div>
                     <div className="relative z-10 flex justify-between items-start mb-2.5">
                         <div className="p-2.5 bg-white/10 rounded-xl text-[var(--accent-gold)] backdrop-blur-sm">
-                          <Wallet size={18} />
+                           <Wallet size={18} />
                         </div>
-                        <span className={`text-[9px] font-black px-2 py-0.5 rounded-md ${netIncome >= 0 ? 'bg-[#4ADE80]/20 text-[#4ADE80]' : 'bg-red-500/20 text-red-400'}`}>
-                           {netIncome >= 0 ? 'سوود' : 'زیان'}
+                        <span className={`text-[9px] font-black px-2 py-0.5 rounded-md ${netIncome >= 0 ? 'bg-emerald-500/25 text-emerald-400' : 'bg-red-500/25 text-red-400'}`}>
+                           {netIncome >= 0 ? 'سوودی پاک' : 'زیان'}
                         </span>
                     </div>
                     <div>
-                        <p className="text-white/60 text-[11px] font-medium mb-1">قازانجی پوخت</p>
+                        <p className="text-white/60 text-[11px] font-medium mb-1">قازانجی گشتی و کۆتایی</p>
                         <h3 className="text-lg lg:text-xl font-extrabold text-[var(--accent-gold)] font-mono whitespace-nowrap">
                             {netIncome.toLocaleString()} <span className="text-[10px] font-normal text-white/50">د.ع</span>
                         </h3>

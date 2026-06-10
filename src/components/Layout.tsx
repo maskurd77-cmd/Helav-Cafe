@@ -23,7 +23,9 @@ import {
   Minimize2,
   Wifi,
   WifiOff,
-  Lock
+  Lock,
+  Monitor,
+  Sun
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from './AuthProvider';
@@ -58,6 +60,82 @@ export function Layout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  
+  const [scale, setScale] = useState<number>(() => {
+    const saved = localStorage.getItem('system_display_scale');
+    return saved ? parseInt(saved, 10) : 100;
+  });
+
+  const [isAntiGlare, setIsAntiGlare] = useState(() => {
+    return localStorage.getItem('system_anti_glare') === 'true';
+  });
+
+  const [showScreenSettings, setShowScreenSettings] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('system_anti_glare', isAntiGlare ? 'true' : 'false');
+    
+    const styleId = 'anti-glare-styles';
+    let styleEl = document.getElementById(styleId);
+    
+    if (isAntiGlare) {
+      if (!styleEl) {
+        styleEl = document.createElement('style');
+        styleEl.id = styleId;
+        document.head.appendChild(styleEl);
+      }
+      styleEl.innerHTML = `
+        /* Extreme contrast sunlight reading mode */
+        .anti-glare-active, .anti-glare-active * {
+          background-color: #ffffff !important;
+          color: #000000 !important;
+          border-color: #000000 !important;
+          text-shadow: none !important;
+          box-shadow: none !important;
+          font-weight: 800 !important;
+        }
+        /* Buttons should stay solid black with white bold text */
+        .anti-glare-active button, 
+        .anti-glare-active a.active, 
+        .anti-glare-active .bg-emerald-600, 
+        .anti-glare-active .bg-amber-600, 
+        .anti-glare-active .bg-blue-600,
+        .anti-glare-active .bg-\\[var\\(--bg-secondary\\)\\],
+        .anti-glare-active .bg-black {
+          background-color: #000000 !important;
+          color: #ffffff !important;
+          border: 3px solid #000000 !important;
+        }
+        /* Keep high contrast icons visible */
+        .anti-glare-active svg {
+          stroke: #000000 !important;
+          stroke-width: 3px !important;
+        }
+        .anti-glare-active button svg, 
+        .anti-glare-active a.active svg {
+          stroke: #ffffff !important;
+          stroke-width: 3px !important;
+        }
+        /* Hide light translucent blur overlays which wash out under direct sun */
+        .anti-glare-active .backdrop-blur-sm,
+        .anti-glare-active .backdrop-blur-md {
+          backdrop-filter: none !important;
+          background-color: #ffffff !important;
+        }
+        /* Force extreme visibility input text fields */
+        .anti-glare-active input, .anti-glare-active textarea, .anti-glare-active select {
+          background-color: #ffffff !important;
+          color: #000000 !important;
+          border: 3px solid #000000 !important;
+        }
+      `;
+    } else {
+      if (styleEl) {
+        styleEl.remove();
+      }
+    }
+  }, [isAntiGlare]);
+
   const [isLocked, setIsLocked] = useState(() => {
     return localStorage.getItem('isAppLocked') === 'true';
   });
@@ -190,7 +268,13 @@ export function Layout() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[var(--bg-lighter)] text-[#3D3D3D]">
+    <div 
+      className={cn(
+        "flex h-screen overflow-hidden bg-[var(--bg-lighter)] text-[#3D3D3D]",
+        isAntiGlare && "anti-glare-active"
+      )}
+      style={{ zoom: scale / 100 } as any}
+    >
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div 
@@ -270,6 +354,76 @@ export function Layout() {
                 </span>
               </div>
               <p className="text-xs font-medium text-white truncate">{user?.email}</p>
+            </div>
+          )}
+
+          {/* Screen & Sunlight Assistance Button */}
+          <button 
+            onClick={() => setShowScreenSettings(!showScreenSettings)}
+            title={isDesktopSidebarCollapsed ? "شاشە و دژەخۆر" : "ڕێکخستنی شاشە و دژە-ڕەنگدانەوە"}
+            className={cn(
+              "flex items-center justify-center transition-all duration-300 font-medium border mb-3 cursor-pointer",
+              isDesktopSidebarCollapsed 
+                ? "w-12 h-12 rounded-xl bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 border-amber-500/20" 
+                : "gap-2 w-full px-4 py-3 bg-amber-500/10 hover:bg-amber-500/20 text-[#FEF2F2] rounded-xl border-amber-500/20 text-sm"
+            )}
+          >
+            <Monitor size={isDesktopSidebarCollapsed ? 20 : 16} />
+            {!isDesktopSidebarCollapsed && <span>ڕوونی شاشە و دژە-خۆر</span>}
+          </button>
+
+          {showScreenSettings && !isDesktopSidebarCollapsed && (
+            <div className="bg-[#1e2521] border border-white/5 rounded-2xl p-4 mb-3 space-y-3 text-right text-xs">
+              <div>
+                <span className="block font-bold text-white mb-2 text-[10px] flex justify-between items-center">
+                  <span>🖥️ زوومکردنی 4K سیستەم</span>
+                  <span className="text-[var(--accent-gold)] font-mono">{scale}%</span>
+                </span>
+                <div className="grid grid-cols-3 gap-1">
+                  {[
+                    { val: 75, label: '4K (75%)' },
+                    { val: 85, label: '2K (85%)' },
+                    { val: 100, label: 'Standard' }
+                  ].map((opt) => (
+                    <button
+                      key={opt.val}
+                      onClick={() => {
+                        setScale(opt.val);
+                        localStorage.setItem('system_display_scale', opt.val.toString());
+                      }}
+                      className={cn(
+                        "py-1 rounded-md text-[9px] font-black text-center transition-all cursor-pointer",
+                        scale === opt.val 
+                          ? "bg-[var(--accent-gold)] text-gray-900" 
+                          : "bg-white/5 text-gray-300 hover:bg-white/10"
+                      )}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-white/5 flex items-center justify-between gap-2">
+                <div className="text-right">
+                  <span className="block font-bold text-white text-[10.5px] mb-0.5">☀️ دۆخی دژە-خۆر</span>
+                  <span className="block text-[9px] text-[#A3B1A7]">کۆنتراستی بەرز لۆ سەر شاشە</span>
+                </div>
+                <button
+                  onClick={() => setIsAntiGlare(!isAntiGlare)}
+                  className={cn(
+                    "relative inline-flex h-5 w-10 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                    isAntiGlare ? "bg-amber-400" : "bg-white/15"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                      isAntiGlare ? "-translate-x-5" : "translate-x-0"
+                    )}
+                  />
+                </button>
+              </div>
             </div>
           )}
 

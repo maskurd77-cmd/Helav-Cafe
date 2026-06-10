@@ -2,6 +2,7 @@ export interface Product {
   id: string;
   name: string;
   price: number;
+  costPrice?: number; // Cost Price (تێچوو) for profit calculations
   category: string;
   image?: string;
   status?: string;
