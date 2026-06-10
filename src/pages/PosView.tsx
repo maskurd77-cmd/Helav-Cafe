@@ -207,13 +207,13 @@ export function PosView() {
     return Math.max(0, total - discount);
   };
 
-  const [printMethod, setPrintMethod] = useState<"iframe" | "direct">("iframe");
+  const [printMethod, setPrintMethod] = useState<"iframe" | "direct">("direct");
 
   const openCheckoutModal = () => {
     if (cart.length === 0) return;
     setDiscountAmount("");
     setReceivedAmount("");
-    setPrintMethod("iframe"); // Default to high-compatibility iframe
+    setPrintMethod("direct"); // Default to direct system print
     setShowCheckoutModal(true);
   };
 
@@ -306,8 +306,8 @@ export function PosView() {
                       @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600;700&display=swap');
                       @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
                       * { box-sizing: border-box; color: #000 !important; font-family: 'Cairo', 'Inter', sans-serif; margin: 0; padding: 0; }
-                      body { padding: 0; font-size: 13px; color: #000; margin: 0 !important; background: #fff; width: 72mm; max-width: 72mm; line-height: 1.4; display: block; overflow: hidden; }
-                      .receipt-container { width: 72mm; max-width: 72mm; padding: 0mm 4mm 5mm 4mm; margin: 0 auto; direction: rtl; }
+                      body { padding: 0; font-size: 13px; color: #000; margin: 0 !important; background: #fff; width: 72mm; max-width: 72mm; line-height: 1.4; display: block; overflow: visible; height: auto; }
+                      .receipt-container { width: 72mm; max-width: 72mm; padding: 0 4mm 5mm 4mm; margin: 0 auto; direction: rtl; }
                       .center { text-align: center; width: 100%; }
                       .bold { font-weight: 800; }
                       .logo-img { max-width: 60px; max-height: 60px; margin: 0 auto 8px; display: block; object-fit: contain; filter: grayscale(100%) contrast(1.2); }
@@ -328,8 +328,8 @@ export function PosView() {
                       .powered-by { text-align: center; margin-top: 15px; font-size: 9px; color: #000; font-weight: 800; letter-spacing: 2px; font-family: 'Inter', sans-serif; width: 100%; direction: ltr; }
                       @page { size: 80mm auto; margin: 0; }
                       @media print {
-                         html, body { width: 72mm; margin: 0 auto; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                         .receipt-container { width: 72mm; max-width: 72mm; padding: 0mm 4mm 5mm 4mm; margin: 0 auto; }
+                         html, body { width: 72mm; height: auto; margin: 0 auto; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; overflow: visible; }
+                         .receipt-container { width: 72mm; max-width: 72mm; padding: 0 4mm 5mm 4mm; margin: 0 auto; }
                       }
                    </style>
                  </head>
@@ -375,6 +375,48 @@ export function PosView() {
     return price.toLocaleString("en-US") + " د.ع";
   };
 
+  const memoizedProductList = React.useMemo(() => {
+    return filteredProducts.map((product) => (
+      <button
+        key={product.id}
+        onClick={() => addToCart(product)}
+        disabled={product.status === "تەواو بووە"}
+        className={`bg-white p-3 lg:p-5 rounded-2xl lg:rounded-[22px] border-2 border-[#E9E5D9] hover:border-[#D4A373] active:scale-[0.97] hover:shadow-[0_8px_24px_rgba(212,163,115,0.08)] transition-all text-right flex flex-col items-center group relative overflow-hidden min-h-[140px] justify-between gap-2.5 cursor-pointer ${product.status === "تەواو بووە" ? "opacity-45 cursor-not-allowed border-dashed" : ""}`}
+      >
+        <div className="w-14 h-14 bg-[#F9F7F2] rounded-xl flex items-center justify-center text-[#1E2420] group-hover:bg-[#1E2420] group-hover:text-[#D4A373] transition-colors shrink-0 duration-300 overflow-hidden shadow-inner border border-[#E9E5D9]/40 relative">
+          {product.image ? (
+            <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" referrerPolicy="no-referrer" />
+          ) : (
+            <Coffee
+              size={22}
+              className="group-hover:rotate-6 transition-transform text-[#A37B4D]"
+            />
+          )}
+        </div>
+        <div className="text-center w-full flex-1 flex flex-col justify-center">
+          <h3 className="font-extrabold text-[#1E2420] text-xs lg:text-[13px] leading-snug line-clamp-2">
+            {product.name}
+          </h3>
+        </div>
+        <div className="text-center w-full mt-auto">
+          <span className="inline-block bg-[#F9F7F2] group-hover:bg-[#1E2420]/10 px-2.5 py-1 rounded-lg text-[#1E2420] font-black text-xs font-mono group-hover:text-[#D4A373] transition-colors">
+            {product.price.toLocaleString("en-US")}{" "}
+            <span className="font-sans text-[10px] font-normal">
+              د.ع
+            </span>
+          </span>
+        </div>
+        {product.status === "تەواو بووە" && (
+          <div className="absolute inset-0 bg-[#F9F7F2]/80 backdrop-blur-[1px] flex items-center justify-center">
+            <span className="bg-[#E11D48] text-white px-2.5 py-1 rounded-lg font-bold text-[10px]">
+              تەواو بووە
+            </span>
+          </div>
+        )}
+      </button>
+    ));
+  }, [filteredProducts, addToCart]);
+
   return (
     <div className="flex bg-[#F9F7F2] overflow-hidden h-full gap-4 lg:gap-8 relative min-w-0 pb-6 lg:pb-0">
       {/* Products Grid */}
@@ -409,45 +451,7 @@ export function PosView() {
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 lg:gap-4 select-none">
-              {filteredProducts.map((product) => (
-                <button
-                  key={product.id}
-                  onClick={() => addToCart(product)}
-                  disabled={product.status === "تەواو بووە"}
-                  className={`bg-white p-3 lg:p-5 rounded-2xl lg:rounded-[22px] border-2 border-[#E9E5D9] hover:border-[#D4A373] active:scale-[0.97] hover:shadow-[0_8px_24px_rgba(212,163,115,0.08)] transition-all text-right flex flex-col items-center group relative overflow-hidden min-h-[140px] justify-between gap-2.5 cursor-pointer ${product.status === "تەواو بووە" ? "opacity-45 cursor-not-allowed border-dashed" : ""}`}
-                >
-                  <div className="w-14 h-14 bg-[#F9F7F2] rounded-xl flex items-center justify-center text-[#1E2420] group-hover:bg-[#1E2420] group-hover:text-[#D4A373] transition-colors shrink-0 duration-300 overflow-hidden shadow-inner border border-[#E9E5D9]/40 relative">
-                    {product.image ? (
-                      <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" referrerPolicy="no-referrer" />
-                    ) : (
-                      <Coffee
-                        size={22}
-                        className="group-hover:rotate-6 transition-transform text-[#A37B4D]"
-                      />
-                    )}
-                  </div>
-                  <div className="text-center w-full flex-1 flex flex-col justify-center">
-                    <h3 className="font-extrabold text-[#1E2420] text-xs lg:text-[13px] leading-snug line-clamp-2">
-                      {product.name}
-                    </h3>
-                  </div>
-                  <div className="text-center w-full mt-auto">
-                    <span className="inline-block bg-[#F9F7F2] group-hover:bg-[#1E2420]/10 px-2.5 py-1 rounded-lg text-[#1E2420] font-black text-xs font-mono group-hover:text-[#D4A373] transition-colors">
-                      {product.price.toLocaleString("en-US")}{" "}
-                      <span className="font-sans text-[10px] font-normal">
-                        د.ع
-                      </span>
-                    </span>
-                  </div>
-                  {product.status === "تەواو بووە" && (
-                    <div className="absolute inset-0 bg-[#F9F7F2]/80 backdrop-blur-[1px] flex items-center justify-center">
-                      <span className="bg-[#E11D48] text-white px-2.5 py-1 rounded-lg font-bold text-[10px]">
-                        تەواو بووە
-                      </span>
-                    </div>
-                  )}
-                </button>
-              ))}
+              {memoizedProductList}
               {filteredProducts.length === 0 && (
                 <div className="col-span-full py-12 text-center font-bold text-[#8B8378] bg-[#F9F7F2] rounded-3xl mt-2 text-xs">
                   هیچ بابەتێک نەدۆزرایەوە بۆ فرۆشتن. تکایە لە بەشی مێنۆ بەروبووم
@@ -656,7 +660,7 @@ export function PosView() {
 
       {/* Hidden Beautiful Receipt Template */}
       <div className="hidden">
-        <div ref={receiptRef} className="receipt-container" style={{ padding: "0px 15px 15px 15px", width: "72mm", maxWidth: "72mm", direction: "rtl", fontFamily: "'Cairo', sans-serif" }}>
+        <div ref={receiptRef} className="receipt-container" style={{ padding: "0 15px 15px 15px", width: "72mm", maxWidth: "72mm", direction: "rtl", fontFamily: "'Cairo', sans-serif" }}>
           <div className="center" style={{ textAlign: "center" }}>
             {settings.logoUrl ? (
               <img src={settings.logoUrl} className="logo-img" alt="Logo" style={{ maxWidth: "65px", maxHeight: "65px", margin: "0 auto 8px", borderRadius: "8px", objectFit: "contain" }} />
@@ -693,7 +697,6 @@ export function PosView() {
 
           <div className="date-row" style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", color: "#000", marginTop: "12px", marginBottom: "10px", borderTop: "1.5px dashed #000", borderBottom: "1.5px dashed #000", padding: "5px 0", direction: "ltr", fontWeight: "700" }}>
             <span>{new Date().toLocaleDateString("en-GB")}</span>
-            <span style={{ fontWeight: "800" }}>{currentBranch === "cafe" ? "لقی کافتریـا" : "لقی نەخۆشخانە"}</span>
             <span>
               {new Date().toLocaleTimeString("en-US", {
                 hour: "2-digit",

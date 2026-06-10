@@ -52,7 +52,8 @@
     padding: 0 !important;
     width: 72mm !important;
     max-width: 72mm !important;
-    overflow: hidden;
+    height: auto !important;
+    overflow: visible !important;
   }
   #root {
     display: none !important;
@@ -66,9 +67,11 @@
     width: 72mm !important;
     max-width: 72mm !important;
     margin: 0 auto !important;
-    padding: 0mm 4mm 5mm 4mm !important;
+    padding: 0 4mm 5mm 4mm !important;
     visibility: visible;
     box-sizing: border-box;
+    height: auto !important;
+    overflow: visible !important;
   }
   .no-print {
     display: none !important;
