@@ -42,7 +42,7 @@
 @media print {
   @page {
     margin: 0;
-    size: auto;
+    size: 80mm auto;
   }
   html, body {
     background: #ffffff !important;
@@ -50,8 +50,9 @@
     font-size: 13px;
     margin: 0 !important;
     padding: 0 !important;
-    width: 100% !important;
-    max-width: 300px !important;
+    width: 72mm !important;
+    max-width: 72mm !important;
+    overflow: hidden;
   }
   #root {
     display: none !important;
@@ -62,11 +63,12 @@
     position: absolute;
     left: 0;
     top: 0;
-    width: 100%;
-    max-width: 300px;
-    margin: 0 auto;
-    padding: 2mm 4mm;
+    width: 72mm !important;
+    max-width: 72mm !important;
+    margin: 0 auto !important;
+    padding: 0mm 4mm 5mm 4mm !important;
     visibility: visible;
+    box-sizing: border-box;
   }
   .no-print {
     display: none !important;

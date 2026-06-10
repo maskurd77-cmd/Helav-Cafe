@@ -57,8 +57,8 @@ export function ReceiptsView() {
               @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600;700&display=swap');
               @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
               * { box-sizing: border-box; color: #000 !important; font-family: 'Cairo', 'Inter', sans-serif; margin: 0; padding: 0; }
-              body { padding: 0; font-size: 13px; color: #000; margin: 0 auto; background: #fff; width: 100%; max-width: 300px; line-height: 1.4; display: block; overflow-x: hidden; }
-              .receipt-container { width: 100%; padding: 2mm 3mm 5mm 3mm; margin: 0 auto; direction: rtl; }
+              body { padding: 0; font-size: 13px; color: #000; margin: 0 !important; background: #fff; width: 72mm; max-width: 72mm; line-height: 1.4; display: block; overflow: hidden; }
+              .receipt-container { width: 72mm; max-width: 72mm; padding: 0mm 4mm 5mm 4mm; margin: 0 auto; direction: rtl; }
               .center { text-align: center; width: 100%; }
               .bold { font-weight: 800; }
               .logo-img { max-width: 60px; max-height: 60px; margin: 0 auto 8px; display: block; object-fit: contain; filter: grayscale(100%) contrast(1.2); }
@@ -77,8 +77,11 @@ export function ReceiptsView() {
               .footer { text-align: center; margin-top: 15px; font-size: 12px; color: #000; white-space: pre-wrap; line-height: 1.4; font-weight: 800; border-top: 1.5px dashed #000; padding-top: 10px; width: 100%; }
               .date-row { display: flex; justify-content: space-between; font-size: 11px; color: #000; margin-top: 10px; margin-bottom: 8px; font-family: 'Inter', monospace; font-weight: 800; text-transform: uppercase; border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 4px 0; width: 100%; direction: ltr; }
               .powered-by { text-align: center; margin-top: 15px; font-size: 9px; color: #000; font-weight: 800; letter-spacing: 2px; font-family: 'Inter', sans-serif; width: 100%; direction: ltr; }
-              @page { margin: 0; }
-              @media print { html, body { width: 100%; margin: 0 auto; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+              @page { size: 80mm auto; margin: 0; }
+              @media print {
+                html, body { width: 72mm; margin: 0 auto; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                .receipt-container { width: 72mm; max-width: 72mm; padding: 0mm 4mm 5mm 4mm; margin: 0 auto; }
+              }
             </style>
           </head>
           <body>
@@ -380,7 +383,7 @@ export function ReceiptsView() {
             <div className="p-6 relative before:absolute before:inset-x-0 before:-top-4 before:h-8 before:bg-white before:rounded-t-[32px] before:-mt-4">
               {/* Hidden receipt for printing */}
               <div style={{ display: "none" }}>
-                <div ref={printRef} className="receipt-container">
+                <div ref={printRef} className="receipt-container" style={{ padding: "0px 15px 15px 15px", width: "72mm", maxWidth: "72mm", direction: "rtl", fontFamily: "Cairo, sans-serif" }}>
                   <div className="center">
                     {storeSettings?.logoUrl && (
                       <img
