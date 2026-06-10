@@ -6,9 +6,31 @@
   --font-mono: "Space Grotesk", ui-monospace, SFMono-Regular, monospace;
 }
 
+:root {
+  --bg-primary: #FAF8F5;
+  --bg-secondary: #1E2420;
+  --bg-lighter: #F9F7F2;
+  --accent-gold: #D4A373;
+  --border-color: #E9E5D9;
+  --text-dark: #2D3631;
+  --text-muted: #8B8378;
+  --text-main: #3D3D3D;
+}
+
+[data-theme="dark"] {
+  --bg-primary: #121212;
+  --bg-secondary: #000000;
+  --bg-lighter: #1A1A1A;
+  --accent-gold: #FFD700;
+  --border-color: #333333;
+  --text-dark: #FFFFFF;
+  --text-muted: #A0A0A0;
+  --text-main: #E0E0E0;
+}
+
 @layer base {
   body {
-    @apply font-sans antialiased bg-[#F9F7F2] text-[#3D3D3D];
+    @apply font-sans antialiased bg-[var(--bg-lighter)] text-[var(--text-main)];
   }
 }
 

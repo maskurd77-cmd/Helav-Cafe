@@ -130,10 +130,10 @@ export function Dashboard() {
     <div className="h-full flex flex-col gap-6 lg:gap-8 min-w-0 pb-6 lg:pb-0">
       
       {/* Dynamic Welcome Heading Banner - Simplified and Compact */}
-      <div className="bg-gradient-to-l from-[#1E2420] to-[#2D3631] text-white p-5 lg:p-6 rounded-[24px] shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative overflow-hidden shrink-0 border border-[#D4A373]/10">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#D4A373]/5 rounded-full blur-2xl -mr-20 -mt-20 pointer-events-none"></div>
+      <div className="bg-gradient-to-l from-[var(--bg-secondary)] to-[var(--text-dark)] text-white p-5 lg:p-6 rounded-[24px] shadow-lg flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative overflow-hidden shrink-0 border border-[var(--accent-gold)]/10">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--accent-gold)]/5 rounded-full blur-2xl -mr-20 -mt-20 pointer-events-none"></div>
         <div className="relative z-10 flex items-center gap-3.5">
-          <div className="p-3 bg-white/10 backdrop-blur-md rounded-xl text-[#D4A373] border border-white/10 hidden sm:block">
+          <div className="p-3 bg-white/10 backdrop-blur-md rounded-xl text-[var(--accent-gold)] border border-white/10 hidden sm:block">
              <LayoutDashboard size={22} className="stroke-[2.5]" />
           </div>
           <div>
@@ -147,7 +147,7 @@ export function Dashboard() {
         </div>
         
         <div className="relative z-10 flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 rounded-xl text-[11px] sm:text-xs">
-           <CalendarDays size={14} className="text-[#D4A373]" />
+           <CalendarDays size={14} className="text-[var(--accent-gold)]" />
            <p className="text-white/60 font-bold">ئەمڕۆ:</p>
            <p className="text-white font-mono font-black">{new Date().toLocaleDateString('ku-IQ')}</p>
         </div>
@@ -157,7 +157,7 @@ export function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-8 shrink-0">
         
         {/* Stat Card 1: Today's Revenue */}
-        <div className="bg-gradient-to-b from-white to-[#FDFBF7] p-7 rounded-[32px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-[#E9E5D9] relative overflow-hidden group hover:border-[#8DAA91] hover:shadow-[0_20px_40px_rgba(141,170,145,0.15)] transition-all duration-500">
+        <div className="bg-gradient-to-b from-white to-[#FDFBF7] p-7 rounded-[32px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-[var(--border-color)] relative overflow-hidden group hover:border-[#8DAA91] hover:shadow-[0_20px_40px_rgba(141,170,145,0.15)] transition-all duration-500">
           <div className="absolute top-0 right-0 w-2 h-full bg-gradient-to-b from-[#8DAA91]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="flex justify-between items-start mb-6">
             <div className="p-3.5 bg-green-50 rounded-[20px] text-green-600 shadow-inner border border-green-100 group-hover:scale-110 transition-transform duration-500">
@@ -167,31 +167,31 @@ export function Dashboard() {
               ئەمڕۆ <ArrowUpRight size={16} className="ml-1" />
             </span>
           </div>
-          <p className="text-[#8B8378] text-xs font-bold mb-2 uppercase tracking-wider">کۆی فرۆشی دەراوزە (POS) بۆ ئەمڕۆ</p>
-          <h3 className="text-3xl lg:text-4xl font-black text-[#1E2420] font-mono tracking-tight group-hover:text-[#8DAA91] transition-colors duration-500 flex items-baseline gap-1.5">
-            {totalSalesToday.toLocaleString('en-US')} <span className="text-sm font-sans text-[#8B8378] font-bold">د.ع</span>
+          <p className="text-[var(--text-muted)] text-xs font-bold mb-2 uppercase tracking-wider">کۆی فرۆشی دەراوزە (POS) بۆ ئەمڕۆ</p>
+          <h3 className="text-3xl lg:text-4xl font-black text-[var(--bg-secondary)] font-mono tracking-tight group-hover:text-[#8DAA91] transition-colors duration-500 flex items-baseline gap-1.5">
+            {totalSalesToday.toLocaleString('en-US')} <span className="text-sm font-sans text-[var(--text-muted)] font-bold">د.ع</span>
           </h3>
         </div>
 
         {/* Stat Card 2: Today's Orders */}
-        <div className="bg-gradient-to-b from-white to-[#FDFBF7] p-7 rounded-[32px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-[#E9E5D9] relative overflow-hidden group hover:border-[#D4A373] hover:shadow-[0_20px_40px_rgba(212,163,115,0.15)] transition-all duration-500">
-          <div className="absolute top-0 right-0 w-2 h-full bg-gradient-to-b from-[#D4A373]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        <div className="bg-gradient-to-b from-white to-[#FDFBF7] p-7 rounded-[32px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-[var(--border-color)] relative overflow-hidden group hover:border-[var(--accent-gold)] hover:shadow-[0_20px_40px_rgba(212,163,115,0.15)] transition-all duration-500">
+          <div className="absolute top-0 right-0 w-2 h-full bg-gradient-to-b from-[var(--accent-gold)]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="flex justify-between items-start mb-6">
-            <div className="p-3.5 bg-amber-50 rounded-[20px] text-[#D4A373] border border-amber-100 shadow-inner group-hover:scale-110 transition-transform duration-500">
+            <div className="p-3.5 bg-amber-50 rounded-[20px] text-[var(--accent-gold)] border border-amber-100 shadow-inner group-hover:scale-110 transition-transform duration-500">
               <ShoppingBag size={24} className="stroke-[2.5]" />
             </div>
-            <span className="flex items-center text-xs font-black text-[#D4A373] bg-amber-50 px-3 py-1.5 rounded-xl border border-[#D4A373]/20">
+            <span className="flex items-center text-xs font-black text-[var(--accent-gold)] bg-amber-50 px-3 py-1.5 rounded-xl border border-[var(--accent-gold)]/20">
                پسوولە
             </span>
           </div>
-          <p className="text-[#8B8378] text-xs font-bold mb-2 uppercase tracking-wider">ژمارەی فاکتۆرە فەرمییەکان</p>
-          <h3 className="text-3xl lg:text-4xl font-black text-[#1E2420] font-mono tracking-tight group-hover:text-[#D4A373] transition-colors duration-500 flex items-baseline gap-1.5">
-            {totalOrdersToday} <span className="text-sm font-sans text-[#8B8378] font-bold">دانە</span>
+          <p className="text-[var(--text-muted)] text-xs font-bold mb-2 uppercase tracking-wider">ژمارەی فاکتۆرە فەرمییەکان</p>
+          <h3 className="text-3xl lg:text-4xl font-black text-[var(--bg-secondary)] font-mono tracking-tight group-hover:text-[var(--accent-gold)] transition-colors duration-500 flex items-baseline gap-1.5">
+            {totalOrdersToday} <span className="text-sm font-sans text-[var(--text-muted)] font-bold">دانە</span>
           </h3>
         </div>
 
         {/* Stat Card 3: Today's Expenses */}
-        <div className="bg-gradient-to-b from-white to-[#FDFBF7] p-7 rounded-[32px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-[#E9E5D9] relative overflow-hidden group hover:border-[#E11D48] hover:shadow-[0_20px_40px_rgba(225,29,72,0.1)] transition-all duration-500 sm:col-span-2 lg:col-span-1">
+        <div className="bg-gradient-to-b from-white to-[#FDFBF7] p-7 rounded-[32px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-[var(--border-color)] relative overflow-hidden group hover:border-[#E11D48] hover:shadow-[0_20px_40px_rgba(225,29,72,0.1)] transition-all duration-500 sm:col-span-2 lg:col-span-1">
           <div className="absolute top-0 right-0 w-2 h-full bg-gradient-to-b from-[#E11D48]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           <div className="flex justify-between items-start mb-6">
             <div className="p-3.5 bg-[#FFF1F2] rounded-[20px] text-[#E11D48] shadow-inner border border-red-100 group-hover:scale-110 transition-transform duration-500">
@@ -201,24 +201,24 @@ export function Dashboard() {
               خەرجیی گشتی <ArrowDownRight size={16} className="ml-1" />
             </span>
           </div>
-          <p className="text-[#8B8378] text-xs font-bold mb-2 uppercase tracking-wider">خەرجییەکانی تەواوی ئەمڕۆ</p>
-          <h3 className="text-3xl lg:text-4xl font-black text-[#1E2420] font-mono tracking-tight group-hover:text-[#E11D48] transition-colors duration-500 flex items-baseline gap-1.5">
-             {expensesTotal.toLocaleString('en-US')} <span className="text-sm font-sans text-[#8B8378] font-bold">د.ع</span>
+          <p className="text-[var(--text-muted)] text-xs font-bold mb-2 uppercase tracking-wider">خەرجییەکانی تەواوی ئەمڕۆ</p>
+          <h3 className="text-3xl lg:text-4xl font-black text-[var(--bg-secondary)] font-mono tracking-tight group-hover:text-[#E11D48] transition-colors duration-500 flex items-baseline gap-1.5">
+             {expensesTotal.toLocaleString('en-US')} <span className="text-sm font-sans text-[var(--text-muted)] font-bold">د.ع</span>
           </h3>
         </div>
 
       </div>
 
       {/* 7-Days Sales Analytical Visualization Graph */}
-      <div className="bg-gradient-to-b from-white to-[#FDFBF7] p-8 lg:p-10 rounded-[32px] lg:rounded-[40px] border border-[#E9E5D9] shadow-md flex flex-col gap-6 shrink-0 hover:border-[#8DAA91] hover:shadow-xl transition-all duration-500">
+      <div className="bg-gradient-to-b from-white to-[#FDFBF7] p-8 lg:p-10 rounded-[32px] lg:rounded-[40px] border border-[var(--border-color)] shadow-md flex flex-col gap-6 shrink-0 hover:border-[#8DAA91] hover:shadow-xl transition-all duration-500">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-gradient-to-br from-[#1E2420] to-[#2D3631] text-[#D4A373] rounded-2xl shadow-xl border border-[#D4A373]/20">
+            <div className="p-3 bg-gradient-to-br from-[var(--bg-secondary)] to-[var(--text-dark)] text-[var(--accent-gold)] rounded-2xl shadow-xl border border-[var(--accent-gold)]/20">
               <BarChart3 size={24} className="stroke-[2]" />
             </div>
             <div>
-              <h4 className="font-extrabold text-[#1E2420] text-xl">دۆخی فرۆشتنی ئێستا</h4>
-              <p className="text-xs text-[#8B8378] mt-1 font-bold">گەشەی گشتی فرۆشراوەکان لە ماوەی ٧ ڕۆژی ڕابردوودا</p>
+              <h4 className="font-extrabold text-[var(--bg-secondary)] text-xl">دۆخی فرۆشتنی ئێستا</h4>
+              <p className="text-xs text-[var(--text-muted)] mt-1 font-bold">گەشەی گشتی فرۆشراوەکان لە ماوەی ٧ ڕۆژی ڕابردوودا</p>
             </div>
           </div>
           <div className="text-right sm:text-left">
@@ -233,28 +233,28 @@ export function Dashboard() {
             <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
               <defs>
                 <linearGradient id="salesGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#D4A373" stopOpacity={0.25}/>
-                  <stop offset="95%" stopColor="#D4A373" stopOpacity={0.0}/>
+                  <stop offset="5%" stopColor="var(--accent-gold)" stopOpacity={0.25}/>
+                  <stop offset="95%" stopColor="var(--accent-gold)" stopOpacity={0.0}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E9E5D9" opacity={0.5} />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color)" opacity={0.5} />
               <XAxis 
                 dataKey="name" 
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: '#8B8378', fontSize: 11, fontWeight: 700 }}
+                tick={{ fill: 'var(--text-muted)', fontSize: 11, fontWeight: 700 }}
               />
               <YAxis 
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: '#8B8378', fontSize: 11 }}
+                tick={{ fill: 'var(--text-muted)', fontSize: 11 }}
                 orientation="right"
                 tickFormatter={(val) => val >= 1000000 ? `${(val / 1000000).toFixed(1)}M` : val >= 1000 ? `${(val / 1000).toFixed(0)}K` : val}
               />
               <Tooltip 
                 contentStyle={{
-                  backgroundColor: '#1E2420',
-                  borderColor: '#D4A373',
+                  backgroundColor: 'var(--bg-secondary)',
+                  borderColor: 'var(--accent-gold)',
                   borderRadius: '16px',
                   color: '#fff',
                   textAlign: 'right',
@@ -262,15 +262,15 @@ export function Dashboard() {
                   boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
                   padding: '12px'
                 }}
-                itemStyle={{ color: '#D4A373', fontWeight: 700 }}
-                labelStyle={{ color: '#E9E5D9', fontWeight: 700, marginBottom: '4px' }}
+                itemStyle={{ color: 'var(--accent-gold)', fontWeight: 700 }}
+                labelStyle={{ color: 'var(--border-color)', fontWeight: 700, marginBottom: '4px' }}
                 formatter={(value: any) => [`${Number(value).toLocaleString('en-US')} د.ع`, 'فرۆش']}
                 labelFormatter={(label) => `ڕۆژ: ${label}`}
               />
               <Area 
                 type="monotone" 
                 dataKey="sales" 
-                stroke="#D4A373" 
+                stroke="var(--accent-gold)" 
                 strokeWidth={3}
                 fillOpacity={1} 
                 fill="url(#salesGradient)" 
@@ -284,29 +284,29 @@ export function Dashboard() {
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 min-h-0 pb-6 lg:pb-8">
         
         {/* Active/Recent Orders Table Panel */}
-        <div className="lg:col-span-2 bg-white rounded-[28px] lg:rounded-[40px] shadow-sm border border-[#E9E5D9] flex flex-col overflow-hidden min-h-[350px]">
-          <div className="p-6 border-b border-[#E9E5D9] flex flex-row justify-between items-center bg-[#FDFBF7] shrink-0">
+        <div className="lg:col-span-2 bg-white rounded-[28px] lg:rounded-[40px] shadow-sm border border-[var(--border-color)] flex flex-col overflow-hidden min-h-[350px]">
+          <div className="p-6 border-b border-[var(--border-color)] flex flex-row justify-between items-center bg-[#FDFBF7] shrink-0">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-white border border-[#E9E5D9] rounded-xl text-[#D4A373] shadow-sm">
+              <div className="p-2.5 bg-white border border-[var(--border-color)] rounded-xl text-[var(--accent-gold)] shadow-sm">
                 <Clock size={18} />
               </div>
               <div>
-                <h4 className="font-extrabold text-[#1E2420] text-base">تازەترین کارەکان</h4>
-                <p className="text-[10px] text-[#8B8378] mt-0.5">دوایین پسوولەکانی فرۆشتنی سەر شاشە</p>
+                <h4 className="font-extrabold text-[var(--bg-secondary)] text-base">تازەترین کارەکان</h4>
+                <p className="text-[10px] text-[var(--text-muted)] mt-0.5">دوایین پسوولەکانی فرۆشتنی سەر شاشە</p>
               </div>
             </div>
-            <Link to="/receipts" className="text-xs font-bold bg-[#1E2420] text-white hover:bg-[#2D3631] px-5 py-2.5 rounded-full transition-all shadow-md">بینینی هەموو پسوڵەکان</Link>
+            <Link to="/receipts" className="text-xs font-bold bg-[var(--bg-secondary)] text-white hover:bg-[var(--text-dark)] px-5 py-2.5 rounded-full transition-all shadow-md">بینینی هەموو پسوڵەکان</Link>
           </div>
           
           <div className="flex-1 overflow-auto">
             {loading ? (
-                <div className="flex flex-col items-center justify-center h-full text-[#8B8378] gap-2 p-8">
-                   <div className="w-8 h-8 border-4 border-[#E9E5D9] border-t-[#D4A373] rounded-full animate-spin"></div>
+                <div className="flex flex-col items-center justify-center h-full text-[var(--text-muted)] gap-2 p-8">
+                   <div className="w-8 h-8 border-4 border-[var(--border-color)] border-t-[var(--accent-gold)] rounded-full animate-spin"></div>
                    <span className="text-xs">بارکردن...</span>
                 </div>
             ) : (
             <table className="w-full text-right border-collapse">
-              <thead className="text-[#8B8378] text-[10px] uppercase bg-[#FDFBF7] sticky top-0 z-10 shadow-[0_1px_0_#E9E5D9]">
+              <thead className="text-[var(--text-muted)] text-[10px] uppercase bg-[#FDFBF7] sticky top-0 z-10 shadow-[0_1px_0_var(--border-color)]">
                 <tr>
                   <th className="px-6 py-4 font-extrabold">کۆدی پسوولە</th>
                   <th className="px-6 py-4 font-extrabold hidden sm:table-cell">بابەتەکان</th>
@@ -314,30 +314,30 @@ export function Dashboard() {
                   <th className="px-6 py-4 font-extrabold">دۆخی پارەدان</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#F9F7F2]">
+              <tbody className="divide-y divide-[var(--bg-lighter)]">
                 {orders.slice(0, 6).map((order) => (
                     <tr key={order.id} className="hover:bg-[#FDFBF7] transition-colors">
                      <td className="px-6 py-4">
-                       <span className="font-mono text-xs font-bold bg-white border border-[#E9E5D9] text-[#1E2420] px-3 py-1.5 rounded-xl">
+                       <span className="font-mono text-xs font-bold bg-white border border-[var(--border-color)] text-[var(--bg-secondary)] px-3 py-1.5 rounded-xl">
                          #{order.id.slice(0, 8).toUpperCase()}
                        </span>
                      </td>
                      <td className="px-6 py-4 hidden sm:table-cell">
                         <div className="flex flex-wrap gap-1.5">
                            {order.items.slice(0, 2).map((i, idx) => (
-                             <span key={idx} className="bg-[#FDFBF7] text-[#1E2420] px-3 py-1.5 rounded-xl text-xs border border-[#E9E5D9] flex items-center gap-2">
-                               <span className="text-[#D4A373] font-extrabold font-mono text-[10px] bg-[#1E2420] text-white px-1.5 py-0.5 rounded-md">{i.quantity}x</span> 
+                             <span key={idx} className="bg-[#FDFBF7] text-[var(--bg-secondary)] px-3 py-1.5 rounded-xl text-xs border border-[var(--border-color)] flex items-center gap-2">
+                               <span className="text-[var(--accent-gold)] font-extrabold font-mono text-[10px] bg-[var(--bg-secondary)] text-white px-1.5 py-0.5 rounded-md">{i.quantity}x</span> 
                                <span className="font-bold">{i.name}</span>
                              </span>
                            ))}
                            {order.items.length > 2 && (
-                             <span className="bg-[#1E2420] text-white px-2 py-1 rounded-xl text-xs font-bold">
+                             <span className="bg-[var(--bg-secondary)] text-white px-2 py-1 rounded-xl text-xs font-bold">
                                +{order.items.length - 2} بابەت زیاتر
                              </span>
                            )}
                         </div>
                      </td>
-                     <td className="px-6 py-4 text-[#1E2420] font-mono font-extrabold text-sm">
+                     <td className="px-6 py-4 text-[var(--bg-secondary)] font-mono font-extrabold text-sm">
                        {order.total.toLocaleString('en-US')} <span className="text-gray-400 font-sans text-xs font-normal">د.ع</span>
                      </td>
                      <td className="px-6 py-4">
@@ -350,10 +350,10 @@ export function Dashboard() {
                 {orders.length === 0 && (
                     <tr>
                         <td colSpan={4} className="text-center py-24">
-                           <div className="flex flex-col items-center gap-3 text-[#8B8378]">
-                              <ShoppingBag size={36} className="text-[#E9E5D9] opacity-30" />
+                           <div className="flex flex-col items-center gap-3 text-[var(--text-muted)]">
+                              <ShoppingBag size={36} className="text-[var(--border-color)] opacity-30" />
                               <span className="font-bold text-sm">هیچ داواکارییەک لەم مەودایەدا نییە</span>
-                              <p className="text-xs text-[#8B8378]">تۆماری فرۆشتنەکان لێرە بە شێوەیەکی خۆکار تازە دەبێتەوە</p>
+                              <p className="text-xs text-[var(--text-muted)]">تۆماری فرۆشتنەکان لێرە بە شێوەیەکی خۆکار تازە دەبێتەوە</p>
                            </div>
                         </td>
                     </tr>
@@ -365,32 +365,32 @@ export function Dashboard() {
         </div>
 
         {/* Popular Items / Top Rated Sidebar panel */}
-        <div className="bg-white rounded-[28px] lg:rounded-[40px] shadow-sm border border-[#E9E5D9] p-6 lg:p-8 flex flex-col min-h-[350px] lg:min-h-0 relative overflow-hidden bg-gradient-to-b from-white to-[#FDFBF7]">
-          <h4 className="font-extrabold text-[#1E2420] mb-6 shrink-0 text-base flex items-center gap-2">
-            <Star size={18} className="text-[#D4A373] fill-[#D4A373]" />
+        <div className="bg-white rounded-[28px] lg:rounded-[40px] shadow-sm border border-[var(--border-color)] p-6 lg:p-8 flex flex-col min-h-[350px] lg:min-h-0 relative overflow-hidden bg-gradient-to-b from-white to-[#FDFBF7]">
+          <h4 className="font-extrabold text-[var(--bg-secondary)] mb-6 shrink-0 text-base flex items-center gap-2">
+            <Star size={18} className="text-[var(--accent-gold)] fill-[var(--accent-gold)]" />
             باشترین فرۆشراوەکانی یەکەم
           </h4>
           
           <div className="space-y-4 flex-1 overflow-auto pr-1">
              {popularItems.length > 0 ? (
                   popularItems.map((item, i) => (
-                     <div key={i} className="flex justify-between items-center p-4 bg-white border border-[#E9E5D9] rounded-2xl hover:border-[#D4A373] transition-all relative overflow-hidden group">
-                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#D4A373] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                     <div key={i} className="flex justify-between items-center p-4 bg-white border border-[var(--border-color)] rounded-2xl hover:border-[var(--accent-gold)] transition-all relative overflow-hidden group">
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--accent-gold)] opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-xl bg-[#F9F7F2] flex items-center justify-center text-xs font-extrabold text-[#1E2420] border border-[#E9E5D9]">
+                            <div className="w-8 h-8 rounded-xl bg-[var(--bg-lighter)] flex items-center justify-center text-xs font-extrabold text-[var(--bg-secondary)] border border-[var(--border-color)]">
                                 #{i + 1}
                             </div>
-                            <span className="font-extrabold text-[#2D3631] text-sm">{item.name}</span>
+                            <span className="font-extrabold text-[var(--text-dark)] text-sm">{item.name}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                            <span className="text-[#8B8378] text-[9px] font-bold uppercase tracking-wider">دانە</span>
-                            <span className="bg-[#1E2420] text-[#D4A373] px-3 py-1 rounded-xl text-xs font-extrabold font-mono shadow-inner">{item.quantity}</span>
+                            <span className="text-[var(--text-muted)] text-[9px] font-bold uppercase tracking-wider">دانە</span>
+                            <span className="bg-[var(--bg-secondary)] text-[var(--accent-gold)] px-3 py-1 rounded-xl text-xs font-extrabold font-mono shadow-inner">{item.quantity}</span>
                         </div>
                      </div>
                   ))
              ) : (
-                  <div className="h-full flex flex-col items-center justify-center text-[#8B8378] gap-4">
-                      <div className="p-4 bg-[#F9F7F2] rounded-full text-[#E9E5D9]">
+                  <div className="h-full flex flex-col items-center justify-center text-[var(--text-muted)] gap-4">
+                      <div className="p-4 bg-[var(--bg-lighter)] rounded-full text-[var(--border-color)]">
                          <Tag size={32} />
                       </div>
                       <span className="text-xs font-bold text-gray-400">تا ئێستا کڕینی گشتی بۆ ئەمڕۆ نییە</span>
@@ -398,9 +398,9 @@ export function Dashboard() {
              )}
           </div>
 
-          <div className="mt-6 pt-6 shrink-0 border-t border-dashed border-[#E9E5D9]">
+          <div className="mt-6 pt-6 shrink-0 border-t border-dashed border-[var(--border-color)]">
             <div className="text-center">
-              <span className="text-[9px] text-[#8B8378] font-bold uppercase tracking-[0.25em] opacity-60">
+              <span className="text-[9px] text-[var(--text-muted)] font-bold uppercase tracking-[0.25em] opacity-60">
                  سیستەمی بەڕێوبەرایەتی کۆیی MAS MENU
               </span>
             </div>

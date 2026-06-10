@@ -228,7 +228,7 @@ export function ReportsView() {
           .header {
             text-align: center;
             margin-bottom: 30px;
-            border-bottom: 2px dashed #E9E5D9;
+            border-bottom: 2px dashed var(--border-color);
             padding-bottom: 25px;
           }
           .header h1 {
@@ -447,14 +447,14 @@ export function ReportsView() {
     <div className="space-y-6 h-full flex flex-col min-w-0 pb-6">
       
       {/* Page Header Banner */}
-      <div className="bg-gradient-to-br from-[#1E2420] to-[#2D3631] text-white p-6 lg:p-8 rounded-[32px] lg:rounded-[40px] shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden shrink-0 border border-[#D4A373]/20">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#D4A373]/10 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
+      <div className="bg-gradient-to-br from-[var(--bg-secondary)] to-[var(--text-dark)] text-white p-6 lg:p-8 rounded-[32px] lg:rounded-[40px] shadow-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden shrink-0 border border-[var(--accent-gold)]/20">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[var(--accent-gold)]/10 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
         <div className="relative z-10 w-full md:w-auto">
-          <span className="bg-[#D4A373]/20 border border-[#D4A373]/40 text-[#D4A373] text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-wider shadow-sm">
+          <span className="bg-[var(--accent-gold)]/20 border border-[var(--accent-gold)]/40 text-[var(--accent-gold)] text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-wider shadow-sm">
              سیستەمی فەرمی داتا و ڕاپۆرتەکان
           </span>
           <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-l from-white to-[#F5E6CA] mt-4 flex items-center gap-3">
-            <Activity className="text-[#D4A373] w-9 h-9 animate-pulse" />
+            <Activity className="text-[var(--accent-gold)] w-9 h-9 animate-pulse" />
             سیستەمی ڕاپۆرت و شیکاری
           </h1>
           <p className="text-white/70 text-sm mt-3 font-bold max-w-lg">
@@ -468,7 +468,7 @@ export function ReportsView() {
           {/* Print Button */}
           <button
             onClick={handlePrintReport}
-            className="bg-gradient-to-br from-[#D4A373] to-[#BFA171] hover:from-[#cdaf8f] hover:to-[#BFA171] text-[#1E2420] font-black py-4 px-7 rounded-2xl text-xs sm:text-sm transition-all shadow-xl flex items-center justify-center gap-2 active:scale-95 stroke-[2.5]"
+            className="bg-gradient-to-br from-[var(--accent-gold)] to-[#BFA171] hover:from-[#cdaf8f] hover:to-[#BFA171] text-[var(--bg-secondary)] font-black py-4 px-7 rounded-2xl text-xs sm:text-sm transition-all shadow-xl flex items-center justify-center gap-2 active:scale-95 stroke-[2.5]"
           >
             <Printer size={18} className="stroke-[2.5]" />
             <span>چاپکردنی ڕاپۆرت</span>
@@ -480,7 +480,7 @@ export function ReportsView() {
                  type="date"
                  value={customDate}
                  onChange={(e) => setCustomDate(e.target.value)}
-                 className="w-full bg-white/10 backdrop-blur-md border border-white/20 text-white font-black py-4 px-5 rounded-2xl text-xs sm:text-sm focus:ring-2 focus:ring-[#D4A373] focus:border-transparent outline-none shadow-inner"
+                 className="w-full bg-white/10 backdrop-blur-md border border-white/20 text-white font-black py-4 px-5 rounded-2xl text-xs sm:text-sm focus:ring-2 focus:ring-[var(--accent-gold)] focus:border-transparent outline-none shadow-inner"
                />
              </div>
           )}
@@ -492,14 +492,14 @@ export function ReportsView() {
                   setDateRange(e.target.value as any);
                   if (e.target.value !== 'custom') setCustomDate('');
               }}
-              className="w-full appearance-none bg-white/10 backdrop-blur-md border border-white/20 text-white font-black py-4 pl-5 pr-14 rounded-2xl text-xs sm:text-sm focus:ring-2 focus:ring-[#D4A373] focus:border-transparent outline-none cursor-pointer hover:bg-white/20 transition-all shadow-inner"
+              className="w-full appearance-none bg-white/10 backdrop-blur-md border border-white/20 text-white font-black py-4 pl-5 pr-14 rounded-2xl text-xs sm:text-sm focus:ring-2 focus:ring-[var(--accent-gold)] focus:border-transparent outline-none cursor-pointer hover:bg-white/20 transition-all shadow-inner"
             >
-              <option value="today" className="bg-[#2D3631] text-white">ئەمڕۆ</option>
-              <option value="yesterday" className="bg-[#2D3631] text-white">دوێنێ</option>
-              <option value="thisMonth" className="bg-[#2D3631] text-white">ئەم مانگە</option>
-              <option value="lastMonth" className="bg-[#2D3631] text-white">مانگی پێشوو</option>
-              <option value="all" className="bg-[#2D3631] text-white">هەموو کاتێک</option>
-              <option value="custom" className="bg-[#2D3631] text-white">دیاریکراو...</option>
+              <option value="today" className="bg-[var(--text-dark)] text-white">ئەمڕۆ</option>
+              <option value="yesterday" className="bg-[var(--text-dark)] text-white">دوێنێ</option>
+              <option value="thisMonth" className="bg-[var(--text-dark)] text-white">ئەم مانگە</option>
+              <option value="lastMonth" className="bg-[var(--text-dark)] text-white">مانگی پێشوو</option>
+              <option value="all" className="bg-[var(--text-dark)] text-white">هەموو کاتێک</option>
+              <option value="custom" className="bg-[var(--text-dark)] text-white">دیاریکراو...</option>
             </select>
             <div className="absolute inset-y-0 right-5 flex items-center pointer-events-none text-white">
               <Calendar size={18} className="stroke-[2.5]" />
@@ -509,8 +509,8 @@ export function ReportsView() {
       </div>
 
       {loading ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-[#8B8378] bg-white rounded-[32px] border border-[#E9E5D9] h-96">
-              <div className="w-9 h-9 border-4 border-[#E9E5D9] border-t-[#D4A373] rounded-full animate-spin"></div>
+          <div className="flex-1 flex flex-col items-center justify-center text-[var(--text-muted)] bg-white rounded-[32px] border border-[var(--border-color)] h-96">
+              <div className="w-9 h-9 border-4 border-[var(--border-color)] border-t-[var(--accent-gold)] rounded-full animate-spin"></div>
               <span className="font-bold text-sm mt-3">بارکردنی شیکارییە داراییەکان و چارتی قازانج...</span>
           </div>
       ) : (
@@ -519,7 +519,7 @@ export function ReportsView() {
              {/* Bento Grid Stats Structure (5 Cards) */}
              <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 shrink-0">
                 {/* 1. Total Sales */}
-                <div className="bg-white p-5 rounded-[24px] shadow-sm border border-[#E9E5D9] relative overflow-hidden group hover:border-[#8DAA91] transition-all">
+                <div className="bg-white p-5 rounded-[24px] shadow-sm border border-[var(--border-color)] relative overflow-hidden group hover:border-[#8DAA91] transition-all">
                     <div className="flex justify-between items-start mb-2.5">
                         <div className="p-2.5 bg-green-50 rounded-xl text-green-600">
                           <TrendingUp size={20} />
@@ -528,14 +528,14 @@ export function ReportsView() {
                            داهات
                         </span>
                     </div>
-                    <p className="text-[#8B8378] text-[11px] font-medium mb-1">کۆی فرۆشتن</p>
-                    <h3 className="text-lg lg:text-xl font-extrabold text-[#1E2420] font-mono whitespace-nowrap">
-                        {totalSales.toLocaleString()} <span className="text-[10px] font-sans text-[#8B8378] font-normal">د.ع</span>
+                    <p className="text-[var(--text-muted)] text-[11px] font-medium mb-1">کۆی فرۆشتن</p>
+                    <h3 className="text-lg lg:text-xl font-extrabold text-[var(--bg-secondary)] font-mono whitespace-nowrap">
+                        {totalSales.toLocaleString()} <span className="text-[10px] font-sans text-[var(--text-muted)] font-normal">د.ع</span>
                     </h3>
                 </div>
 
                 {/* 2. Total Expenses */}
-                <div className="bg-white p-5 rounded-[24px] shadow-sm border border-[#E9E5D9] relative overflow-hidden group hover:border-[#E11D48] transition-all">
+                <div className="bg-white p-5 rounded-[24px] shadow-sm border border-[var(--border-color)] relative overflow-hidden group hover:border-[#E11D48] transition-all">
                     <div className="flex justify-between items-start mb-2.5">
                         <div className="p-2.5 bg-red-50 rounded-xl text-[#E11D48]">
                           <TrendingDown size={20} />
@@ -544,30 +544,30 @@ export function ReportsView() {
                            خەرجکراو
                         </span>
                     </div>
-                    <p className="text-[#8B8378] text-[11px] font-medium mb-1">خەرجی گشتی</p>
-                    <h3 className="text-lg lg:text-xl font-extrabold text-[#1E2420] font-mono whitespace-nowrap">
-                        {totalExpenses.toLocaleString()} <span className="text-[10px] font-sans text-[#8B8378] font-normal">د.ع</span>
+                    <p className="text-[var(--text-muted)] text-[11px] font-medium mb-1">خەرجی گشتی</p>
+                    <h3 className="text-lg lg:text-xl font-extrabold text-[var(--bg-secondary)] font-mono whitespace-nowrap">
+                        {totalExpenses.toLocaleString()} <span className="text-[10px] font-sans text-[var(--text-muted)] font-normal">د.ع</span>
                     </h3>
                 </div>
 
                 {/* 3. Basket Average (AOV) */}
-                <div className="bg-white p-5 rounded-[24px] shadow-sm border border-[#E9E5D9] relative overflow-hidden group hover:border-[#D4A373] transition-all">
+                <div className="bg-white p-5 rounded-[24px] shadow-sm border border-[var(--border-color)] relative overflow-hidden group hover:border-[var(--accent-gold)] transition-all">
                     <div className="flex justify-between items-start mb-2.5">
-                        <div className="p-2.5 bg-[#F9F7F2] rounded-xl text-[#D4A373]">
+                        <div className="p-2.5 bg-[var(--bg-lighter)] rounded-xl text-[var(--accent-gold)]">
                           <Briefcase size={20} />
                         </div>
-                        <span className="text-[10px] font-bold text-[#D4A373] bg-[#F9F7F2] px-2 py-0.5 rounded-md font-mono">
+                        <span className="text-[10px] font-bold text-[var(--accent-gold)] bg-[var(--bg-lighter)] px-2 py-0.5 rounded-md font-mono">
                            AOV
                         </span>
                     </div>
-                    <p className="text-[#8B8378] text-[11px] font-medium mb-1">تێکڕای پسوولە</p>
-                    <h3 className="text-lg lg:text-xl font-extrabold text-[#1E2420] font-mono whitespace-nowrap">
-                        {avgOrderValue.toLocaleString()} <span className="text-[10px] font-sans text-[#8B8378] font-normal">د.ع</span>
+                    <p className="text-[var(--text-muted)] text-[11px] font-medium mb-1">تێکڕای پسوولە</p>
+                    <h3 className="text-lg lg:text-xl font-extrabold text-[var(--bg-secondary)] font-mono whitespace-nowrap">
+                        {avgOrderValue.toLocaleString()} <span className="text-[10px] font-sans text-[var(--text-muted)] font-normal">د.ع</span>
                     </h3>
                 </div>
 
                 {/* 4. Total Invoices Scale */}
-                <div className="bg-white p-5 rounded-[24px] shadow-sm border border-[#E9E5D9] relative overflow-hidden group hover:border-[#8DAA91] transition-all">
+                <div className="bg-white p-5 rounded-[24px] shadow-sm border border-[var(--border-color)] relative overflow-hidden group hover:border-[#8DAA91] transition-all">
                     <div className="flex justify-between items-start mb-2.5">
                         <div className="p-2.5 bg-blue-50 rounded-xl text-blue-600">
                           <ShoppingBag size={20} />
@@ -576,17 +576,17 @@ export function ReportsView() {
                            قەبارە
                         </span>
                     </div>
-                    <p className="text-[#8B8378] text-[11px] font-medium mb-1">کۆی کارەکان</p>
-                    <h3 className="text-lg lg:text-xl font-extrabold text-[#1E2420] font-mono whitespace-nowrap">
-                        {orders.length} <span className="text-[10px] font-sans text-[#8B8378] font-normal">پسوولە</span>
+                    <p className="text-[var(--text-muted)] text-[11px] font-medium mb-1">کۆی کارەکان</p>
+                    <h3 className="text-lg lg:text-xl font-extrabold text-[var(--bg-secondary)] font-mono whitespace-nowrap">
+                        {orders.length} <span className="text-[10px] font-sans text-[var(--text-muted)] font-normal">پسوولە</span>
                     </h3>
                 </div>
 
                 {/* 5. Net Profit Charcoal Card */}
-                <div className="bg-[#1E2420] p-5 rounded-[24px] shadow-md text-white relative overflow-hidden flex flex-col justify-between col-span-2 lg:col-span-1">
+                <div className="bg-[var(--bg-secondary)] p-5 rounded-[24px] shadow-md text-white relative overflow-hidden flex flex-col justify-between col-span-2 lg:col-span-1">
                     <div className="absolute top-0 left-0 w-24 h-24 bg-white/5 rounded-full blur-xl -ml-5 -mt-5"></div>
                     <div className="relative z-10 flex justify-between items-start mb-2.5">
-                        <div className="p-2.5 bg-white/10 rounded-xl text-[#D4A373] backdrop-blur-sm">
+                        <div className="p-2.5 bg-white/10 rounded-xl text-[var(--accent-gold)] backdrop-blur-sm">
                           <Wallet size={18} />
                         </div>
                         <span className={`text-[9px] font-black px-2 py-0.5 rounded-md ${netIncome >= 0 ? 'bg-[#4ADE80]/20 text-[#4ADE80]' : 'bg-red-500/20 text-red-400'}`}>
@@ -595,7 +595,7 @@ export function ReportsView() {
                     </div>
                     <div>
                         <p className="text-white/60 text-[11px] font-medium mb-1">قازانجی پوخت</p>
-                        <h3 className="text-lg lg:text-xl font-extrabold text-[#D4A373] font-mono whitespace-nowrap">
+                        <h3 className="text-lg lg:text-xl font-extrabold text-[var(--accent-gold)] font-mono whitespace-nowrap">
                             {netIncome.toLocaleString()} <span className="text-[10px] font-normal text-white/50">د.ع</span>
                         </h3>
                     </div>
@@ -603,11 +603,11 @@ export function ReportsView() {
              </div>
 
              {/* Internal Navigation Tabs for Report sections */}
-             <div className="flex bg-white border border-[#E9E5D9] rounded-2xl p-1 shrink-0 shadow-inner w-full md:w-max">
+             <div className="flex bg-white border border-[var(--border-color)] rounded-2xl p-1 shrink-0 shadow-inner w-full md:w-max">
                  <button 
                    onClick={() => setActiveTab('overview')}
                    className={`flex-1 md:flex-initial px-6 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
-                     activeTab === 'overview' ? 'bg-[#1E2420] text-white shadow-md' : 'text-[#8B8378] hover:text-[#1E2420]'
+                     activeTab === 'overview' ? 'bg-[var(--bg-secondary)] text-white shadow-md' : 'text-[var(--text-muted)] hover:text-[var(--bg-secondary)]'
                    }`}
                  >
                     <Activity size={14} /> داشبۆردی گشتی و چارتەکان
@@ -615,7 +615,7 @@ export function ReportsView() {
                  <button 
                    onClick={() => setActiveTab('products')}
                    className={`flex-1 md:flex-initial px-6 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
-                     activeTab === 'products' ? 'bg-[#1E2420] text-white shadow-md' : 'text-[#8B8378] hover:text-[#1E2420]'
+                     activeTab === 'products' ? 'bg-[var(--bg-secondary)] text-white shadow-md' : 'text-[var(--text-muted)] hover:text-[var(--bg-secondary)]'
                    }`}
                  >
                     <Layers size={14} /> فرۆشتنی مێنو و بابەتەکان
@@ -623,7 +623,7 @@ export function ReportsView() {
                  <button 
                    onClick={() => setActiveTab('expenses')}
                    className={`flex-1 md:flex-initial px-6 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
-                     activeTab === 'expenses' ? 'bg-[#1E2420] text-white shadow-md' : 'text-[#8B8378] hover:text-[#1E2420]'
+                     activeTab === 'expenses' ? 'bg-[var(--bg-secondary)] text-white shadow-md' : 'text-[var(--text-muted)] hover:text-[var(--bg-secondary)]'
                    }`}
                  >
                     <Wallet size={14} /> خستنەڕووی خەرجکراوەکان
@@ -636,13 +636,13 @@ export function ReportsView() {
                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full items-stretch">
                       
                       {/* Left: Revenues Over Time Chart (Grid 2) */}
-                      <div className="lg:col-span-2 bg-white rounded-[28px] border border-[#E9E5D9] p-6 flex flex-col min-h-[350px]">
+                      <div className="lg:col-span-2 bg-white rounded-[28px] border border-[var(--border-color)] p-6 flex flex-col min-h-[350px]">
                          <div className="flex items-center justify-between mb-6 shrink-0">
-                            <h4 className="font-extrabold text-[#1E2420] text-sm lg:text-base flex items-center gap-2">
-                               <span className="w-1.5 h-6 bg-[#D4A373] rounded-full"></span>
+                            <h4 className="font-extrabold text-[var(--bg-secondary)] text-sm lg:text-base flex items-center gap-2">
+                               <span className="w-1.5 h-6 bg-[var(--accent-gold)] rounded-full"></span>
                                چارتی هێڵی تەوژمی داهاتی فرۆشتنەکان
                             </h4>
-                            <span className="text-xs text-[#8B8378] bg-[#F9F7F2] border border-[#E9E5D9] px-3 py-1.5 rounded-full font-bold">
+                            <span className="text-xs text-[var(--text-muted)] bg-[var(--bg-lighter)] border border-[var(--border-color)] px-3 py-1.5 rounded-full font-bold">
                                 بێ کێشە و ڕاستەوخۆ
                             </span>
                          </div>
@@ -653,54 +653,54 @@ export function ReportsView() {
                                   <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                      <defs>
                                         <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                                           <stop offset="5%" stopColor="#1E2420" stopOpacity={0.2}/>
-                                           <stop offset="95%" stopColor="#1E2420" stopOpacity={0}/>
+                                           <stop offset="5%" stopColor="var(--bg-secondary)" stopOpacity={0.2}/>
+                                           <stop offset="95%" stopColor="var(--bg-secondary)" stopOpacity={0}/>
                                         </linearGradient>
                                      </defs>
                                      <CartesianGrid strokeDasharray="3 3" stroke="#F1EFE9" vertical={false} />
                                      <XAxis 
                                         dataKey="name" 
-                                        tick={{fontSize: 11, fill: '#8B8378', fontWeight: 'bold'}}
+                                        tick={{fontSize: 11, fill: 'var(--text-muted)', fontWeight: 'bold'}}
                                         axisLine={false}
                                         tickLine={false}
                                         dy={10}
                                      />
                                      <YAxis 
-                                        tick={{fontSize: 11, fill: '#8B8378', fontFamily: 'monospace'}}
+                                        tick={{fontSize: 11, fill: 'var(--text-muted)', fontFamily: 'monospace'}}
                                         axisLine={false}
                                         tickLine={false}
                                         tickFormatter={(val) => val >= 1000 ? `${(val / 1000)}k` : val}
                                         dx={-10}
                                      />
                                      <Tooltip 
-                                        cursor={{ stroke: '#D4A373', strokeWidth: 1.5, strokeDasharray: '4 4' }}
+                                        cursor={{ stroke: 'var(--accent-gold)', strokeWidth: 1.5, strokeDasharray: '4 4' }}
                                         contentStyle={{
                                             borderRadius: '16px',
-                                            border: '1px solid #E9E5D9',
+                                            border: '1px solid var(--border-color)',
                                             boxShadow: '0 12px 30px rgba(0,0,0,0.06)',
                                             fontSize: '13px',
                                             fontWeight: 'extrabold',
-                                            color: '#1E2420',
+                                            color: 'var(--bg-secondary)',
                                             backgroundColor: '#ffffff'
                                         }}
                                         formatter={(val: number) => [`${val.toLocaleString()} د.ع`, 'کۆی گشتی']}
-                                        labelStyle={{ color: '#8B8378', marginBottom: '4px', fontSize: '11px', fontWeight: 'bold' }}
+                                        labelStyle={{ color: 'var(--text-muted)', marginBottom: '4px', fontSize: '11px', fontWeight: 'bold' }}
                                      />
                                      <Area 
                                         type="monotone" 
                                         dataKey="total" 
-                                        stroke="#1E2420" 
+                                        stroke="var(--bg-secondary)" 
                                         strokeWidth={3}
                                         fillOpacity={1} 
                                         fill="url(#colorTotal)" 
                                         animationDuration={1100}
-                                        dot={{ stroke: '#D4A373', strokeWidth: 2, r: 4, fill: '#FFFFFF' }}
-                                        activeDot={{ r: 6, stroke: '#1E2420', strokeWidth: 2, fill: '#D4A373' }}
+                                        dot={{ stroke: 'var(--accent-gold)', strokeWidth: 2, r: 4, fill: '#FFFFFF' }}
+                                        activeDot={{ r: 6, stroke: 'var(--bg-secondary)', strokeWidth: 2, fill: 'var(--accent-gold)' }}
                                      />
                                   </AreaChart>
                                </ResponsiveContainer>
                             ) : (
-                               <div className="absolute inset-0 flex flex-col items-center justify-center text-[#8B8378] gap-3">
+                               <div className="absolute inset-0 flex flex-col items-center justify-center text-[var(--text-muted)] gap-3">
                                   <CalendarDays size={36} className="text-gray-300" />
                                   <span className="text-xs font-bold">هیچ فرۆشراوێک تۆمار نەکراوە بۆ ئەم هێڵە کاتییە</span>
                                 </div>
@@ -709,9 +709,9 @@ export function ReportsView() {
                       </div>
 
                       {/* Right: Category Revenue Share Meters (Grid 1) */}
-                      <div className="bg-white rounded-[28px] border border-[#E9E5D9] p-6 flex flex-col min-h-[350px]">
-                         <h4 className="font-extrabold text-[#1E2420] text-sm lg:text-base flex items-center gap-2 mb-6 shrink-0">
-                            <Layers size={18} className="text-[#D4A373]" />
+                      <div className="bg-white rounded-[28px] border border-[var(--border-color)] p-6 flex flex-col min-h-[350px]">
+                         <h4 className="font-extrabold text-[var(--bg-secondary)] text-sm lg:text-base flex items-center gap-2 mb-6 shrink-0">
+                            <Layers size={18} className="text-[var(--accent-gold)]" />
                             ڕێژەی هۆبەکانی داهات
                          </h4>
 
@@ -720,12 +720,12 @@ export function ReportsView() {
                                categoryShareList.map((cat, idx) => (
                                   <div key={idx} className="space-y-2">
                                      <div className="flex justify-between items-center text-xs">
-                                        <span className="font-bold text-[#1E2420] flex items-center gap-1.5">
-                                           <span className="w-2.5 h-2.5 rounded-full bg-[#1E2420] shrink-0"></span>
+                                        <span className="font-bold text-[var(--bg-secondary)] flex items-center gap-1.5">
+                                           <span className="w-2.5 h-2.5 rounded-full bg-[var(--bg-secondary)] shrink-0"></span>
                                            {cat.name}
                                         </span>
                                         <div className="flex items-center gap-2 font-mono">
-                                           <span className="font-bold text-[#D4A373]">{cat.percentage}%</span>
+                                           <span className="font-bold text-[var(--accent-gold)]">{cat.percentage}%</span>
                                            <span className="text-gray-400">({cat.value.toLocaleString()} د.ع)</span>
                                         </div>
                                      </div>
@@ -733,14 +733,14 @@ export function ReportsView() {
                                      {/* Custom elegant progress tracking meter */}
                                      <div className="h-3 w-full bg-[#F5F2EA] rounded-full overflow-hidden">
                                         <div 
-                                          className="h-full bg-gradient-to-r from-[#1E2420] to-[#D4A373] rounded-full transition-all duration-1000"
+                                          className="h-full bg-gradient-to-r from-[var(--bg-secondary)] to-[var(--accent-gold)] rounded-full transition-all duration-1000"
                                           style={{ width: `${cat.percentage}%` }}
                                         ></div>
                                      </div>
                                   </div>
                                ))
                             ) : (
-                               <div className="h-full flex flex-col items-center justify-center text-[#8B8378] py-8">
+                               <div className="h-full flex flex-col items-center justify-center text-[var(--text-muted)] py-8">
                                   <Sparkles size={32} className="opacity-10 mb-2" />
                                   <p className="text-xs font-bold text-gray-400">داتای بەشەکان خاڵییە</p>
                                </div>
@@ -753,11 +753,11 @@ export function ReportsView() {
 
                 {/* Tab 2: Itemized product performance */}
                 {activeTab === 'products' && (
-                    <div className="bg-white rounded-[28px] border border-[#E9E5D9] p-6 flex flex-col h-full min-h-[400px]">
-                       <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 border-b border-[#F9F7F2] pb-5 mb-5 shrink-0">
+                    <div className="bg-white rounded-[28px] border border-[var(--border-color)] p-6 flex flex-col h-full min-h-[400px]">
+                       <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 border-b border-[var(--bg-lighter)] pb-5 mb-5 shrink-0">
                           <div>
-                             <h3 className="font-extrabold text-sm lg:text-base text-[#1E2420]">شیکاریی هەر بەرهەمێک</h3>
-                             <p className="text-xs text-[#8B8378] mt-0.5">بەپێی ژمارەی فرۆشراو و پارەی کەڵەکەبوو لە تێکڕای فرۆشتندا</p>
+                             <h3 className="font-extrabold text-sm lg:text-base text-[var(--bg-secondary)]">شیکاریی هەر بەرهەمێک</h3>
+                             <p className="text-xs text-[var(--text-muted)] mt-0.5">بەپێی ژمارەی فرۆشراو و پارەی کەڵەکەبوو لە تێکڕای فرۆشتندا</p>
                           </div>
                           
                           {/* Search products filter */}
@@ -770,7 +770,7 @@ export function ReportsView() {
                                value={productQuery}
                                onChange={(e) => setProductQuery(e.target.value)}
                                placeholder="گەڕان بەدوای بەرهەم یان مێنو..."
-                               className="w-full bg-[#FDFBF7] border border-[#E9E5D9] rounded-2xl py-2.5 pl-4 pr-11 text-xs outline-none focus:ring-2 focus:ring-[#D4A373] text-[#1E2420] font-medium"
+                               className="w-full bg-[#FDFBF7] border border-[var(--border-color)] rounded-2xl py-2.5 pl-4 pr-11 text-xs outline-none focus:ring-2 focus:ring-[var(--accent-gold)] text-[var(--bg-secondary)] font-medium"
                              />
                           </div>
                        </div>
@@ -778,7 +778,7 @@ export function ReportsView() {
                        <div className="flex-1 overflow-auto">
                           {filteredProductsPerformance.length > 0 ? (
                              <table className="w-full text-right border-collapse">
-                                <thead className="text-[#8B8378] text-[10px] lg:text-xs uppercase bg-[#FDFBF7] shadow-[0_1px_0_#E9E5D9] sticky top-0 z-10">
+                                <thead className="text-[var(--text-muted)] text-[10px] lg:text-xs uppercase bg-[#FDFBF7] shadow-[0_1px_0_var(--border-color)] sticky top-0 z-10">
                                    <tr>
                                       <th className="px-6 py-4 font-extrabold">ڕیز</th>
                                       <th className="px-6 py-4 font-extrabold">ناوی بەرهەم</th>
@@ -791,9 +791,9 @@ export function ReportsView() {
                                    {filteredProductsPerformance.map((p, idx) => (
                                       <tr key={idx} className="hover:bg-[#FDFBF7] transition-all duration-150">
                                          <td className="px-6 py-4 text-xs font-mono font-bold text-gray-400">{idx + 1}</td>
-                                         <td className="px-6 py-4 font-bold text-[#1E2420]">{p.name}</td>
+                                         <td className="px-6 py-4 font-bold text-[var(--bg-secondary)]">{p.name}</td>
                                          <td className="px-6 py-4">
-                                            <span className="bg-[#F9F7F2] text-[#2D3631] px-2.5 py-1 rounded-lg text-xs font-semibold border border-[#E9E5D9]">
+                                            <span className="bg-[var(--bg-lighter)] text-[var(--text-dark)] px-2.5 py-1 rounded-lg text-xs font-semibold border border-[var(--border-color)]">
                                                {p.category}
                                             </span>
                                          </td>
@@ -804,7 +804,7 @@ export function ReportsView() {
                                 </tbody>
                              </table>
                           ) : (
-                             <div className="flex flex-col items-center justify-center py-16 text-[#8B8378]">
+                             <div className="flex flex-col items-center justify-center py-16 text-[var(--text-muted)]">
                                 <Layers size={36} className="opacity-20 mb-3" />
                                 <span className="text-xs font-bold">هیچ بابەتێکی مێنو نەدۆزرایەوە</span>
                              </div>
@@ -815,11 +815,11 @@ export function ReportsView() {
 
                 {/* Tab 3: Detailed Expenses structure */}
                 {activeTab === 'expenses' && (
-                    <div className="bg-white rounded-[28px] border border-[#E9E5D9] p-6 flex flex-col h-full min-h-[400px]">
-                       <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 border-b border-[#F9F7F2] pb-5 mb-5 shrink-0">
+                    <div className="bg-white rounded-[28px] border border-[var(--border-color)] p-6 flex flex-col h-full min-h-[400px]">
+                       <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 border-b border-[var(--bg-lighter)] pb-5 mb-5 shrink-0">
                           <div>
-                             <h3 className="font-extrabold text-sm lg:text-base text-[#1E2420]">تۆماری خەرجییەکان</h3>
-                             <p className="text-xs text-[#8B8378] mt-0.5">بەپێی مێژووی سەرهەڵدان و وردەکاری بڕە پارەی خەرجکراو لە سیستەمەکەدا</p>
+                             <h3 className="font-extrabold text-sm lg:text-base text-[var(--bg-secondary)]">تۆماری خەرجییەکان</h3>
+                             <p className="text-xs text-[var(--text-muted)] mt-0.5">بەپێی مێژووی سەرهەڵدان و وردەکاری بڕە پارەی خەرجکراو لە سیستەمەکەدا</p>
                           </div>
                           
                           <div className="relative w-full sm:w-80">
@@ -831,7 +831,7 @@ export function ReportsView() {
                                value={expenseQuery}
                                onChange={(e) => setExpenseQuery(e.target.value)}
                                placeholder="گەڕان بەدوای هۆکاری خەرجی..."
-                               className="w-full bg-[#FDFBF7] border border-[#E9E5D9] rounded-2xl py-2.5 pl-4 pr-11 text-xs outline-none focus:ring-2 focus:ring-[#D4A373] text-[#1E2420] font-medium"
+                               className="w-full bg-[#FDFBF7] border border-[var(--border-color)] rounded-2xl py-2.5 pl-4 pr-11 text-xs outline-none focus:ring-2 focus:ring-[var(--accent-gold)] text-[var(--bg-secondary)] font-medium"
                              />
                           </div>
                        </div>
@@ -839,7 +839,7 @@ export function ReportsView() {
                        <div className="flex-1 overflow-auto">
                           {filteredExpenses.length > 0 ? (
                              <table className="w-full text-right border-collapse">
-                                <thead className="text-[#8B8378] text-[10px] lg:text-xs uppercase bg-[#FDFBF7] shadow-[0_1px_0_#E9E5D9] sticky top-0 z-10">
+                                <thead className="text-[var(--text-muted)] text-[10px] lg:text-xs uppercase bg-[#FDFBF7] shadow-[0_1px_0_var(--border-color)] sticky top-0 z-10">
                                    <tr>
                                       <th className="px-6 py-4 font-extrabold">ڕیزبەندی</th>
                                       <th className="px-6 py-4 font-extrabold">هۆکاری خەرجکردن / بابەت</th>
@@ -851,8 +851,8 @@ export function ReportsView() {
                                    {filteredExpenses.map((exp, idx) => (
                                       <tr key={idx} className="hover:bg-[#FDFBF7] transition-all duration-150">
                                          <td className="px-6 py-4 text-xs font-mono font-bold text-gray-400">{idx + 1}</td>
-                                         <td className="px-6 py-4 font-extrabold text-[#1E2420]">{exp.name}</td>
-                                         <td className="px-6 py-4 text-xs text-[#8B8378] font-mono">
+                                         <td className="px-6 py-4 font-extrabold text-[var(--bg-secondary)]">{exp.name}</td>
+                                         <td className="px-6 py-4 text-xs text-[var(--text-muted)] font-mono">
                                              {exp.date ? new Date(exp.date).toLocaleString('ku-IQ', { dateStyle: 'medium', timeStyle: 'short' }) : ''}
                                          </td>
                                          <td className="px-6 py-4 text-left font-mono font-extrabold text-red-600">{exp.amount.toLocaleString()} <span className="font-sans text-[10px] text-gray-400 font-normal">د.ع</span></td>
@@ -861,7 +861,7 @@ export function ReportsView() {
                                 </tbody>
                              </table>
                           ) : (
-                             <div className="flex flex-col items-center justify-center py-16 text-[#8B8378]">
+                             <div className="flex flex-col items-center justify-center py-16 text-[var(--text-muted)]">
                                 <Wallet size={36} className="opacity-20 mb-3" />
                                 <span className="text-xs font-bold">هیچ خەرجییەک لەم لیستی تاقیگەیەدا نییە</span>
                              </div>

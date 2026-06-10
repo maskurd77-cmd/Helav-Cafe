@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { CartItem, Product } from '@/types';
-import { Coffee, Clock, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Coffee, Clock, ArrowRight, ArrowLeft, Maximize, Minimize } from 'lucide-react';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/firebase';
 import { Link } from 'react-router-dom';
@@ -13,6 +13,49 @@ export function CustomerDisplay() {
   const { currentBranch } = useBranchStore();
   const { products, initProducts } = useProductStore();
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isFullscreenOn, setIsFullscreenOn] = useState(false);
+
+  // Toggle fullscreen mode manually
+  const toggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+        setIsFullscreenOn(true);
+      } else {
+        await document.exitFullscreen();
+        setIsFullscreenOn(false);
+      }
+    } catch (err) {
+      console.error("Fullscreen toggle failed:", err);
+    }
+  };
+
+  // Sync state when native fullscreen state changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreenOn(!!document.fullscreenElement);
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    
+    // Auto-request fullscreen on first mount
+    const tryAutoFullscreen = async () => {
+      try {
+        if (document.documentElement.requestFullscreen) {
+          await document.documentElement.requestFullscreen();
+          setIsFullscreenOn(true);
+        }
+      } catch (e) {
+        console.log("Auto-fullscreen blocked by browser security. Manual button is shown.");
+      }
+    };
+    // Delay slightly to ensure user interaction registers if opened from popup focus
+    const timer = setTimeout(tryAutoFullscreen, 500);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      clearTimeout(timer);
+    };
+  }, []);
 
   // Settings read dynamically in real-time
   const [settings, setSettings] = useState<any>({
@@ -53,9 +96,9 @@ export function CustomerDisplay() {
     }
   ];
 
-  const activeSlides = settings.promoSlides && settings.promoSlides.length > 0 
-    ? settings.promoSlides 
-    : defaultPromoSlides;
+  const hasSlides = settings.promoSlides && settings.promoSlides.length > 0;
+
+  const activeSlides = hasSlides ? settings.promoSlides : [];
 
   // Live clock
   useEffect(() => {
@@ -83,11 +126,26 @@ export function CustomerDisplay() {
        console.error("Failed to fetch settings", err);
     });
 
-    // Load active branch cart live
+    // 1. Initialise BroadcastChannel for instantaneous (0ms latency local transfer matching SambaPOS)
+    let localChannel: BroadcastChannel | null = null;
+    try {
+      localChannel = new BroadcastChannel("pos_customer_display_channel");
+      localChannel.onmessage = (event) => {
+        const { type, cart: updatedCart, branch } = event.data || {};
+        if (type === "CART_UPDATE" && branch === currentBranch) {
+          setCart(updatedCart || []);
+        }
+      };
+    } catch (err) {
+      console.warn("Could not setup local BroadcastChannel:", err);
+    }
+
+    // 2. Load active branch cart live via Firestore (Background fallback/durable persistence)
     const unsubscribeCart = onSnapshot(doc(db, 'settings', `customer_display_cart_${currentBranch}`), (docSnap) => {
         if (docSnap.exists()) {
             const data = docSnap.data();
             if (data && data.cart) {
+                // Only update if not already instantly updated or as robust master source of truth
                 setCart(data.cart);
             } else {
                 setCart([]);
@@ -96,12 +154,15 @@ export function CustomerDisplay() {
             setCart([]);
         }
     }, (err) => {
-        console.error("Failed to fetch cart", err);
+        console.error("Failed to fetch cart from Firestore", err);
     });
 
     return () => {
       unsubscribeCart();
       unsubscribeSettings();
+      if (localChannel) {
+        localChannel.close();
+      }
     };
   }, [currentBranch]);
 
@@ -121,25 +182,25 @@ export function CustomerDisplay() {
     accent === 'emerald' ? 'text-[#8DAA91]' :
     accent === 'azure' ? 'text-sky-500' :
     accent === 'rose' ? 'text-rose-500' :
-    'text-[#D4A373]';
+    'text-[var(--accent-gold)]';
 
   const accentBg = 
     accent === 'emerald' ? 'bg-[#8DAA91]' :
     accent === 'azure' ? 'bg-sky-500' :
     accent === 'rose' ? 'bg-rose-500' :
-    'bg-[#D4A373]';
+    'bg-[var(--accent-gold)]';
 
   const accentBorder = 
     accent === 'emerald' ? 'border-[#8DAA91]' :
     accent === 'azure' ? 'border-sky-500' :
     accent === 'rose' ? 'border-rose-500' :
-    'border-[#D4A373]';
+    'border-[var(--accent-gold)]';
 
   const accentRing = 
     accent === 'emerald' ? 'focus:ring-[#8DAA91]' :
     accent === 'azure' ? 'focus:ring-sky-500' :
     accent === 'rose' ? 'focus:ring-rose-500' :
-    'focus:ring-[#D4A373]';
+    'focus:ring-[var(--accent-gold)]';
 
   const availableCategories = ['هەمووی', ...Array.from(new Set(products.map(p => p.category)))];
   
@@ -151,16 +212,16 @@ export function CustomerDisplay() {
     <div 
       className={`min-h-screen flex flex-col font-sans select-none overflow-hidden h-screen text-right transition-colors duration-500 ${
         isLightMode 
-          ? 'bg-[#FAF8F5] text-[#2D3631]' 
-          : 'bg-[#0A0F0D] text-[#E9E5D9]'
+          ? 'bg-[var(--bg-primary)] text-[var(--text-dark)]' 
+          : 'bg-[#0A0F0D] text-[var(--border-color)]'
       }`} 
       dir="rtl"
     >
       {/* 1. TOP PREMIUM HEADER */}
       <header className={`py-4 px-8 border-b flex items-center justify-between shrink-0 z-20 ${
         isLightMode 
-          ? 'bg-white/80 backdrop-blur border-[#E9E5D9]' 
-          : 'bg-[#111613]/90 backdrop-blur border-[#E9E5D9]/10'
+          ? 'bg-white/80 backdrop-blur border-[var(--border-color)]' 
+          : 'bg-[#111613]/90 backdrop-blur border-[var(--border-color)]/10'
       }`}>
         <div className="flex items-center gap-4">
           {settings?.logoUrl ? (
@@ -199,12 +260,25 @@ export function CustomerDisplay() {
             <span>ڕاستەوخۆ</span>
           </div>
 
+          {/* Fullscreen Toggle Button */}
+          <button 
+            onClick={toggleFullscreen}
+            className={`w-9 h-9 flex items-center justify-center rounded-xl transition-all border ${
+              isLightMode 
+                ? 'bg-white hover:bg-gray-150 text-gray-700 border-gray-200' 
+                : 'bg-white/5 hover:bg-white/10 text-white/90 border-[var(--border-color)]/10'
+            }`}
+            title={isFullscreenOn ? "بچووککردنەوەی شاشە" : "گەورەکردنی شاشە بۆ تەواو"}
+          >
+            {isFullscreenOn ? <Minimize size={16} /> : <Maximize size={16} />}
+          </button>
+
           <Link 
             to="/pos" 
             className={`w-9 h-9 flex items-center justify-center rounded-xl transition-all border ${
               isLightMode 
                 ? 'bg-white hover:bg-gray-150 text-gray-700 border-gray-200' 
-                : 'bg-white/5 hover:bg-white/10 text-white/90 border-[#E9E5D9]/10'
+                : 'bg-white/5 hover:bg-white/10 text-white/90 border-[var(--border-color)]/10'
             }`}
           >
             <ArrowLeft size={16} />
@@ -216,11 +290,11 @@ export function CustomerDisplay() {
       <main className="flex-1 flex overflow-hidden p-6 gap-6 h-full max-h-[calc(100vh-73px)]">
         
         {/* Left Hand: Promotion Slider / Big Brand Card */}
-        {settings.customerDisplayShowPromo !== false && (
+        {settings.customerDisplayShowPromo !== false && hasSlides && (
           <div className={`hidden lg:flex w-[400px] shrink-0 rounded-[28px] overflow-hidden border p-6 flex-col justify-between transition-all ${
             isLightMode 
-              ? 'bg-white border-[#E9E5D9]' 
-              : 'bg-[#111613] border-[#E9E5D9]/10'
+              ? 'bg-white border-[var(--border-color)]' 
+              : 'bg-[#111613] border-[var(--border-color)]/10'
           }`}>
             {/* Top Indicator */}
             <div className="flex justify-between items-center">
@@ -280,7 +354,7 @@ export function CustomerDisplay() {
             {/* Signature Area (Optional) */}
             {settings.customerDisplayShowSignature !== false && (
               <div className={`p-3.5 rounded-2xl border text-center text-xs font-bold ${
-                isLightMode ? 'bg-[#FAF8F5] border-gray-100 text-gray-500' : 'bg-white/5 border-white/5 text-gray-400'
+                isLightMode ? 'bg-[var(--bg-primary)] border-gray-100 text-gray-500' : 'bg-white/5 border-white/5 text-gray-400'
               }`}>
                 تام و چێژێکی ناوازە هەمیشە ١٠٠٪ سروشتی 🌾
               </div>
@@ -291,8 +365,8 @@ export function CustomerDisplay() {
         {/* Right Hand: Order Details List or Menu Catalog */}
         <div className={`flex-1 flex flex-col rounded-[28px] border overflow-hidden h-full ${
           isLightMode 
-            ? 'bg-white border-[#E9E5D9]' 
-            : 'bg-[#111613] border-[#E9E5D9]/10'
+            ? 'bg-white border-[var(--border-color)]' 
+            : 'bg-[#111613] border-[var(--border-color)]/10'
         }`}>
           
           {/* Section banner */}
@@ -334,7 +408,7 @@ export function CustomerDisplay() {
                             activeCategory === cat
                               ? `${accentBg} text-white border-transparent shadow`
                               : (isLightMode 
-                                  ? 'bg-[#FAF8F5] text-gray-600 border-gray-150 hover:bg-[#FAF8F5]/80' 
+                                  ? 'bg-[var(--bg-primary)] text-gray-600 border-gray-150 hover:bg-[var(--bg-primary)]/80' 
                                   : 'bg-white/5 text-gray-400 border-transparent hover:bg-white/10')
                           }`}
                         >
@@ -351,7 +425,7 @@ export function CustomerDisplay() {
                             key={prod.id}
                             className={`p-3 rounded-2xl flex items-center justify-between border transition-all ${
                               isLightMode 
-                                ? 'bg-[#FAF8F5] border-gray-150 hover:bg-[#FAF8F5]/80' 
+                                ? 'bg-[var(--bg-primary)] border-gray-150 hover:bg-[var(--bg-primary)]/80' 
                                 : 'bg-white/5 border-transparent hover:bg-white/10'
                             }`}
                           >
@@ -359,7 +433,7 @@ export function CustomerDisplay() {
                               {prod.image ? (
                                 <img src={prod.image} alt={prod.name} className="w-10 h-10 object-cover rounded-xl border border-gray-200/55" referrerPolicy="no-referrer" />
                               ) : (
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-[#D4A373]/10 text-[#D4A373] shrink-0`}>
+                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-[var(--accent-gold)]/10 text-[var(--accent-gold)] shrink-0`}>
                                   <Coffee size={18} />
                                 </div>
                               )}
@@ -440,8 +514,8 @@ export function CustomerDisplay() {
           {/* 3. GRAND TOTAL FOOTER (Massive clean numbers) */}
           <div className={`p-6 border-t ${
             isLightMode 
-              ? 'bg-[#FAF8F5] border-[#E9E5D9]' 
-              : 'bg-[#151D19] border-[#E9E5D9]/10'
+              ? 'bg-[var(--bg-primary)] border-[var(--border-color)]' 
+              : 'bg-[#151D19] border-[var(--border-color)]/10'
           }`}>
             <div className="flex justify-between items-center">
               <div>

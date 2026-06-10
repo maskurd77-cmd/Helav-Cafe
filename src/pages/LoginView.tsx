@@ -29,14 +29,14 @@ export function LoginView() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F9F7F2] flex items-center justify-center p-4">
-      <div className="bg-white max-w-md w-full rounded-[40px] shadow-xl border border-[#E9E5D9] p-8">
+    <div className="min-h-screen bg-[var(--bg-lighter)] flex items-center justify-center p-4">
+      <div className="bg-white max-w-md w-full rounded-[40px] shadow-xl border border-[var(--border-color)] p-8">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-[#F9F7F2] rounded-full flex items-center justify-center mx-auto mb-4 text-[#8DAA91]">
+          <div className="w-16 h-16 bg-[var(--bg-lighter)] rounded-full flex items-center justify-center mx-auto mb-4 text-[#8DAA91]">
             <Coffee size={32} />
           </div>
-          <h1 className="text-2xl font-bold text-[#2D3631]">MAS MENU</h1>
-          <p className="text-[#8B8378] mt-2">سیستەمی بەڕێوەبردن</p>
+          <h1 className="text-2xl font-bold text-[var(--text-dark)]">MAS MENU</h1>
+          <p className="text-[var(--text-muted)] mt-2">سیستەمی بەڕێوەبردن</p>
         </div>
 
         {error && (
@@ -47,25 +47,25 @@ export function LoginView() {
 
         <form onSubmit={handleAuth} className="space-y-6">
           <div>
-            <label className="block text-sm font-bold text-[#2D3631] mb-2">ئیمەیڵ</label>
+            <label className="block text-sm font-bold text-[var(--text-dark)] mb-2">ئیمەیڵ</label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-[#F9F7F2] border-0 rounded-2xl px-4 py-3 focus:ring-2 focus:ring-[#8DAA91] outline-none text-[#2D3631] text-left dir-ltr"
+              className="w-full bg-[var(--bg-lighter)] border-0 rounded-2xl px-4 py-3 focus:ring-2 focus:ring-[#8DAA91] outline-none text-[var(--text-dark)] text-left dir-ltr"
               placeholder="admin@helav.cafe"
             />
           </div>
           
           <div>
-            <label className="block text-sm font-bold text-[#2D3631] mb-2">وشەی نهێنی</label>
+            <label className="block text-sm font-bold text-[var(--text-dark)] mb-2">وشەی نهێنی</label>
             <input
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-[#F9F7F2] border-0 rounded-2xl px-4 py-3 focus:ring-2 focus:ring-[#8DAA91] outline-none text-[#2D3631] text-left dir-ltr"
+              className="w-full bg-[var(--bg-lighter)] border-0 rounded-2xl px-4 py-3 focus:ring-2 focus:ring-[#8DAA91] outline-none text-[var(--text-dark)] text-left dir-ltr"
               placeholder="••••••••"
             />
           </div>

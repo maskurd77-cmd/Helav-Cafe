@@ -242,7 +242,7 @@ export function VirtualKeyboard({ inputRef, onChange, onClose }: VirtualKeyboard
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: "100%", opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 180 }}
-            className="fixed bottom-0 left-0 right-0 bg-[#161a1d]/95 backdrop-blur-3xl shadow-[0_-25px_60px_rgba(0,0,0,0.65)] border-t border-[#D4A373]/20 pb-4 pt-3.5 px-4 lg:px-6 z-50 select-none font-sans"
+            className="fixed bottom-0 left-0 right-0 bg-[#161a1d]/95 backdrop-blur-3xl shadow-[0_-25px_60px_rgba(0,0,0,0.65)] border-t border-[var(--accent-gold)]/20 pb-4 pt-3.5 px-4 lg:px-6 z-50 select-none font-sans"
         >
             <div className={`mx-auto ${isNumeric ? 'max-w-md' : 'max-w-5xl'}`}>
                 
@@ -258,14 +258,14 @@ export function VirtualKeyboard({ inputRef, onChange, onClose }: VirtualKeyboard
                             <motion.span 
                                 animate={{ opacity: [1, 0, 1] }} 
                                 transition={{ repeat: Infinity, duration: 1 }} 
-                                className="inline-block w-1.5 h-4 bg-[#D4A373] rounded-sm shrink-0" 
+                                className="inline-block w-1.5 h-4 bg-[var(--accent-gold)] rounded-sm shrink-0" 
                             />
                         </div>
                     </div>
 
                     <div className="flex justify-between items-center px-1">
                         <div className="flex items-center gap-2">
-                            <div className="p-1 px-2 bg-gradient-to-br from-[#D4A373] to-[#A37B4D] text-neutral-950 rounded-lg shadow-lg font-black text-[9px] flex items-center gap-1.5 antialiased">
+                            <div className="p-1 px-2 bg-gradient-to-br from-[var(--accent-gold)] to-[#A37B4D] text-neutral-950 rounded-lg shadow-lg font-black text-[9px] flex items-center gap-1.5 antialiased">
                                 <Keyboard size={12} className="stroke-[3]" />
                                 <span className="tracking-widest">MAS MENU V-KEY</span>
                             </div>
@@ -275,7 +275,7 @@ export function VirtualKeyboard({ inputRef, onChange, onClose }: VirtualKeyboard
                                 className="flex items-center gap-1 bg-[#1c2225] hover:bg-neutral-850 text-neutral-400 hover:text-white border border-neutral-800 rounded-lg px-2 py-1 text-[10px] font-extrabold transition-all active:scale-95"
                                 title="دەنگی دوگمەکان"
                             >
-                                <Volume2 size={12} className={soundMode !== 'mute' ? 'text-[#D4A373]' : 'text-neutral-600'} />
+                                <Volume2 size={12} className={soundMode !== 'mute' ? 'text-[var(--accent-gold)]' : 'text-neutral-600'} />
                                 <span>{soundMode === 'mute' ? 'دەنگ: بێدەنگ' : `دەنگ: ${soundMode === 'click' ? 'میکانیکی' : soundMode === 'chime' ? 'چایم' : 'بیپ'}`}</span>
                             </button>
                         </div>
@@ -284,9 +284,9 @@ export function VirtualKeyboard({ inputRef, onChange, onClose }: VirtualKeyboard
                             {!isNumeric && (
                                 <button 
                                     onMouseDown={(e) => { e.preventDefault(); playSoundEffect(); setLanguage(lang => lang === 'ku' ? 'en' : 'ku'); }}
-                                    className="flex items-center gap-1.5 bg-[#1c2225] hover:bg-neutral-800 hover:text-[#D4A373] border border-neutral-800 px-3 py-1.5 rounded-xl text-xs font-black text-neutral-300 transition-all active:scale-95 shadow-md"
+                                    className="flex items-center gap-1.5 bg-[#1c2225] hover:bg-neutral-800 hover:text-[var(--accent-gold)] border border-neutral-800 px-3 py-1.5 rounded-xl text-xs font-black text-neutral-300 transition-all active:scale-95 shadow-md"
                                 >
-                                    <Globe size={13} className={language === 'ku' ? 'text-[#D4A373]' : 'text-sky-400'} />
+                                    <Globe size={13} className={language === 'ku' ? 'text-[var(--accent-gold)]' : 'text-sky-400'} />
                                     {language === 'ku' ? 'کوردی (KU)' : 'English (EN)'}
                                 </button>
                             )}
@@ -304,8 +304,8 @@ export function VirtualKeyboard({ inputRef, onChange, onClose }: VirtualKeyboard
 
                 {/* Intelligent Dynamic Suggestions Track */}
                 <div className="flex items-center gap-1.5 overflow-x-auto pb-2 mb-2 no-scrollbar scroll-smooth">
-                    <div className="flex items-center gap-1 text-[9px] text-[#A37B4D] font-extrabold shrink-0 bg-[#A37B4D]/5 px-2 py-1 rounded-lg border border-[#D4A373]/15 ml-1">
-                        <Sparkles size={10} className="text-[#D4A373]" />
+                    <div className="flex items-center gap-1 text-[9px] text-[#A37B4D] font-extrabold shrink-0 bg-[#A37B4D]/5 px-2 py-1 rounded-lg border border-[var(--accent-gold)]/15 ml-1">
+                        <Sparkles size={10} className="text-[var(--accent-gold)]" />
                         <span>خێرا نوسین:</span>
                     </div>
                     {isNumeric 
@@ -322,7 +322,7 @@ export function VirtualKeyboard({ inputRef, onChange, onClose }: VirtualKeyboard
                             <button
                                 key={word}
                                 onMouseDown={(e) => handleSuggestionClick(word, e)}
-                                className="bg-gradient-to-b from-[#1c2225] to-neutral-900 hover:from-neutral-800 hover:to-neutral-850 text-neutral-200 hover:text-[#D4A373] border border-neutral-800 font-bold text-xs px-3 py-1.5 rounded-lg transition-all active:scale-95 shrink-0 shadow-sm"
+                                className="bg-gradient-to-b from-[#1c2225] to-neutral-900 hover:from-neutral-800 hover:to-neutral-850 text-neutral-200 hover:text-[var(--accent-gold)] border border-neutral-800 font-bold text-xs px-3 py-1.5 rounded-lg transition-all active:scale-95 shrink-0 shadow-sm"
                             >
                                 {word}
                             </button>
@@ -337,7 +337,7 @@ export function VirtualKeyboard({ inputRef, onChange, onClose }: VirtualKeyboard
                             {!isNumeric && rowIndex === (language === 'ku' ? 3 : 3) && language === 'en' && (
                                 <button
                                     onMouseDown={(e) => { e.preventDefault(); playSoundEffect(); setIsShift(!isShift); }}
-                                    className={`px-3 rounded-xl font-black text-xs transition-all flex items-center justify-center active:scale-95 border-2 ${isShift ? 'bg-gradient-to-br from-[#D4A373] to-[#A37B4D] text-neutral-950 border-[#D4A373] shadow-lg' : 'bg-[#1c2225] hover:bg-neutral-800 text-neutral-200 border-neutral-800'}`}
+                                    className={`px-3 rounded-xl font-black text-xs transition-all flex items-center justify-center active:scale-95 border-2 ${isShift ? 'bg-gradient-to-br from-[var(--accent-gold)] to-[#A37B4D] text-neutral-950 border-[var(--accent-gold)] shadow-lg' : 'bg-[#1c2225] hover:bg-neutral-800 text-neutral-200 border-neutral-800'}`}
                                 >
                                     <ArrowUp size={16} className={isShift ? "stroke-[3.5]" : "stroke-[2.5]"} />
                                 </button>
@@ -358,12 +358,12 @@ export function VirtualKeyboard({ inputRef, onChange, onClose }: VirtualKeyboard
                                               'w-8.5 h-11 lg:w-[60px] lg:h-[60px] bg-[#1b2023] border border-neutral-800/80 text-neutral-100')}
                                             ${key === 'Clear' ? '!bg-gradient-to-br !from-rose-950/50 !to-rose-900/40 !text-rose-400 hover:!from-rose-800 hover:!to-rose-900 hover:!text-white !border-rose-950/60' : 
                                               key === 'Delete' ? '!bg-gradient-to-br !from-neutral-850 !to-neutral-900 !text-neutral-400 hover:!from-neutral-700 hover:!to-neutral-750 hover:!text-white !border-neutral-800' :
-                                              key === 'Space' ? 'hover:bg-neutral-800 hover:text-[#D4A373]' :
-                                              'hover:bg-neutral-800 hover:text-[#D4A373] active:bg-[#D4A373] active:text-neutral-950'}
+                                              key === 'Space' ? 'hover:bg-neutral-800 hover:text-[var(--accent-gold)]' :
+                                              'hover:bg-neutral-800 hover:text-[var(--accent-gold)] active:bg-[var(--accent-gold)] active:text-neutral-950'}
                                             font-black ${isNumeric && !isAction ? 'text-lg lg:text-xl' : 'text-xs lg:text-[14px]'}
                                             rounded-xl lg:rounded-2xl transition-all flex items-center justify-center focus:outline-none 
                                             border border-neutral-800/70 shadow-md transform
-                                            ${lastPressedKey === key ? 'bg-[#D4A373] !text-black border-[#D4A373]' : ''}
+                                            ${lastPressedKey === key ? 'bg-[var(--accent-gold)] !text-black border-[var(--accent-gold)]' : ''}
                                         `}
                                     >
                                         {key === 'Space' ? 'بۆشایی SPACE' : 

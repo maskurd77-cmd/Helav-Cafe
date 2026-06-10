@@ -14,6 +14,8 @@ interface SettingsState {
     subGreeting: string;
     enableVirtualKeyboard: boolean;
     autoPrintReceipt?: boolean;
+    lockPin?: string;
+    appTheme?: 'light' | 'dark';
     promoSlides: { title: string; desc: string; tag: string; image: string; }[];
     invoicePrefix?: string;
     invoiceStartNumber?: number;
@@ -60,6 +62,8 @@ const defaultSettings = {
     promoSlides: defaultSlides,
     enableVirtualKeyboard: false,
     autoPrintReceipt: false,
+    lockPin: '0000',
+    appTheme: 'light',
     invoicePrefix: '#',
     invoiceStartNumber: 1000,
     invoiceNextNumber: 1001
@@ -78,6 +82,8 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     promoSlides: defaultSlides,
     enableVirtualKeyboard: false,
     autoPrintReceipt: false,
+    lockPin: '0000',
+    appTheme: 'light',
     invoicePrefix: '#',
     invoiceStartNumber: 1000,
     invoiceNextNumber: 1001
@@ -116,7 +122,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     unsubscribe = onSnapshot(doc(db, 'settings', docName), (docSnap) => {
       if (docSnap.exists()) {
           const freshData = docSnap.data();
-          const updated = { ...fallback, ...freshData };
+          const updated = { ...fallback, ...freshData } as any;
           set({ settings: updated, loading: false, initialized: true });
           try {
             localStorage.setItem(cacheKey, JSON.stringify(freshData));

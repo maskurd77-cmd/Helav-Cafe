@@ -126,7 +126,7 @@ export function PosView() {
     setShowDrawerAnimation(true);
     setTimeout(() => {
       setShowDrawerAnimation(false);
-    }, 2200);
+    }, 1000);
   };
 
   // Keyboard shortcut hooks (F1 = Checkout, F2 = Custom Item Modal, F3 = Cashdrawer, Enter/Escape)
@@ -139,7 +139,7 @@ export function PosView() {
           if (showCheckoutModal) {
             handleCheckout();
           } else {
-            openCheckoutModal();
+            handleCheckoutAction();
           }
         }
         return;
@@ -172,7 +172,7 @@ export function PosView() {
           if (showCheckoutModal) {
             handleCheckout();
           } else {
-            openCheckoutModal();
+            handleCheckoutAction();
           }
         }
       } else if (e.key === "Escape") {
@@ -193,8 +193,80 @@ export function PosView() {
 
   const { currentBranch } = useBranchStore();
 
-  // Sync cart for customer display
+  // Custom Toast state for POS View
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+
+  const showNotification = (message: string, type: "success" | "error" = "success") => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast(null);
+    }, 4500);
+  };
+
+  // Window Management API to open customer display on secondary monitor beautifully (SambaPOS Style)
+  const openCustomerDisplayOnSecondaryScreen = async () => {
+    // Check if the Window Management/Placement API is available
+    if ("getScreenDetails" in window || "getScreenDetails" in navigator || (window.screen as any).isExtended) {
+      try {
+        const getScreenDetails = (window as any).getScreenDetails || (navigator as any).getScreenDetails;
+        if (getScreenDetails) {
+          showNotification("گەڕان بەدوای شاشەی دووەمدا دەستی پێکرد...", "success");
+          const screenDetails = await getScreenDetails();
+          
+          // Find secondary screen (a screen other than the current one)
+          const secondaryScreen = screenDetails.screens.find(
+            (screen: any) => screen !== screenDetails.currentScreen
+          );
+
+          if (secondaryScreen) {
+            const { left, top, width, height } = secondaryScreen;
+            // SambaPOS-style: launch popup on secondary screen coordinates with fullscreen
+            const features = `left=${left},top=${top},width=${width},height=${height},fullscreen=yes,menubar=no,toolbar=no,location=no,status=no,resizable=yes`;
+            
+            const secondaryWindow = window.open("/customer", "CustomerDisplay", features);
+            if (secondaryWindow) {
+              secondaryWindow.focus();
+              showNotification("شاشەی دووەم دۆزرایەوە و بە سەرکەوتوویی کرایەوە!", "success");
+              return;
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("Failed using Window Management API:", err);
+      }
+    }
+
+    // Default Fallback popup centered or standard size
+    const width = 1200;
+    const height = 800;
+    const left = window.screen.width > width ? (window.screen.width - width) / 2 : 0;
+    const top = window.screen.height > height ? (window.screen.height - height) / 2 : 0;
+    const features = `left=${left},top=${top},width=${width},height=${height},menubar=no,toolbar=no,location=no,status=no,resizable=yes`;
+    
+    const secondaryWindow = window.open("/customer", "CustomerDisplay", features);
+    if (secondaryWindow) {
+      secondaryWindow.focus();
+      showNotification("شاشەی کڕیار کرایەوە (تکایە بیگوازەرەوە بۆ شاشەی دووەم)", "success");
+    }
+  };
+
+  // Sync cart for customer display with BroadcastChannel for instant local 0ms rendering & Firestore background persistence
   useEffect(() => {
+    // 1. Sync through BroadcastChannel for real-time local sync (0-latency local sync)
+    try {
+      const channel = new BroadcastChannel("pos_customer_display_channel");
+      channel.postMessage({
+        type: "CART_UPDATE",
+        cart,
+        branch: currentBranch,
+        updatedAt: new Date().toISOString()
+      });
+      channel.close();
+    } catch (e) {
+      console.error("Local BroadcastChannel sync error:", e);
+    }
+
+    // 2. Fallback/Background Firestore Sync
     setDoc(doc(db, "settings", `customer_display_cart_${currentBranch}`), {
       cart,
       updatedAt: new Date().toISOString(),
@@ -208,6 +280,14 @@ export function PosView() {
   };
 
   const [printMethod, setPrintMethod] = useState<"iframe" | "direct">("direct");
+
+  const handleCheckoutAction = () => {
+    if (settings.autoPrintReceipt) {
+      handleCheckout(true);
+    } else {
+      openCheckoutModal();
+    }
+  };
 
   const openCheckoutModal = () => {
     if (cart.length === 0) return;
@@ -227,7 +307,7 @@ export function PosView() {
     setTimeout(() => {
       window.print();
       document.body.removeChild(printDiv);
-    }, 150);
+    }, 50);
   };
 
   const handleAddCustomItem = (e: React.FormEvent) => {
@@ -267,38 +347,40 @@ export function PosView() {
 
       setCurrentInvoiceNo(invoiceNo);
 
-      await addOrder({
+      // Fire and forget Firestore save to make UI instantly responsive
+      addOrder({
         items: cart,
         total: finalTotal,
         date: new Date(),
         status: "completed",
         invoiceNo: invoiceNo,
+      }).catch(err => {
+        console.error("Order save sync error:", err);
+        handleFirestoreError(err, OperationType.CREATE, "orders");
       });
 
-      // Update next invoice counter safely in Firestore
-      try {
-        const docName = currentBranch === "cafe" ? "general" : "hospital";
-        await updateDoc(doc(db, "settings", docName), {
-          invoiceNextNumber: nextNum + 1,
-        });
-      } catch (err) {
-        console.error("Failed to increment next invoice counter:", err);
-      }
+      // Update next invoice counter safely in Firestore (Background)
+      const docName = currentBranch === "cafe" ? "general" : "hospital";
+      updateDoc(doc(db, "settings", docName), {
+        invoiceNextNumber: nextNum + 1,
+      }).catch(err => console.error("Failed to increment next invoice counter:", err));
 
-      // Beautiful Print logic
-      if (doPrint && receiptRef.current) {
-        if (printMethod === "direct") {
-          // 1. Direct browser window.print() method
-          triggerDirectWindowPrint();
-        } else {
-          // 2. Iframe dynamic silent-style printing method
-          const iframe = document.createElement("iframe");
-          iframe.style.display = "none";
-          document.body.appendChild(iframe);
+      // Wait a tiny bit (50ms) for React to flush `currentInvoiceNo` state to DOM
+      setTimeout(() => {
+        // Beautiful Print logic
+        if (doPrint && receiptRef.current) {
+          if (printMethod === "direct") {
+            // 1. Direct browser window.print() method
+            triggerDirectWindowPrint();
+          } else {
+            // 2. Iframe dynamic silent-style printing method
+            const iframe = document.createElement("iframe");
+            iframe.style.display = "none";
+            document.body.appendChild(iframe);
 
-          const iframeDoc = iframe.contentWindow?.document;
-          if (iframeDoc) {
-            iframeDoc.write(`
+            const iframeDoc = iframe.contentWindow?.document;
+            if (iframeDoc) {
+              iframeDoc.write(`
                <html dir="rtl" lang="ku">
                  <head>
                    <title>Receipt</title><style>.receipt-table { width: 100%; border-collapse: collapse; margin-top: 5px; direction: rtl !important; } .receipt-table th { border-bottom: 2px solid #000; font-size: 12px; font-weight: 800; padding: 6px 0; color: #000 !important; font-family: 'Cairo', sans-serif; text-align: right; } .receipt-table td { border-bottom: 1px dotted #ccc; font-size: 13px; padding: 6px 0; vertical-align: top; color: #000 !important; font-weight: 700; } .col-name { text-align: right !important; direction: rtl !important; padding-right: 2px; font-family: 'Cairo', sans-serif; } .col-qty { text-align: center !important; width: 35px; font-weight: 800; font-family: 'Space Grotesk', 'Inter', monospace; } .col-price { text-align: left !important; width: 75px; font-weight: 800; font-family: 'Space Grotesk', monospace; direction: ltr !important; white-space: nowrap; } .item-row { direction: rtl !important; } .total-row { direction: rtl !important; } .total-amount { direction: ltr !important; text-align: left !important; }</style>
@@ -356,12 +438,14 @@ export function PosView() {
       kickCashDrawer();
 
       clearCart();
-      setIsCartOpen(false);
-      setShowCheckoutModal(false);
+        setIsCartOpen(false);
+        setShowCheckoutModal(false);
+        setCheckingOut(false);
+      }, 50);
+
     } catch (error) {
       console.error(error);
       handleFirestoreError(error, OperationType.CREATE, "orders");
-    } finally {
       setCheckingOut(false);
     }
   };
@@ -381,9 +465,9 @@ export function PosView() {
         key={product.id}
         onClick={() => addToCart(product)}
         disabled={product.status === "تەواو بووە"}
-        className={`bg-white p-3 lg:p-5 rounded-2xl lg:rounded-[22px] border-2 border-[#E9E5D9] hover:border-[#D4A373] active:scale-[0.97] hover:shadow-[0_8px_24px_rgba(212,163,115,0.08)] transition-all text-right flex flex-col items-center group relative overflow-hidden min-h-[140px] justify-between gap-2.5 cursor-pointer ${product.status === "تەواو بووە" ? "opacity-45 cursor-not-allowed border-dashed" : ""}`}
+        className={`bg-white p-3 lg:p-5 rounded-2xl lg:rounded-[22px] border-2 border-[var(--border-color)] hover:border-[var(--accent-gold)] active:scale-[0.97] hover:shadow-[0_8px_24px_rgba(212,163,115,0.08)] transition-all text-right flex flex-col items-center group relative overflow-hidden min-h-[140px] justify-between gap-2.5 cursor-pointer ${product.status === "تەواو بووە" ? "opacity-45 cursor-not-allowed border-dashed" : ""}`}
       >
-        <div className="w-14 h-14 bg-[#F9F7F2] rounded-xl flex items-center justify-center text-[#1E2420] group-hover:bg-[#1E2420] group-hover:text-[#D4A373] transition-colors shrink-0 duration-300 overflow-hidden shadow-inner border border-[#E9E5D9]/40 relative">
+        <div className="w-14 h-14 bg-[var(--bg-lighter)] rounded-xl flex items-center justify-center text-[var(--bg-secondary)] group-hover:bg-[var(--bg-secondary)] group-hover:text-[var(--accent-gold)] transition-colors shrink-0 duration-300 overflow-hidden shadow-inner border border-[var(--border-color)]/40 relative">
           {product.image ? (
             <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" referrerPolicy="no-referrer" />
           ) : (
@@ -394,12 +478,12 @@ export function PosView() {
           )}
         </div>
         <div className="text-center w-full flex-1 flex flex-col justify-center">
-          <h3 className="font-extrabold text-[#1E2420] text-xs lg:text-[13px] leading-snug line-clamp-2">
+          <h3 className="font-extrabold text-[var(--bg-secondary)] text-xs lg:text-[13px] leading-snug line-clamp-2">
             {product.name}
           </h3>
         </div>
         <div className="text-center w-full mt-auto">
-          <span className="inline-block bg-[#F9F7F2] group-hover:bg-[#1E2420]/10 px-2.5 py-1 rounded-lg text-[#1E2420] font-black text-xs font-mono group-hover:text-[#D4A373] transition-colors">
+          <span className="inline-block bg-[var(--bg-lighter)] group-hover:bg-[var(--bg-secondary)]/10 px-2.5 py-1 rounded-lg text-[var(--bg-secondary)] font-black text-xs font-mono group-hover:text-[var(--accent-gold)] transition-colors">
             {product.price.toLocaleString("en-US")}{" "}
             <span className="font-sans text-[10px] font-normal">
               د.ع
@@ -407,7 +491,7 @@ export function PosView() {
           </span>
         </div>
         {product.status === "تەواو بووە" && (
-          <div className="absolute inset-0 bg-[#F9F7F2]/80 backdrop-blur-[1px] flex items-center justify-center">
+          <div className="absolute inset-0 bg-[var(--bg-lighter)]/80 backdrop-blur-[1px] flex items-center justify-center">
             <span className="bg-[#E11D48] text-white px-2.5 py-1 rounded-lg font-bold text-[10px]">
               تەواو بووە
             </span>
@@ -418,12 +502,12 @@ export function PosView() {
   }, [filteredProducts, addToCart]);
 
   return (
-    <div className="flex bg-[#F9F7F2] overflow-hidden h-full gap-4 lg:gap-8 relative min-w-0 pb-6 lg:pb-0">
+    <div className="flex bg-[var(--bg-lighter)] overflow-hidden h-full gap-4 lg:gap-8 relative min-w-0 pb-6 lg:pb-0">
       {/* Products Grid */}
-      <div className="flex-1 flex flex-col h-full bg-white rounded-[32px] lg:rounded-[40px] border border-[#E9E5D9] shadow-sm overflow-hidden min-w-0">
-        <div className="p-4 lg:p-6 border-b border-[#F9F7F2] shrink-0 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <h4 className="font-bold text-[#1E2420] text-lg lg:text-xl flex items-center gap-2">
-            <ShoppingBag size={20} className="text-[#D4A373]" />
+      <div className="flex-1 flex flex-col h-full bg-white rounded-[32px] lg:rounded-[40px] border border-[var(--border-color)] shadow-sm overflow-hidden min-w-0">
+        <div className="p-4 lg:p-6 border-b border-[var(--bg-lighter)] shrink-0 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <h4 className="font-bold text-[var(--bg-secondary)] text-lg lg:text-xl flex items-center gap-2">
+            <ShoppingBag size={20} className="text-[var(--accent-gold)]" />
             بڕگەکان
           </h4>
           <div className="flex gap-2 min-w-0 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0 no-scrollbar">
@@ -433,8 +517,8 @@ export function PosView() {
                 onClick={() => setActiveCategory(category)}
                 className={`px-4 lg:px-5 py-2 lg:py-2.5 rounded-full font-bold transition-all text-xs lg:text-sm whitespace-nowrap ${
                   activeCategory === category
-                    ? "bg-[#1E2420] text-[#E9E5D9] shadow-md"
-                    : "bg-[#F9F7F2] text-[#8B8378] hover:bg-[#E9E5D9] hover:text-[#2D3631]"
+                    ? "bg-[var(--bg-secondary)] text-[var(--border-color)] shadow-md"
+                    : "bg-[var(--bg-lighter)] text-[var(--text-muted)] hover:bg-[var(--border-color)] hover:text-[var(--text-dark)]"
                 }`}
               >
                 {category}
@@ -445,15 +529,15 @@ export function PosView() {
 
         <div className="p-3 lg:p-5 overflow-y-auto flex-grow h-0 min-h-0">
           {loading ? (
-            <div className="flex flex-col items-center justify-center h-full text-[#8B8378] gap-4">
-              <div className="w-8 h-8 border-4 border-[#E9E5D9] border-t-[#D4A373] rounded-full animate-spin"></div>
+            <div className="flex flex-col items-center justify-center h-full text-[var(--text-muted)] gap-4">
+              <div className="w-8 h-8 border-4 border-[var(--border-color)] border-t-[var(--accent-gold)] rounded-full animate-spin"></div>
               <span className="font-medium text-sm">بارکردنی بابەتەکان...</span>
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 lg:gap-4 select-none">
               {memoizedProductList}
               {filteredProducts.length === 0 && (
-                <div className="col-span-full py-12 text-center font-bold text-[#8B8378] bg-[#F9F7F2] rounded-3xl mt-2 text-xs">
+                <div className="col-span-full py-12 text-center font-bold text-[var(--text-muted)] bg-[var(--bg-lighter)] rounded-3xl mt-2 text-xs">
                   هیچ بابەتێک نەدۆزرایەوە بۆ فرۆشتن. تکایە لە بەشی مێنۆ بەروبووم
                   زیاد بکە.
                 </div>
@@ -463,33 +547,33 @@ export function PosView() {
         </div>
 
         {/* Keyboard Shortcut Info Bar */}
-        <div className="p-3 bg-[#FDFBF7] border-t border-[#E9E5D9] flex flex-wrap gap-x-4 gap-y-2 items-center justify-center shrink-0">
-          <span className="text-[10px] text-[#8B8378] font-bold flex items-center gap-1">
-            <kbd className="bg-[#1E2420]/5 px-2 py-0.5 rounded font-mono text-[#1E2420] border border-[#1E2420]/10 text-[10px] shadow-sm">
+        <div className="p-3 bg-[#FDFBF7] border-t border-[var(--border-color)] flex flex-wrap gap-x-4 gap-y-2 items-center justify-center shrink-0">
+          <span className="text-[10px] text-[var(--text-muted)] font-bold flex items-center gap-1">
+            <kbd className="bg-[var(--bg-secondary)]/5 px-2 py-0.5 rounded font-mono text-[var(--bg-secondary)] border border-[var(--bg-secondary)]/10 text-[10px] shadow-sm">
               F1
             </kbd>{" "}
             حیسابکردن
           </span>
-          <span className="text-[10px] text-[#8B8378] font-bold flex items-center gap-1">
-            <kbd className="bg-[#1E2420]/5 px-2 py-0.5 rounded font-mono text-[#1E2420] border border-[#1E2420]/10 text-[10px] shadow-sm">
+          <span className="text-[10px] text-[var(--text-muted)] font-bold flex items-center gap-1">
+            <kbd className="bg-[var(--bg-secondary)]/5 px-2 py-0.5 rounded font-mono text-[var(--bg-secondary)] border border-[var(--bg-secondary)]/10 text-[10px] shadow-sm">
               F2
             </kbd>{" "}
             بابەتی دەستی (کاتی)
           </span>
-          <span className="text-[10px] text-[#8B8378] font-bold flex items-center gap-1">
-            <kbd className="bg-[#1E2420]/5 px-2 py-0.5 rounded font-mono text-[#1E2420] border border-[#1E2420]/10 text-[10px] shadow-sm">
+          <span className="text-[10px] text-[var(--text-muted)] font-bold flex items-center gap-1">
+            <kbd className="bg-[var(--bg-secondary)]/5 px-2 py-0.5 rounded font-mono text-[var(--bg-secondary)] border border-[var(--bg-secondary)]/10 text-[10px] shadow-sm">
               F3
             </kbd>{" "}
             تاقیکردنەوەی درۆوەر
           </span>
-          <span className="text-[10px] text-[#8B8378] font-bold flex items-center gap-1">
-            <kbd className="bg-[#1E2420]/5 px-2 py-0.5 rounded font-mono text-[#1E2420] border border-[#1E2420]/10 text-[10px] shadow-sm">
+          <span className="text-[10px] text-[var(--text-muted)] font-bold flex items-center gap-1">
+            <kbd className="bg-[var(--bg-secondary)]/5 px-2 py-0.5 rounded font-mono text-[var(--bg-secondary)] border border-[var(--bg-secondary)]/10 text-[10px] shadow-sm">
               Enter
             </kbd>{" "}
             تەواوکردنی حیساب
           </span>
-          <span className="text-[10px] text-[#8B8378] font-bold flex items-center gap-1">
-            <kbd className="bg-[#1E2420]/5 px-2 py-0.5 rounded font-mono text-[#1E2420] border border-[#1E2420]/10 text-[10px] shadow-sm">
+          <span className="text-[10px] text-[var(--text-muted)] font-bold flex items-center gap-1">
+            <kbd className="bg-[var(--bg-secondary)]/5 px-2 py-0.5 rounded font-mono text-[var(--bg-secondary)] border border-[var(--bg-secondary)]/10 text-[10px] shadow-sm">
               ESC
             </kbd>{" "}
             داخستن
@@ -499,7 +583,7 @@ export function PosView() {
 
       {/* Mobile Cart Toggle Button */}
       <button
-        className="lg:hidden fixed bottom-6 left-6 z-40 bg-[#1E2420] text-[#E9E5D9] p-4 rounded-full shadow-2xl flex items-center justify-center w-14 h-14 border border-[#2D3631]"
+        className="lg:hidden fixed bottom-6 left-6 z-40 bg-[var(--bg-secondary)] text-[var(--border-color)] p-4 rounded-full shadow-2xl flex items-center justify-center w-14 h-14 border border-[var(--text-dark)]"
         onClick={() => setIsCartOpen(true)}
       >
         <div className="relative">
@@ -522,25 +606,26 @@ export function PosView() {
 
       {/* Cart Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 lg:static w-[280px] lg:w-[320px] bg-white border-l lg:border border-[#E9E5D9] lg:rounded-[32px] flex flex-col shadow-2xl lg:shadow-[0_2px_10px_rgba(0,0,0,0.02)] overflow-hidden shrink-0 z-50 transform transition-transform duration-300 lg:transform-none ${isCartOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
+        className={`fixed inset-y-0 left-0 lg:static w-[280px] lg:w-[320px] bg-white border-l lg:border border-[var(--border-color)] lg:rounded-[32px] flex flex-col shadow-2xl lg:shadow-[0_2px_10px_rgba(0,0,0,0.02)] overflow-hidden shrink-0 z-50 transform transition-transform duration-300 lg:transform-none ${isCartOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
       >
-        <div className="p-3 border-b border-[#E9E5D9] flex items-center justify-between shrink-0 bg-[#FDFBF7]">
-          <h2 className="font-bold text-[#1E2420] text-sm flex items-center gap-2">
+        <div className="p-3 border-b border-[var(--border-color)] flex items-center justify-between shrink-0 bg-[#FDFBF7]">
+          <h2 className="font-bold text-[var(--bg-secondary)] text-sm flex items-center gap-2">
             داواکارییەکان
-            <span className="bg-[#1E2420] text-white text-[10px] px-1.5 py-0.5 rounded-full">
+            <span className="bg-[var(--bg-secondary)] text-white text-[10px] px-1.5 py-0.5 rounded-full">
               {cart.reduce((sum, item) => sum + item.quantity, 0)}
             </span>
           </h2>
           <div className="flex items-center gap-1">
-            <Link
-              to="/customer"
-              target="_blank"
-              onClick={() => setIsCartOpen(false)}
-              className="p-1.5 text-[#8B8378] hover:bg-white rounded-full transition-colors border border-transparent hover:border-[#E9E5D9] hover:text-[#1E2420]"
-              title="کردنەوەی شاشەی کڕیار"
+            <button
+              onClick={() => {
+                setIsCartOpen(false);
+                openCustomerDisplayOnSecondaryScreen();
+              }}
+              className="p-1.5 text-[var(--text-muted)] hover:bg-white rounded-full transition-colors border border-transparent hover:border-[var(--border-color)] hover:text-[var(--bg-secondary)]"
+              title="کردنەوەی شاشەی کڕیار (دوو شاشەی SambaPOS)"
             >
               <MonitorSmartphone size={16} />
-            </Link>
+            </button>
             {cart.length > 0 && (
               <button
                 onClick={clearCart}
@@ -552,7 +637,7 @@ export function PosView() {
               </button>
             )}
             <button
-              className="lg:hidden p-1 text-[#8B8378] hover:bg-white rounded-full transition-colors border border-transparent hover:border-[#E9E5D9]"
+              className="lg:hidden p-1 text-[var(--text-muted)] hover:bg-white rounded-full transition-colors border border-transparent hover:border-[var(--border-color)]"
               onClick={() => setIsCartOpen(false)}
             >
               <X size={16} />
@@ -562,9 +647,9 @@ export function PosView() {
 
         <div className="flex-1 overflow-y-auto p-3 space-y-2 no-scrollbar">
           {cart.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-[#8B8378] space-y-2 opacity-70">
-              <div className="w-14 h-14 bg-[#F9F7F2] rounded-full flex items-center justify-center">
-                <ShoppingCart size={24} className="text-[#D4A373]" />
+            <div className="h-full flex flex-col items-center justify-center text-[var(--text-muted)] space-y-2 opacity-70">
+              <div className="w-14 h-14 bg-[var(--bg-lighter)] rounded-full flex items-center justify-center">
+                <ShoppingCart size={24} className="text-[var(--accent-gold)]" />
               </div>
               <p className="font-medium text-xs">سەبەتەی کاڵاکان بەتاڵە</p>
             </div>
@@ -572,38 +657,38 @@ export function PosView() {
             cart.map((item, index) => (
               <div
                 key={item.id}
-                className="flex flex-col gap-2 p-2.5 bg-white rounded-[16px] border border-[#E9E5D9] hover:border-[#D4A373] transition-colors shadow-sm group"
+                className="flex flex-col gap-2 p-2.5 bg-white rounded-[16px] border border-[var(--border-color)] hover:border-[var(--accent-gold)] transition-colors shadow-sm group"
               >
                 <div className="flex justify-between items-start">
                   <div className="flex items-start gap-2">
-                    <div className="w-5 h-5 rounded-full bg-[#1E2420] text-[#D4A373] flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
+                    <div className="w-5 h-5 rounded-full bg-[var(--bg-secondary)] text-[var(--accent-gold)] flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
                       {index + 1}
                     </div>
-                    <h4 className="font-bold text-[#1E2420] text-xs leading-snug pt-0.5 max-w-[140px]">
+                    <h4 className="font-bold text-[var(--bg-secondary)] text-xs leading-snug pt-0.5 max-w-[140px]">
                       {item.name}
                     </h4>
                   </div>
-                  <span className="font-bold text-[#1E2420] text-xs font-mono bg-[#F9F7F2] px-1.5 py-0.5 rounded mr-1">
+                  <span className="font-bold text-[var(--bg-secondary)] text-xs font-mono bg-[var(--bg-lighter)] px-1.5 py-0.5 rounded mr-1">
                     {formatPrice(item.price * item.quantity)}
                   </span>
                 </div>
                 <div className="flex justify-between items-center pl-7">
-                  <span className="text-[#8B8378] text-[10px] font-mono">
+                  <span className="text-[var(--text-muted)] text-[10px] font-mono">
                     {formatPrice(item.price)} دانەیەک
                   </span>
-                  <div className="flex items-center gap-1 bg-[#F9F7F2] rounded-full p-0.5 border border-[#E9E5D9]">
+                  <div className="flex items-center gap-1 bg-[var(--bg-lighter)] rounded-full p-0.5 border border-[var(--border-color)]">
                     <button
                       onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                      className="w-6 h-6 flex items-center justify-center hover:bg-white rounded-full text-[#1E2420] transition-colors shadow-sm"
+                      className="w-6 h-6 flex items-center justify-center hover:bg-white rounded-full text-[var(--bg-secondary)] transition-colors shadow-sm"
                     >
                       <Minus size={12} strokeWidth={3} />
                     </button>
-                    <span className="w-4 text-center font-bold text-[#1E2420] text-[11px]">
+                    <span className="w-4 text-center font-bold text-[var(--bg-secondary)] text-[11px]">
                       {item.quantity}
                     </span>
                     <button
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      className="w-6 h-6 flex items-center justify-center hover:bg-white rounded-full text-[#1E2420] transition-colors shadow-sm"
+                      className="w-6 h-6 flex items-center justify-center hover:bg-white rounded-full text-[var(--bg-secondary)] transition-colors shadow-sm"
                     >
                       <Plus size={12} strokeWidth={3} />
                     </button>
@@ -615,34 +700,34 @@ export function PosView() {
         </div>
 
         {/* Quick Actions Panel */}
-        <div className="p-3 bg-[#FDFBF7] border-t border-[#E9E5D9] grid grid-cols-2 gap-2 shrink-0">
+        <div className="p-3 bg-[#FDFBF7] border-t border-[var(--border-color)] grid grid-cols-2 gap-2 shrink-0">
           <button
             type="button"
             onClick={() => setShowCustomItemModal(true)}
-            className="flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl border border-[#E9E5D9] hover:border-[#D4A373] hover:bg-[#F9F7F2] text-[#1E2420] font-bold text-[11px] transition-colors cursor-pointer"
+            className="flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl border border-[var(--border-color)] hover:border-[var(--accent-gold)] hover:bg-[var(--bg-lighter)] text-[var(--bg-secondary)] font-bold text-[11px] transition-colors cursor-pointer"
             title="کاڵای دەرەکی مۆد مینی"
           >
-            <Plus size={14} className="text-[#D4A373]" />
+            <Plus size={14} className="text-[var(--accent-gold)]" />
             کاڵای دەستی [F2]
           </button>
           <button
             type="button"
             onClick={kickCashDrawer}
-            className="flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl border border-[#E9E5D9] hover:border-[#1E2420] hover:bg-[#1E2420]/5 text-[#1E2420] font-bold text-[11px] transition-colors cursor-pointer"
+            className="flex items-center justify-center gap-1.5 py-2 px-1 rounded-xl border border-[var(--border-color)] hover:border-[var(--bg-secondary)] hover:bg-[var(--bg-secondary)]/5 text-[var(--bg-secondary)] font-bold text-[11px] transition-colors cursor-pointer"
             title="درۆوەری کاش"
           >
-            <Banknote size={14} className="text-[#D4A373]" />
+            <Banknote size={14} className="text-[var(--accent-gold)]" />
             کاش درۆوەر [F3]
           </button>
         </div>
 
-        <div className="p-4 bg-[#1E2420] text-white shrink-0 relative overflow-hidden flex flex-col justify-end lg:rounded-b-[32px] lg:m-1">
+        <div className="p-4 bg-[var(--bg-secondary)] text-white shrink-0 relative overflow-hidden flex flex-col justify-end lg:rounded-b-[32px] lg:m-1">
           <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
 
           <div className="relative z-10 flex justify-between items-end mb-3">
             <span className="text-white/70 font-medium text-xs">کۆی گشتی:</span>
             <div className="text-right flex items-baseline gap-1">
-              <span className="text-xl font-bold font-mono text-[#D4A373] tracking-tight">
+              <span className="text-xl font-bold font-mono text-[var(--accent-gold)] tracking-tight">
                 {getCartTotal().toLocaleString("en-US")}
               </span>
               <span className="text-[10px] text-white/70">د.ع</span>
@@ -650,8 +735,8 @@ export function PosView() {
           </div>
           <button
             disabled={cart.length === 0 || checkingOut}
-            onClick={openCheckoutModal}
-            className="w-full relative z-10 bg-[#D4A373] hover:brightness-110 disabled:bg-white/10 disabled:text-white/40 disabled:cursor-not-allowed text-[#1E2420] font-bold py-3 rounded-xl transition-all shadow-lg shadow-[#D4A373]/20 disabled:shadow-none flex justify-center items-center gap-2 text-sm border border-transparent disabled:border-white/10"
+            onClick={handleCheckoutAction}
+            className="w-full relative z-10 bg-[var(--accent-gold)] hover:brightness-110 disabled:bg-white/10 disabled:text-white/40 disabled:cursor-not-allowed text-[var(--bg-secondary)] font-bold py-3 rounded-xl transition-all shadow-lg shadow-[var(--accent-gold)]/20 disabled:shadow-none flex justify-center items-center gap-2 text-sm border border-transparent disabled:border-white/10"
           >
             {checkingOut ? "چاوەڕێبە..." : "پارەدان و پسوڵە"}
           </button>
@@ -810,11 +895,11 @@ export function PosView() {
               {/* Luxury Header */}
               <div className="px-6 py-5 bg-gradient-to-b from-[#FFFDF9] to-white border-b border-neutral-100 flex items-center justify-between">
                 <div className="flex items-center gap-3.5">
-                  <div className="p-3 bg-gradient-to-br from-[#1E2420] to-[#2D3631] text-[#D4A373] rounded-2xl shadow-md ring-4 ring-neutral-50">
+                  <div className="p-3 bg-gradient-to-br from-[var(--bg-secondary)] to-[var(--text-dark)] text-[var(--accent-gold)] rounded-2xl shadow-md ring-4 ring-neutral-50">
                     <Banknote size={22} className="stroke-[2.5]" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-black text-[#1E2420] tracking-tight">
+                    <h2 className="text-xl font-black text-[var(--bg-secondary)] tracking-tight">
                       پەڕەی پارەدان
                     </h2>
                     <p className="text-xs text-neutral-400 font-bold mt-0.5">
@@ -835,17 +920,17 @@ export function PosView() {
                 
                 {/* Upper Status Row: Two Distinct Visual Pillars */}
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-[#1E2420] p-4 rounded-2xl flex flex-col justify-between shadow-md relative overflow-hidden ring-1 ring-white/10">
+                  <div className="bg-[var(--bg-secondary)] p-4 rounded-2xl flex flex-col justify-between shadow-md relative overflow-hidden ring-1 ring-white/10">
                     <div className="absolute -top-5 -left-5 w-20 h-20 bg-white/5 rounded-full blur-xl"></div>
                     <span className="text-white/50 font-bold text-xs mb-1block">کۆبەند و کۆی گشتی</span>
                     <span className="text-xl font-black text-white font-mono tracking-tight flex items-baseline gap-1 mt-1">
                       {getCartTotal().toLocaleString("en-US")}{" "}
-                      <span className="font-sans text-[10px] text-[#D4A373] font-bold">د.ع</span>
+                      <span className="font-sans text-[10px] text-[var(--accent-gold)] font-bold">د.ع</span>
                     </span>
                   </div>
 
-                  <div className="bg-white border border-[#E9E5D9] p-4 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden">
-                    <span className="text-[#8B8378] font-bold text-xs mb-1 block">کۆی داشکانی دیاریکراو</span>
+                  <div className="bg-white border border-[var(--border-color)] p-4 rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden">
+                    <span className="text-[var(--text-muted)] font-bold text-xs mb-1 block">کۆی داشکانی دیاریکراو</span>
                     <span className="text-xl font-black text-amber-700 font-mono tracking-tight flex items-baseline gap-1 mt-1">
                       {Number(discountAmount || 0).toLocaleString("en-US")}{" "}
                       <span className="font-sans text-[10px] text-neutral-400 font-bold">د.ع</span>
@@ -860,10 +945,10 @@ export function PosView() {
                   <div className="space-y-3.5">
                     
                     {/* Discount Box */}
-                    <div className="bg-white rounded-2xl p-4 border border-[#E9E5D9] shadow-sm flex flex-col justify-between">
+                    <div className="bg-white rounded-2xl p-4 border border-[var(--border-color)] shadow-sm flex flex-col justify-between">
                       <div>
                         <label className="flex items-center gap-1.5 text-xs font-black text-neutral-800 mb-2">
-                          <Tag size={13} className="text-[#D4A373]" />
+                          <Tag size={13} className="text-[var(--accent-gold)]" />
                           داشکاندن (بە بەهای نووسراو)
                         </label>
                         <div className="relative">
@@ -873,7 +958,7 @@ export function PosView() {
                             value={discountAmount}
                             onChange={(e) => setDiscountAmount(e.target.value)}
                             placeholder="نموونە: 2000"
-                            className="w-full bg-neutral-50 focus:bg-white border border-neutral-200 focus:border-[#D4A373] focus:ring-4 focus:ring-[#D4A373]/5 rounded-xl pl-4 pr-10 py-2.5 outline-none text-neutral-900 text-left dir-ltr transition-all font-mono font-black text-sm placeholder:text-right placeholder:text-xs placeholder:font-sans"
+                            className="w-full bg-neutral-50 focus:bg-white border border-neutral-200 focus:border-[var(--accent-gold)] focus:ring-4 focus:ring-[var(--accent-gold)]/5 rounded-xl pl-4 pr-10 py-2.5 outline-none text-neutral-900 text-left dir-ltr transition-all font-mono font-black text-sm placeholder:text-right placeholder:text-xs placeholder:font-sans"
                           />
                           <Percent size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
                         </div>
@@ -888,8 +973,8 @@ export function PosView() {
                             onClick={() => setDiscountAmount(amt.toString())}
                             className={`px-3 py-1.5 text-[11px] font-extrabold rounded-lg transition-all border shrink-0 ${
                               discountAmount === amt.toString()
-                                ? "bg-[#1E2420] text-[#D4A373] border-[#1E2420]"
-                                : "bg-white text-neutral-600 border-neutral-200 hover:border-[#D4A373] hover:bg-amber-50/10"
+                                ? "bg-[var(--bg-secondary)] text-[var(--accent-gold)] border-[var(--bg-secondary)]"
+                                : "bg-white text-neutral-600 border-neutral-200 hover:border-[var(--accent-gold)] hover:bg-amber-50/10"
                             }`}
                           >
                             {amt.toLocaleString("en-US")} د.ع
@@ -908,10 +993,10 @@ export function PosView() {
                     </div>
 
                     {/* Cash Received Box */}
-                    <div className="bg-white rounded-2xl p-4 border border-[#E9E5D9] shadow-sm flex flex-col justify-between">
+                    <div className="bg-white rounded-2xl p-4 border border-[var(--border-color)] shadow-sm flex flex-col justify-between">
                       <div>
                         <label className="flex items-center gap-1.5 text-xs font-black text-neutral-800 mb-2">
-                          <Coins size={13} className="text-[#D4A373]" />
+                          <Coins size={13} className="text-[var(--accent-gold)]" />
                           پارەی پێدراوی کڕیار (کاش)
                         </label>
                         <div className="relative">
@@ -921,7 +1006,7 @@ export function PosView() {
                             value={receivedAmount}
                             onChange={(e) => setReceivedAmount(e.target.value)}
                             placeholder="بڕی پارەی پێدراو..."
-                            className="w-full bg-neutral-50 focus:bg-white border border-neutral-200 focus:border-[#D4A373] focus:ring-4 focus:ring-[#D4A373]/5 rounded-xl pl-4 pr-10 py-2.5 outline-none text-neutral-900 text-left dir-ltr transition-all font-mono font-black text-sm placeholder:text-right placeholder:text-xs placeholder:font-sans"
+                            className="w-full bg-neutral-50 focus:bg-white border border-neutral-200 focus:border-[var(--accent-gold)] focus:ring-4 focus:ring-[var(--accent-gold)]/5 rounded-xl pl-4 pr-10 py-2.5 outline-none text-neutral-900 text-left dir-ltr transition-all font-mono font-black text-sm placeholder:text-right placeholder:text-xs placeholder:font-sans"
                           />
                           <Banknote size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
                         </div>
@@ -932,7 +1017,7 @@ export function PosView() {
                         <button
                           type="button"
                           onClick={() => setReceivedAmount(getFinalTotal().toString())}
-                          className="col-span-2 py-2 px-2 text-[11px] font-bold bg-[#1E2420] hover:bg-[#2C342F] text-[#D4A373] rounded-lg shadow-sm hover:translate-y-[-1px] active:translate-y-[1px] transition-all text-center flex items-center justify-center gap-1"
+                          className="col-span-2 py-2 px-2 text-[11px] font-bold bg-[var(--bg-secondary)] hover:bg-[#2C342F] text-[var(--accent-gold)] rounded-lg shadow-sm hover:translate-y-[-1px] active:translate-y-[1px] transition-all text-center flex items-center justify-center gap-1"
                         >
                           <Check size={12} className="stroke-[3]" />
                           بێ باقی (ڕێک)
@@ -944,7 +1029,7 @@ export function PosView() {
                             onClick={() => setReceivedAmount(note.toString())}
                             className={`py-2 px-1 text-[11px] font-black border transition-all rounded-lg ${
                               receivedAmount === note.toString()
-                                ? "bg-[#D4A373] text-[#1E2420] border-[#D4A373] shadow-inner"
+                                ? "bg-[var(--accent-gold)] text-[var(--bg-secondary)] border-[var(--accent-gold)] shadow-inner"
                                 : "bg-white text-neutral-700 border-neutral-200 hover:bg-neutral-50"
                             }`}
                           >
@@ -958,7 +1043,7 @@ export function PosView() {
                 </div>
 
                 {/* Print Options Block: Only Method Selector now */}
-                <div className="bg-[#FAF8F4] px-4 py-3 rounded-2xl border border-[#E9E5D9]">
+                <div className="bg-[#FAF8F4] px-4 py-3 rounded-2xl border border-[var(--border-color)]">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] text-neutral-500 font-bold flex items-center gap-1.5">
                       <Printer size={12} />
@@ -970,7 +1055,7 @@ export function PosView() {
                         onClick={() => setPrintMethod("iframe")}
                         className={`py-1 px-2 rounded-md text-[10px] font-black transition-all ${
                           printMethod === "iframe"
-                            ? "bg-[#1E2420] text-[#D4A373] shadow-sm"
+                            ? "bg-[var(--bg-secondary)] text-[var(--accent-gold)] shadow-sm"
                             : "text-neutral-500 hover:text-neutral-900"
                         }`}
                       >
@@ -981,7 +1066,7 @@ export function PosView() {
                         onClick={() => setPrintMethod("direct")}
                         className={`py-1 px-2 rounded-md text-[10px] font-black transition-all ${
                           printMethod === "direct"
-                            ? "bg-[#1E2420] text-[#D4A373] shadow-sm"
+                            ? "bg-[var(--bg-secondary)] text-[var(--accent-gold)] shadow-sm"
                             : "text-neutral-500 hover:text-neutral-900"
                         }`}
                       >
@@ -997,9 +1082,9 @@ export function PosView() {
                     <div className="text-right">
                       <span className="text-xs text-neutral-500 font-black block">کۆتایی حیساب</span>
                     </div>
-                    <span className="text-2xl font-black text-[#1E2420] font-mono tracking-tight flex items-baseline gap-1">
+                    <span className="text-2xl font-black text-[var(--bg-secondary)] font-mono tracking-tight flex items-baseline gap-1">
                       {getFinalTotal().toLocaleString("en-US")}{" "}
-                      <span className="font-sans text-xs text-[#8B8378] font-bold">د.ع</span>
+                      <span className="font-sans text-xs text-[var(--text-muted)] font-bold">د.ع</span>
                     </span>
                   </div>
 
@@ -1046,10 +1131,10 @@ export function PosView() {
                     type="button"
                     onClick={() => handleCheckout(false)}
                     disabled={checkingOut || (Number(receivedAmount) > 0 && Number(receivedAmount) < getFinalTotal())}
-                    className="flex-1 bg-white border border-[#E9E5D9] hover:border-neutral-300 disabled:opacity-50 text-[#1E2420] font-black py-3 rounded-xl transition-all shadow-sm active:scale-98 flex items-center justify-center gap-2 text-xs"
+                    className="flex-1 bg-white border border-[var(--border-color)] hover:border-neutral-300 disabled:opacity-50 text-[var(--bg-secondary)] font-black py-3 rounded-xl transition-all shadow-sm active:scale-98 flex items-center justify-center gap-2 text-xs"
                   >
                     {checkingOut ? (
-                      <div className="w-3.5 h-3.5 border-2 border-[#1E2420] border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-3.5 h-3.5 border-2 border-[var(--bg-secondary)] border-t-transparent rounded-full animate-spin"></div>
                     ) : (
                       <>
                         <Check size={14} className="text-emerald-600" />
@@ -1061,10 +1146,10 @@ export function PosView() {
                     type="button"
                     onClick={() => handleCheckout(true)}
                     disabled={checkingOut || (Number(receivedAmount) > 0 && Number(receivedAmount) < getFinalTotal())}
-                    className="flex-1 bg-gradient-to-r from-[#1E2420] to-[#2D3631] hover:brightness-110 disabled:opacity-50 text-[#D4A373] disabled:text-[#D4A373]/50 font-black py-3 rounded-xl transition-all shadow-md active:scale-98 flex items-center justify-center gap-2 text-xs"
+                    className="flex-1 bg-gradient-to-r from-[var(--bg-secondary)] to-[var(--text-dark)] hover:brightness-110 disabled:opacity-50 text-[var(--accent-gold)] disabled:text-[var(--accent-gold)]/50 font-black py-3 rounded-xl transition-all shadow-md active:scale-98 flex items-center justify-center gap-2 text-xs"
                   >
                     {checkingOut ? (
-                      <div className="w-3.5 h-3.5 border-2 border-[#D4A373] border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-3.5 h-3.5 border-2 border-[var(--accent-gold)] border-t-transparent rounded-full animate-spin"></div>
                     ) : (
                       <>
                         <Printer size={14} className="stroke-[2.5]" />
@@ -1090,17 +1175,17 @@ export function PosView() {
       {showCustomItemModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
           <div
-            className="bg-white rounded-[32px] w-full max-w-md shadow-2xl overflow-hidden flex flex-col border border-[#E9E5D9] animate-in fade-in zoom-in duration-200 text-right dir-rtl"
+            className="bg-white rounded-[32px] w-full max-w-md shadow-2xl overflow-hidden flex flex-col border border-[var(--border-color)] animate-in fade-in zoom-in duration-200 text-right dir-rtl"
             dir="rtl"
           >
-            <div className="p-6 bg-[#FDFBF7] border-b border-[#E9E5D9] flex items-center justify-between">
-              <h2 className="text-xl font-bold text-[#1E2420] flex items-center gap-2">
-                <Plus size={24} className="text-[#D4A373]" />
+            <div className="p-6 bg-[#FDFBF7] border-b border-[var(--border-color)] flex items-center justify-between">
+              <h2 className="text-xl font-bold text-[var(--bg-secondary)] flex items-center gap-2">
+                <Plus size={24} className="text-[var(--accent-gold)]" />
                 زیادکردنی بابەت بە دەستی
               </h2>
               <button
                 onClick={() => setShowCustomItemModal(false)}
-                className="p-2 text-[#8B8378] hover:bg-[#F9F7F2] rounded-full"
+                className="p-2 text-[var(--text-muted)] hover:bg-[var(--bg-lighter)] rounded-full"
               >
                 <X size={20} />
               </button>
@@ -1108,7 +1193,7 @@ export function PosView() {
 
             <form onSubmit={handleAddCustomItem} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-bold text-[#1E2420] mb-2 text-right">
+                <label className="block text-sm font-bold text-[var(--bg-secondary)] mb-2 text-right">
                   ناوی بابەت (کوردی یان ئینگلیزی)
                 </label>
                 <input
@@ -1117,13 +1202,13 @@ export function PosView() {
                   value={customItemName}
                   onChange={(e) => setCustomItemName(e.target.value)}
                   placeholder="بۆ نموونە: کێکی شوکولاتەی تایبەت"
-                  className="w-full bg-[#F9F7F2] border border-[#E9E5D9] rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-[#D4A373] outline-none text-[#1E2420] text-right"
+                  className="w-full bg-[var(--bg-lighter)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-[var(--accent-gold)] outline-none text-[var(--bg-secondary)] text-right"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-bold text-[#1E2420] mb-2 text-right">
+                  <label className="block text-sm font-bold text-[var(--bg-secondary)] mb-2 text-right">
                     نرخ (بە دینار)
                   </label>
                   <input
@@ -1134,17 +1219,17 @@ export function PosView() {
                     value={customItemPrice}
                     onChange={(e) => setCustomItemPrice(e.target.value)}
                     placeholder="3000"
-                    className="w-full bg-[#F9F7F2] border border-[#E9E5D9] rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-[#D4A373] outline-none text-[#1E2420] font-mono text-left"
+                    className="w-full bg-[var(--bg-lighter)] border border-[var(--border-color)] rounded-xl px-4 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-[var(--accent-gold)] outline-none text-[var(--bg-secondary)] font-mono text-left"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-[#1E2420] mb-2 text-right">
+                  <label className="block text-sm font-bold text-[var(--bg-secondary)] mb-2 text-right">
                     کۆمەڵە (پۆلێن)
                   </label>
                   <select
                     value={customItemCategory}
                     onChange={(e) => setCustomItemCategory(e.target.value)}
-                    className="w-full bg-[#F9F7F2] border border-[#E9E5D9] rounded-xl px-3 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-[#D4A373] outline-none text-[#1E2420] text-right"
+                    className="w-full bg-[var(--bg-lighter)] border border-[var(--border-color)] rounded-xl px-3 py-3 text-sm focus:bg-white focus:ring-2 focus:ring-[var(--accent-gold)] outline-none text-[var(--bg-secondary)] text-right"
                   >
                     <option value="گشتی">گشتی</option>
                     <option value="گەرم">گەرم</option>
@@ -1155,8 +1240,8 @@ export function PosView() {
                 </div>
               </div>
 
-              <div className="bg-[#F9F7F2] p-4 rounded-2xl border border-[#E9E5D9] flex items-start gap-2.5 mt-2 text-right">
-                <span className="text-[11px] text-[#8B8378] leading-relaxed">
+              <div className="bg-[var(--bg-lighter)] p-4 rounded-2xl border border-[var(--border-color)] flex items-start gap-2.5 mt-2 text-right">
+                <span className="text-[11px] text-[var(--text-muted)] leading-relaxed">
                   ● کاڵاکان بە شێوازێکی کاتی تەنها بۆ ئەم پرۆسەیە لە نێو
                   سەبەتەکەدا دروست دەبن و پێویستیان بە تۆمارکردنی هەمیشەیی لە
                   مێنۆدا نابێت.
@@ -1167,13 +1252,13 @@ export function PosView() {
                 <button
                   type="button"
                   onClick={() => setShowCustomItemModal(false)}
-                  className="flex-1 bg-white border border-[#E9E5D9] text-[#1E2420] font-bold py-3.5 rounded-xl text-xs"
+                  className="flex-1 bg-white border border-[var(--border-color)] text-[var(--bg-secondary)] font-bold py-3.5 rounded-xl text-xs"
                 >
                   پاشگەزبوونەوە
                 </button>
                 <button
                   type="submit"
-                  className="flex-[2] bg-[#1E2420] text-[#D4A373] hover:brightness-110 font-bold py-3.5 rounded-xl text-xs flex items-center justify-center gap-1"
+                  className="flex-[2] bg-[var(--bg-secondary)] text-[var(--accent-gold)] hover:brightness-110 font-bold py-3.5 rounded-xl text-xs flex items-center justify-center gap-1"
                 >
                   <Plus size={14} />
                   زیادکردن بۆ سەبەتە
@@ -1186,11 +1271,11 @@ export function PosView() {
 
       {/* Animated Cash Drawer Simulation */}
       {showDrawerAnimation && (
-        <div className="fixed inset-0 bg-[#1E2420]/80 backdrop-blur-md z-[200] flex items-center justify-center p-4 transition-all duration-300">
-          <div className="bg-white rounded-[32px] p-8 max-w-sm w-full border border-[#D4A373]/30 shadow-[0_20px_50px_rgba(212,163,115,0.25)] text-center flex flex-col items-center gap-6 animate-in fade-in zoom-in duration-300">
-            <div className="relative w-32 h-24 bg-[#E9E5D9] rounded-xl border-4 border-[#1E2420] shadow-inner overflow-hidden flex flex-col justify-end">
+        <div className="fixed inset-0 bg-[var(--bg-secondary)]/80 backdrop-blur-md z-[200] flex items-center justify-center p-4 transition-all duration-300">
+          <div className="bg-white rounded-[32px] p-8 max-w-sm w-full border border-[var(--accent-gold)]/30 shadow-[0_20px_50px_rgba(212,163,115,0.25)] text-center flex flex-col items-center gap-6 animate-in fade-in zoom-in duration-300">
+            <div className="relative w-32 h-24 bg-[var(--border-color)] rounded-xl border-4 border-[var(--bg-secondary)] shadow-inner overflow-hidden flex flex-col justify-end">
               {/* Cash Drawer slide body */}
-              <div className="absolute top-2 left-2 right-2 bottom-1 bg-[#1E2420] rounded-lg border border-[#D4A373] flex flex-col justify-between p-2 shadow-md animate-pulse">
+              <div className="absolute top-2 left-2 right-2 bottom-1 bg-[var(--bg-secondary)] rounded-lg border border-[var(--accent-gold)] flex flex-col justify-between p-2 shadow-md animate-pulse">
                 <div className="flex justify-around gap-1">
                   <div className="h-5 w-4 bg-emerald-500 rounded-sm shadow-sm flex items-center justify-center text-[10px] text-white font-bold">
                     $
@@ -1202,14 +1287,14 @@ export function PosView() {
                     $
                   </div>
                 </div>
-                <div className="h-2 w-full bg-[#D4A373] rounded-full self-center"></div>
+                <div className="h-2 w-full bg-[var(--accent-gold)] rounded-full self-center"></div>
               </div>
             </div>
             <div className="space-y-2">
-              <h3 className="text-xl font-bold text-[#1E2420]">
+              <h3 className="text-xl font-bold text-[var(--bg-secondary)]">
                 مەکینەی درۆوەر کرایەوە
               </h3>
-              <p className="text-xs text-[#8B8378] leading-relaxed">
+              <p className="text-xs text-[var(--text-muted)] leading-relaxed">
                 سیستەمی مەکینەی پارەدان بە سەرکەوتوویی کرایەوە و زەنگی
                 ئاگادارکردنەوە لێدرا!
               </p>
@@ -1220,6 +1305,25 @@ export function PosView() {
           </div>
         </div>
       )}
+
+      {/* Custom Toast Notifications */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div 
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className={`fixed bottom-6 right-6 z-[9999] flex items-center gap-3 px-5 py-4 rounded-2xl shadow-[0_12px_45px_-8px_rgba(0,0,0,0.15)] border-l-4 ${
+              toast.type === 'success' 
+                ? "bg-[#1E2420] border-[#8DAA91] text-white" 
+                : "bg-rose-900 border-rose-800 text-white"
+            }`}
+          >
+            <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${toast.type === 'success' ? "bg-[#8DAA91]" : "bg-rose-500 animate-pulse"}`} />
+            <span className="font-black text-xs tracking-wide">{toast.message}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
