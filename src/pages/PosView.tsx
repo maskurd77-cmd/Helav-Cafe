@@ -301,13 +301,13 @@ export function PosView() {
             iframeDoc.write(`
                <html dir="rtl" lang="ku">
                  <head>
-                   <title>Receipt</title><style>.receipt-table { width: 100%; border-collapse: collapse; margin-top: 5px; direction: rtl !important; } .receipt-table th { border-bottom: 2px solid #000; font-size: 12px; font-weight: 800; padding: 6px 0; color: #000 !important; font-family: 'Cairo', sans-serif; text-align: right; } .receipt-table td { border-bottom: 1px dotted #ccc; font-size: 13px; padding: 6px 0; vertical-align: top; color: #000 !important; font-weight: 700; } .col-name { text-align: right !important; direction: rtl !important; padding-right: 2px; font-family: 'Cairo', sans-serif; } .col-qty { text-align: center !important; width: 45px; font-weight: 800; font-family: 'Space Grotesk', 'Inter', monospace; } .col-price { text-align: left !important; width: 85px; font-weight: 800; font-family: 'Space Grotesk', monospace; direction: ltr !important; white-space: nowrap; } .item-row { direction: rtl !important; } .total-row { direction: rtl !important; } .total-amount { direction: ltr !important; text-align: left !important; }</style>
+                   <title>Receipt</title><style>.receipt-table { width: 100%; border-collapse: collapse; margin-top: 5px; direction: rtl !important; } .receipt-table th { border-bottom: 2px solid #000; font-size: 12px; font-weight: 800; padding: 6px 0; color: #000 !important; font-family: 'Cairo', sans-serif; text-align: right; } .receipt-table td { border-bottom: 1px dotted #ccc; font-size: 13px; padding: 6px 0; vertical-align: top; color: #000 !important; font-weight: 700; } .col-name { text-align: right !important; direction: rtl !important; padding-right: 2px; font-family: 'Cairo', sans-serif; } .col-qty { text-align: center !important; width: 35px; font-weight: 800; font-family: 'Space Grotesk', 'Inter', monospace; } .col-price { text-align: left !important; width: 75px; font-weight: 800; font-family: 'Space Grotesk', monospace; direction: ltr !important; white-space: nowrap; } .item-row { direction: rtl !important; } .total-row { direction: rtl !important; } .total-amount { direction: ltr !important; text-align: left !important; }</style>
                    <style>
                       @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600;700&display=swap');
                       @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap');
                       * { box-sizing: border-box; color: #000 !important; font-family: 'Cairo', 'Inter', sans-serif; margin: 0; padding: 0; }
-                      body { padding: 0; font-size: 13px; color: #000; margin: 0 auto; background: #fff; width: 80mm; line-height: 1.4; display: block; }
-                      .receipt-container { width: 80mm; max-width: 80mm; padding: 2mm 5mm 5mm 5mm; margin: 0 auto; direction: rtl; }
+                      body { padding: 0; font-size: 13px; color: #000; margin: 0 auto; background: #fff; width: 100%; max-width: 300px; line-height: 1.4; display: block; overflow-x: hidden; }
+                      .receipt-container { width: 100%; padding: 2mm 4mm 5mm 4mm; margin: 0 auto; direction: rtl; }
                       .center { text-align: center; width: 100%; }
                       .bold { font-weight: 800; }
                       .logo-img { max-width: 60px; max-height: 60px; margin: 0 auto 8px; display: block; object-fit: contain; filter: grayscale(100%) contrast(1.2); }
@@ -318,8 +318,8 @@ export function PosView() {
                       .solid-line { border-bottom: 2px solid #000; margin: 8px 0; width: 100%; }
                       .item-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px; align-items: flex-start; width: 100%; flex-wrap: nowrap; }
                       .item-name-group { flex: 1; padding-right: 0px; padding-left: 8px; line-height: 1.2; font-weight: 700; text-align: right; }
-                      .item-qty { font-weight: 800; font-size: 13px; margin-top: 0px; width: 20px; text-align: right; shrink-0; }
-                      .item-price { min-width: 65px; text-align: left; font-weight: 800; font-family: 'Space Grotesk', monospace; font-size: 13px; white-space: nowrap; direction: ltr; shrink-0; }
+                      .item-qty { font-weight: 800; font-size: 13px; margin-top: 0px; width: 20px; text-align: right; flex-shrink: 0; }
+                      .item-price { min-width: 65px; text-align: left; font-weight: 800; font-family: 'Space Grotesk', monospace; font-size: 13px; white-space: nowrap; direction: ltr; flex-shrink: 0; }
                       .total-row { display: flex; justify-content: space-between; font-size: 15px; font-weight: 800; margin-top: 6px; align-items: center; width: 100%; }
                       .total-label { font-size: 15px; font-weight: 800; }
                       .total-amount { font-family: 'Space Grotesk', monospace; font-size: 20px; font-weight: 800; direction: ltr; text-align: left; }
@@ -328,7 +328,7 @@ export function PosView() {
                       .powered-by { text-align: center; margin-top: 15px; font-size: 9px; color: #000; font-weight: 800; letter-spacing: 2px; font-family: 'Inter', sans-serif; width: 100%; direction: ltr; }
                       @page { margin: 0; }
                       @media print {
-                         html, body { width: 80mm; margin: 0 auto; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                         html, body { width: 100%; margin: 0 auto; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
                       }
                    </style>
                  </head>
@@ -655,7 +655,7 @@ export function PosView() {
 
       {/* Hidden Beautiful Receipt Template */}
       <div className="hidden">
-        <div ref={receiptRef} className="receipt-container" style={{ padding: "10px 15px", direction: "rtl", fontFamily: "'Cairo', sans-serif" }}>
+        <div ref={receiptRef} className="receipt-container" style={{ padding: "8px 12px", width: "100%", maxWidth: "300px", direction: "rtl", fontFamily: "'Cairo', sans-serif" }}>
           <div className="center" style={{ textAlign: "center" }}>
             {settings.logoUrl ? (
               <img src={settings.logoUrl} className="logo-img" alt="Logo" style={{ maxWidth: "65px", maxHeight: "65px", margin: "0 auto 8px", borderRadius: "8px", objectFit: "contain" }} />
