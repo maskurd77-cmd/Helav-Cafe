@@ -66,7 +66,7 @@ export function MenuView() {
     setEditId(product.id);
     setName(product.name);
     setPrice(product.price.toString());
-    setCostPrice(product.costPrice !== undefined ? product.costPrice.toString() : '');
+    setCostPrice(product.costPrice != null ? product.costPrice.toString() : '');
     setCategory(product.category);
     setStatus(product.status || 'بەردەستە');
     setImage(product.image || '');
@@ -83,7 +83,7 @@ export function MenuView() {
       const payload = {
         name,
         price: Number(price),
-        costPrice: isCostSet ? Number(costPrice) : undefined,
+        costPrice: isCostSet ? Number(costPrice) : null,
         category,
         status,
         image
@@ -276,10 +276,10 @@ export function MenuView() {
                     </td>
                     <td className="px-6 py-4 font-black text-[var(--accent-gold)] text-base font-mono">{product.price.toLocaleString('en-US')} <span className="font-sans text-xs font-bold text-[var(--text-muted)] ml-1 font-sans">د.ع</span></td>
                     <td className="px-6 py-4 font-bold text-gray-600 dark:text-gray-400 font-mono text-sm">
-                      {product.costPrice !== undefined ? `${product.costPrice.toLocaleString('en-US')} د.ع` : <span className="text-gray-400 font-sans text-xs">دیاری نەکراوە</span>}
+                      {product.costPrice != null ? `${product.costPrice.toLocaleString('en-US')} د.ع` : <span className="text-gray-400 font-sans text-xs">دیاری نەکراوە</span>}
                     </td>
                     <td className="px-6 py-4 font-mono">
-                      {product.costPrice !== undefined ? (
+                      {product.costPrice != null ? (
                         <span className={`font-black text-sm ${calculatedProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
                           {calculatedProfit.toLocaleString('en-US')} د.ع
                         </span>

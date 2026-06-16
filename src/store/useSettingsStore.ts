@@ -20,6 +20,9 @@ interface SettingsState {
     invoicePrefix?: string;
     invoiceStartNumber?: number;
     invoiceNextNumber?: number;
+    publicMenuBannerUrl?: string;
+    publicMenuTitle?: string;
+    publicMenuSubtitle?: string;
   };
   loading: boolean;
   initialized: boolean;
@@ -66,7 +69,10 @@ const defaultSettings = {
     appTheme: 'light',
     invoicePrefix: '#',
     invoiceStartNumber: 1000,
-    invoiceNextNumber: 1001
+    invoiceNextNumber: 1001,
+    publicMenuBannerUrl: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=1200',
+    publicMenuTitle: 'مێنۆی کافێ',
+    publicMenuSubtitle: 'تکایە داواکارییەکەت لای ستاف تۆماربکە',
   }
 };
 
@@ -86,7 +92,10 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     appTheme: 'light',
     invoicePrefix: '#',
     invoiceStartNumber: 1000,
-    invoiceNextNumber: 1001
+    invoiceNextNumber: 1001,
+    publicMenuBannerUrl: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&q=80&w=1200',
+    publicMenuTitle: 'مێنۆی کافێ',
+    publicMenuSubtitle: 'تکایە داواکارییەکەت لای ستاف تۆماربکە'
   },
   loading: true,
   initialized: false,

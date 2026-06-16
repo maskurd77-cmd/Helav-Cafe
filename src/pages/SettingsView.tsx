@@ -331,6 +331,15 @@ export function SettingsView() {
       hoverClass: 'hover:-translate-y-1 hover:border-purple-500/50 hover:shadow-lg'
     },
     {
+      id: 'publicMenu',
+      title: 'مێنیۆی ئۆنلاین (مۆبایل)',
+      desc: 'دانانی وێنەی باکگراوند (Banner) و دەقەکانی سەر مێنیۆ بۆ مۆبایلی کڕیار.',
+      icon: <Monitor size={22} />,
+      tag: 'ئۆنلاین 📱',
+      colorClass: 'from-indigo-500/10 to-indigo-500/5 border-indigo-500/20 text-indigo-600',
+      hoverClass: 'hover:-translate-y-1 hover:border-indigo-500/50 hover:shadow-lg'
+    },
+    {
       id: 'backup',
       title: 'پاراستنی زانیاری و باکئەپ',
       desc: 'ڕوانین و دابەزاندنی فایلی یەدەگ و گێڕانەوەی تەواوی داتاکان بە یەک چرکە کات.',
@@ -1056,6 +1065,56 @@ export function SettingsView() {
                         disabled={saving}
                       />
                     </label>
+                  </div>
+                </>
+              )}
+
+              {activeModal === 'publicMenu' && (
+                <>
+                  <div className="flex items-center gap-3.5 border-b border-[var(--border-color)]/50 pb-4">
+                    <div className="bg-[var(--bg-secondary)] p-3 rounded-2xl text-[var(--accent-gold)]">
+                      <Monitor size={22} />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-black text-[var(--bg-secondary)]">مێنیۆی ئۆنلاین بۆ مۆبایل</h2>
+                      <p className="text-[10px] text-[var(--text-muted)] mt-0.5">بەڕێوەبردنی وێنە و ناونیشانی مێنیۆی کڕیاران (بەشی بانەر)</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 pt-4">
+                    <div>
+                      <label className="block text-xs font-black text-[var(--text-dark)] mb-1.5">لینکی وێنەی باکگراوند (Banner URL)</label>
+                      <input 
+                        value={settings.publicMenuBannerUrl || ''}
+                        onChange={(e) => setSettings({...settings, publicMenuBannerUrl: e.target.value})}
+                        placeholder="https://example.com/banner.jpg"
+                        className="w-full bg-[var(--bg-primary)] border border-gray-250 rounded-xl px-4 py-3 text-xs focus:ring-2 focus:ring-[var(--accent-gold)] outline-none text-[var(--text-dark)] text-left dir-ltr"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-black text-[var(--text-dark)] mb-1.5">تایتڵی سەرەکی</label>
+                      <input 
+                        value={settings.publicMenuTitle || ''}
+                        onChange={(e) => setSettings({...settings, publicMenuTitle: e.target.value})}
+                        className="w-full bg-[var(--bg-primary)] border border-gray-250 rounded-xl px-4 py-3 text-xs focus:ring-2 focus:ring-[#8DAA91] outline-none text-[var(--text-dark)]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-black text-[var(--text-dark)] mb-1.5">دەقی ژێر تایتڵ (Subtitle)</label>
+                      <input 
+                        value={settings.publicMenuSubtitle || ''}
+                        onChange={(e) => setSettings({...settings, publicMenuSubtitle: e.target.value})}
+                        className="w-full bg-[var(--bg-primary)] border border-gray-250 rounded-xl px-4 py-3 text-xs focus:ring-2 focus:ring-[#8DAA91] outline-none text-[var(--text-dark)]"
+                      />
+                    </div>
+
+                    <div className="bg-white p-4 rounded-xl border border-[var(--accent-gold)]/20 text-center space-y-3 mt-4 border-dashed relative overflow-hidden">
+                      <div className="absolute top-0 right-0 left-0 h-2 bg-gradient-to-r from-transparent via-[var(--accent-gold)] to-transparent opacity-30"></div>
+                      <Monitor className="mx-auto text-[var(--accent-gold)]" size={32} />
+                      <p className="text-[11px] text-[var(--text-muted)] font-bold">زیارەتکردنی مێنیۆی ئۆنلاین:</p>
+                      <div className="bg-gray-100 p-2 rounded-lg font-mono text-xs dir-ltr inline-block border-[1px] border-black/5">/m/branch1 یان /branch1</div>
+                      <p className="text-[9px] text-[#A3B1A7] max-w-sm mx-auto leading-relaxed">دەتوانیت کڕیارەکانت ڕاستەوخۆ دەستیان بگاتە ئەم مێنیۆیە لە ڕێگەی لینکی تایبەتەوە لە کاتی هێڵی ئینتەرنێتدا. دڵنیابە لە ڕوونی وێنەکە بۆ شاشەی مۆبایل.</p>
+                    </div>
                   </div>
                 </>
               )}

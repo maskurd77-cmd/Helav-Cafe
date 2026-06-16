@@ -113,7 +113,7 @@ export function ReportsView() {
   const productCostMap = React.useMemo(() => {
     const map: Record<string, number> = {};
     products.forEach(p => {
-      if (p.costPrice !== undefined) {
+      if (p.costPrice != null) {
         map[p.name] = p.costPrice;
       }
     });
@@ -127,7 +127,7 @@ export function ReportsView() {
     let sum = 0;
     orders.forEach(o => {
       o.items.forEach(item => {
-        const itemCost = item.costPrice !== undefined ? item.costPrice : (productCostMap[item.name] || 0);
+        const itemCost = item.costPrice != null ? item.costPrice : (productCostMap[item.name] || 0);
         sum += (itemCost * item.quantity);
       });
     });

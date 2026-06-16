@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Dashboard } from './pages/Dashboard';
@@ -14,9 +14,10 @@ import { CustomerDisplay } from './pages/CustomerDisplay';
 import { AuthProvider, useAuth } from './components/AuthProvider';
 import { LoginView } from './pages/LoginView';
 import SubscriptionLock from './components/SubscriptionLock';
+import { PublicMenuView } from './pages/PublicMenuView';
 
-function AppRoutes() {
-  const { user, loading, role } = useAuth();
+function ProtectedRoute() {
+  const { user, loading } = useAuth();
 
   if (loading) {
     return (
@@ -30,23 +31,7 @@ function AppRoutes() {
     return <LoginView />;
   }
 
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/customer" element={<CustomerDisplay />} />
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="pos" element={<PosView />} />
-          <Route path="menu" element={<MenuView />} />
-          <Route path="expenses" element={<ExpensesView />} />
-          <Route path="receipts" element={<ReceiptsView />} />
-          <Route path="reports" element={<ReportsView />} />
-          <Route path="users" element={<UsersView />} />
-          <Route path="settings" element={<SettingsView />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
-  );
+  return <Layout />;
 }
 
 export default function App() {
@@ -54,8 +39,29 @@ export default function App() {
     <ErrorBoundary>
       <SubscriptionLock />
       <AuthProvider>
-        <AppRoutes />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/m/:code" element={<PublicMenuView />} />
+            <Route path="/customer" element={<CustomerDisplay />} />
+            
+            <Route path="/" element={<ProtectedRoute />}>
+              <Route index element={<Dashboard />} />
+              <Route path="pos" element={<PosView />} />
+              <Route path="menu" element={<MenuView />} />
+              <Route path="expenses" element={<ExpensesView />} />
+              <Route path="receipts" element={<ReceiptsView />} />
+              <Route path="reports" element={<ReportsView />} />
+              <Route path="users" element={<UsersView />} />
+              <Route path="settings" element={<SettingsView />} />
+            </Route>
+
+            <Route path="/:code" element={<PublicMenuView />} />
+            
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
       </AuthProvider>
     </ErrorBoundary>
   );
 }
+
